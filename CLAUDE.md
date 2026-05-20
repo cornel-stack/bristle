@@ -73,8 +73,11 @@ Extracted from `docs/Bristle-Design-Brief.docx` §3. This section is referenced 
 | `text/tertiary` | `#6B6B65` | Hint, disabled |
 | `accent/bristle` | `#F97316` | Primary brand, brighter for dark |
 | `accent/validated` | `#10B981` | Verified, high-signal |
+| `status/warning` | `#F59E0B` | Caution, rate-limit warnings (dark variant) |
+| `status/error` | `#EF4444` | Errors and destructive confirmations (dark variant) |
+| `status/success` | `#10B981` | Save confirmations, paid status (matches `accent/validated`) |
 
-> The brief does not specify dark-theme `status/warning|error|success`. Do not invent them — ask before adding (see §10). A third "Reading Mode" (sepia) theme is named in the brief but has no tokens defined; out of scope until specified.
+> Reading Mode (third theme) is deferred to v1.1; only Editorial Light and Editorial Dark ship in v1.0.
 
 ### 4.2 Typography
 
@@ -168,7 +171,7 @@ Then: **Deploy** (push to main → green CI → live on Vercel/Railway) → **Ga
 
 Specs live in `specs/[NNN-slice-name]/spec.md` (e.g. `specs/013-design-tokens/spec.md`). **`docs/Bristle-Build-Plan.pdf` is the source of truth for slice ordering** — 45 slices across 8 tiers (Walking Skeleton → Public Surface → Auth & Onboarding → App with Fixtures → Pipeline + Live Data → Settings/Billing/Delivery → System Pages + Polish → Pre-Launch + Launch). **Do not start the next slice without confirmation that the current one is done.**
 
-Explicit v1.0 deferrals (do not build): SSO/SAML, per-seat overage billing, the full 312-category catalog (ship ~40 curated), the "Bristle's Read" LLM (hardcoded in fixtures for v1.0), 7 of 10 integrations (MS Teams/Discord/Linear/Notion/n8n/CSV-export/direct-REST show "Coming v1.1" or join-waitlist), live migration-log streaming, Reddit ingestion, a native mobile app, and real-time WebSocket updates (all updates are batch, 4–6h).
+Explicit v1.0 deferrals (do not build): SSO/SAML, per-seat overage billing, the full 312-category catalog (ship ~40 curated), the "Bristle's Read" LLM (hardcoded in fixtures for v1.0), Reading Mode (third sepia theme), 7 of 10 integrations (MS Teams/Discord/Linear/Notion/n8n/CSV-export/direct-REST show "Coming v1.1" or join-waitlist), live migration-log streaming, Reddit ingestion, a native mobile app, and real-time WebSocket updates (all updates are batch, 4–6h).
 
 ## 8. Repository structure
 
@@ -179,12 +182,12 @@ bristle/
 │   ├── Bristle-Build-Plan.pdf     # 45 slices / 8 tiers — slice-order source of truth
 │   └── Bristle-Design-Brief.docx  # Full design-system + page spec source of truth
 ├── design/                    # Read-only high-fidelity screen PDFs — the visual contract
-│   ├── Public pages.pdf           # Landing, About, Pricing, FAQ, Blog, Sample report, Changelog, Contact, Legal
+│   ├── Public_pages.pdf           # Landing, About, Pricing, FAQ, Blog, Sample report, Changelog, Contact, Legal
 │   ├── Authentication.pdf         # Sign up, Login, Forgot, Reset, Verify, OAuth callback
 │   ├── onboarding.pdf             # Role, Categories, First-run tour
-│   ├── Core app.pdf               # Dashboard, Problem detail, Library, Saved, Alerts, Compare, Command palette
-│   ├── User and Admin.pdf         # Profile, Billing, Notifications, API Keys, Team, Integrations
-│   └── System pages.pdf           # 404, 500, Maintenance, Success, Indexing, Loading skeletons
+│   ├── Core_app.pdf               # Dashboard, Problem detail, Library, Saved, Alerts, Compare, Command palette
+│   ├── User_and_Admin.pdf         # Profile, Billing, Notifications, API Keys, Team, Integrations
+│   └── System_pages.pdf           # 404, 500, Maintenance, Success, Indexing, Loading skeletons
 ├── specs/                     # SDD specs, one dir per slice: [NNN-slice-name]/spec.md + plan.md + tasks.md
 ├── apps/
 │   ├── web/                   # Next.js 15 App Router — the product surface
@@ -208,4 +211,4 @@ bristle/
 
 ## 10. How to handle ambiguity
 
-When a spec is unclear, or the design PDFs don't cover a state you need to build (an error variant, an edge case, a token that isn't defined — e.g. dark-theme status colors), **stop and ask before guessing.** Cite the exact reference: filename and page number — for example, *"`design/Core app.pdf` page 2 shows the Problem Detail populated state but not the <3-quotes empty state; the brief §5.4.2 says such clusters shouldn't render as pages at all — confirm we hide them?"* Prefer a precise question with the relevant PDF page over a plausible invention. The build plan and design brief are detailed; when they're silent, that silence is a decision point for the user, not for you.
+When a spec is unclear, or the design PDFs don't cover a state you need to build (an error variant, an edge case, a token that isn't defined — e.g. Reading Mode theme tokens), **stop and ask before guessing.** Cite the exact reference: filename and page number — for example, *"`design/Core_app.pdf` page 2 shows the Problem Detail populated state but not the <3-quotes empty state; the brief §5.4.2 says such clusters shouldn't render as pages at all — confirm we hide them?"* Prefer a precise question with the relevant PDF page over a plausible invention. The build plan and design brief are detailed; when they're silent, that silence is a decision point for the user, not for you.
