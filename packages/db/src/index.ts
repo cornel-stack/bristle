@@ -1,2 +1,4 @@
-// Placeholder export — real surface arrives in later slices.
-export const PACKAGE_NAME = "@bristle/db" as const;
+export { problems } from "./schema";
+export type { Problem, NewProblem } from "./schema";
+export { getDb } from "./client";
+export { getFirstProblem } from "./queries";
