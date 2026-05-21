@@ -12,11 +12,10 @@ Phase 0 decisions. Each resolves a "how" the spec left open. Format: Decision / 
 - **Rationale**: Google Fonts renamed "Source Serif Pro" → "Source Serif 4"; `next/font/google` exposes the current name only.
 - **Alternatives**: self-host the legacy "Source Serif Pro" files — rejected (defeats `next/font` optimization; brief permits the locked Source Serif choice, and SS4 is the same superfamily).
 
-## D3 — Named spacing tokens (px-valued) + semantic aliases — REVISED
-- **Decision**: define the §4.3 octave as **px-valued named tokens** in the Tailwind v4 `--spacing-*` namespace (`--spacing-4: 4px` … `--spacing-128: 128px`, token name = pixel value → `p-24` = 24px, `gap-16` = 16px), plus three **semantic aliases** (`--spacing-card: 24px`, `--spacing-grid: 16px`, `--spacing-section: 64px` → `p-card`, `gap-grid`, `space-y-section`). Replaces the single `--spacing` base unit.
-- **Rationale**: user pivot — wants named tokens, not the base-unit multiplier. px-named tokens make utilities read as their pixel size (matching Bristle's px-based scale); semantic aliases let downstream code express intent (`p-card`/`gap-grid`). Maps cleanly to the `--spacing-*` namespace.
-- **Convention chosen**: px-named octave + semantic aliases (documented in plan §1). Deliberately diverges from Tailwind's default rem-multiplier spacing (numeric utilities now equal pixels).
-- **Alternatives**: single `--spacing: 4px` base unit (prior plan) — rejected per pivot. `--space-1…13` numeric names — rejected (`--space-*` is not the v4 spacing namespace, wouldn't generate `p-*` utilities).
+## D3 — Additive semantic spacing tokens (default scale intact) — REVISED
+- **Decision**: leave Tailwind v4's **default numeric spacing scale intact** (4px unit: `p-1`=4px … `p-6`=24px …) and add an *additive* semantic set in the `--spacing-*` namespace: `--spacing-tight` 8, `--spacing-snug` 12, `--spacing-grid` 16, `--spacing-card` 24, `--spacing-loose` 40, `--spacing-section` 64 → utilities `p-card`, `gap-grid`, `space-y-section`, `p-snug`, `gap-tight`, etc. Values drawn from the §4.3 octave; the three concrete layout tokens (card 24, grid 16, section 64) match §4.3 defaults.
+- **Rationale**: user pivot — semantic names that read as intent, **without** shadowing/redefining Tailwind's numeric utilities (so `p-24` keeps its stock meaning and nothing surprises downstream). Component-specific tokens (button/field padding) are deferred — §4.3 gives no explicit values, so they're added when those components are built rather than invented now.
+- **Alternatives**: px-valued numeric names (`--spacing-24`) — rejected per pivot (shadowed defaults). Single `--spacing` base unit — rejected (user wants named semantic tokens).
 
 ## D4 — Client wrapper with server `children` for the RSC boundary
 - **Decision**: `page.tsx` (server) renders the cards and passes them as `children` to a `"use client"` `ThemeShowcase`.

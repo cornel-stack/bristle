@@ -147,15 +147,14 @@ Tailwind v4 generates utilities from `@theme` namespaces (`--color-*` → `bg-/t
   --text-body-sm: 13px; --text-body-sm--line-height: 20px; --text-body-sm--letter-spacing: 0.01em;
   --text-mono-sm: 13px; --text-mono-sm--line-height: 20px;
 
-  /* §4.3 octave as px-valued named tokens (name == pixel value → p-24 = 24px, gap-16 = 16px) */
-  --spacing-4: 4px;   --spacing-8: 8px;   --spacing-12: 12px; --spacing-16: 16px;
-  --spacing-20: 20px; --spacing-24: 24px; --spacing-32: 32px; --spacing-40: 40px;
-  --spacing-48: 48px; --spacing-64: 64px; --spacing-80: 80px; --spacing-96: 96px;
-  --spacing-128: 128px;
-  /* semantic aliases for the §4.3 defaults → p-card / gap-grid / space-y-section */
-  --spacing-card: 24px;     /* card interior padding */
-  --spacing-grid: 16px;     /* gap between cards */
-  --spacing-section: 64px;  /* section-to-section vertical rhythm */
+  /* Tailwind's default numeric spacing scale is left INTACT (4px unit: p-1=4px … p-6=24px …) — not redefined. */
+  /* Additive semantic spacing tokens → p-card / gap-grid / space-y-section / p-snug / gap-tight … (values from §4.3 octave) */
+  --spacing-tight: 8px;     /* minimal internal gaps (badge row, icon+label) */
+  --spacing-snug: 12px;     /* compact padding */
+  --spacing-grid: 16px;     /* gap between cards (§4.3 default) */
+  --spacing-card: 24px;     /* card interior padding (§4.3 default) */
+  --spacing-loose: 40px;    /* generous block separation */
+  --spacing-section: 64px;  /* section-to-section vertical rhythm (§4.3 default) */
 
   --radius-button: 6px;
   --radius-card:   8px;
@@ -200,7 +199,7 @@ Tailwind v4 generates utilities from `@theme` namespaces (`--color-*` → `bg-/t
 }
 ```
 
-**Coverage check (for SC-001)**: 13 core color tokens + 16 category tokens = **29 themeable vars per theme**, each present in both `:root` and `[data-theme="dark"]`; 10 type-scale tokens; 13 px-named spacing steps + 3 semantic spacing aliases; 4 radii; 3 font families. A token-by-token diff script (planned in quickstart) compares these to CLAUDE.md §4.1/§4.1a/§4.2–§4.4.
+**Coverage check (for SC-001)**: 13 core color tokens + 16 category tokens = **29 themeable vars per theme**, each present in both `:root` and `[data-theme="dark"]`; 10 type-scale tokens; 6 additive semantic spacing tokens (default numeric scale left intact); 4 radii; 3 font families. A token-by-token diff script (planned in quickstart) compares these to CLAUDE.md §4.1/§4.1a/§4.2–§4.4.
 
 ## 2. Theme switching mechanism
 
