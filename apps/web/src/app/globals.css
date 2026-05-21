@@ -1,2 +1,191 @@
 @import "tailwindcss";
-/* No Bristle tokens yet — added in Slice 1.3. */
+
+/* ---------------------------------------------------------------------------
+   Bristle design tokens (CLAUDE.md §4).
+   Themeable colors use `@theme inline` so utilities emit var() references and
+   restyle at runtime when [data-theme="dark"] flips the raw values below.
+   Static tokens (type scale, spacing, radius, font families) use plain @theme.
+   --------------------------------------------------------------------------- */
+
+@theme inline {
+  /* §4.1 core palette */
+  --color-surface-canvas: var(--surface-canvas);
+  --color-surface-card: var(--surface-card);
+  --color-surface-raised: var(--surface-raised);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent-bristle: var(--accent-bristle);
+  --color-accent-validated: var(--accent-validated);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-success: var(--status-success);
+
+  /* §4.1a category tints (bg + fg per category) */
+  --color-category-payments-bg: var(--category-payments-bg);
+  --color-category-payments-fg: var(--category-payments-fg);
+  --color-category-devtools-bg: var(--category-devtools-bg);
+  --color-category-devtools-fg: var(--category-devtools-fg);
+  --color-category-ai-ml-bg: var(--category-ai-ml-bg);
+  --color-category-ai-ml-fg: var(--category-ai-ml-fg);
+  --color-category-auth-sso-bg: var(--category-auth-sso-bg);
+  --color-category-auth-sso-fg: var(--category-auth-sso-fg);
+  --color-category-deployment-bg: var(--category-deployment-bg);
+  --color-category-deployment-fg: var(--category-deployment-fg);
+  --color-category-analytics-bg: var(--category-analytics-bg);
+  --color-category-analytics-fg: var(--category-analytics-fg);
+  --color-category-mobile-bg: var(--category-mobile-bg);
+  --color-category-mobile-fg: var(--category-mobile-fg);
+  --color-category-email-bg: var(--category-email-bg);
+  --color-category-email-fg: var(--category-email-fg);
+
+  /* §4.2 font families (resolve to next/font vars set on <html> in layout.tsx) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+}
+
+@theme {
+  /* §4.2 type scale (size / line-height / tracking) */
+  --text-display-xl: 60px;
+  --text-display-xl--line-height: 64px;
+  --text-display-xl--letter-spacing: -0.025em;
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.022em;
+  --text-h1: 36px;
+  --text-h1--line-height: 44px;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: 28px;
+  --text-h2--line-height: 36px;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: 22px;
+  --text-h3--line-height: 30px;
+  --text-h3--letter-spacing: -0.005em;
+  --text-h4: 18px;
+  --text-h4--line-height: 26px;
+  --text-h4--letter-spacing: 0;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 30px;
+  --text-body-lg--letter-spacing: 0;
+  --text-body-md: 15px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--letter-spacing: 0;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--letter-spacing: 0.01em;
+  --text-mono-sm: 13px;
+  --text-mono-sm--line-height: 20px;
+  --text-mono-sm--letter-spacing: 0;
+
+  /* §4.3 spacing — Tailwind's default numeric scale is left intact; these are
+     additive semantic tokens (values from the §4.3 octave) → p-card, gap-grid … */
+  --spacing-tight: 8px;
+  --spacing-snug: 12px;
+  --spacing-grid: 16px;
+  --spacing-card: 24px;
+  --spacing-loose: 40px;
+  --spacing-section: 64px;
+
+  /* §4.4 border radius */
+  --radius-button: 6px;
+  --radius-card: 8px;
+  --radius-modal: 12px;
+  --radius-pill: 999px;
+}
+
+/* §4.1 / §4.1a raw values — Editorial Light (default) */
+:root {
+  --surface-canvas: #FAFAF7;
+  --surface-card: #FFFFFF;
+  --surface-raised: #F4F2EA;
+  --border-default: #E8E6DF;
+  --border-strong: #D9D7CE;
+  --text-primary: #1A1A19;
+  --text-secondary: #6B6B65;
+  --text-tertiary: #9A9A93;
+  --accent-bristle: #C2410C;
+  --accent-validated: #064E3B;
+  --status-warning: #B45309;
+  --status-error: #991B1B;
+  --status-success: #166534;
+
+  --category-payments-bg: #E3F2EB;
+  --category-payments-fg: #1F6B47;
+  --category-devtools-bg: #FBE9DC;
+  --category-devtools-fg: #C2410C;
+  --category-ai-ml-bg: #ECE7F7;
+  --category-ai-ml-fg: #5B3C99;
+  --category-auth-sso-bg: #E4EDF9;
+  --category-auth-sso-fg: #1F4E8F;
+  --category-deployment-bg: #DFF0EE;
+  --category-deployment-fg: #0F6E68;
+  --category-analytics-bg: #F6EAD6;
+  --category-analytics-fg: #8A5512;
+  --category-mobile-bg: #F8E6EC;
+  --category-mobile-fg: #A12648;
+  --category-email-bg: #E9EBF0;
+  --category-email-fg: #3D4860;
+}
+
+/* §4.1 / §4.1a raw values — Editorial Dark (explicit attribute, no media query) */
+[data-theme="dark"] {
+  --surface-canvas: #0F0F0E;
+  --surface-card: #1A1A19;
+  --surface-raised: #232321;
+  --border-default: #2E2E2A;
+  --border-strong: #3A3A35;
+  --text-primary: #F5F5F0;
+  --text-secondary: #A8A89F;
+  --text-tertiary: #6B6B65;
+  --accent-bristle: #F97316;
+  --accent-validated: #10B981;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --status-success: #10B981;
+
+  --category-payments-bg: #142E20;
+  --category-payments-fg: #6FD79E;
+  --category-devtools-bg: #3A1E10;
+  --category-devtools-fg: #F97316;
+  --category-ai-ml-bg: #251C3A;
+  --category-ai-ml-fg: #B69CE6;
+  --category-auth-sso-bg: #16263F;
+  --category-auth-sso-fg: #8FB6E8;
+  --category-deployment-bg: #103230;
+  --category-deployment-fg: #5FD0C7;
+  --category-analytics-bg: #332710;
+  --category-analytics-fg: #E0B469;
+  --category-mobile-bg: #34161F;
+  --category-mobile-fg: #E891A8;
+  --category-email-bg: #1E2230;
+  --category-email-fg: #9FB0CC;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface-canvas);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+  }
+
+  /* §4.5 motion — ≤180ms color shift for the theme switch; off under reduced motion */
+  *,
+  ::before,
+  ::after {
+    transition:
+      background-color 180ms cubic-bezier(0.2, 0, 0, 1),
+      border-color 180ms cubic-bezier(0.2, 0, 0, 1),
+      color 180ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition: none;
+    }
+  }
+}
