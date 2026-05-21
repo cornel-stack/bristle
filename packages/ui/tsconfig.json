@@ -1,5 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    // Override base `lib` to add DOM/DOM.Iterable and enable the automatic JSX
+    // runtime: this package renders React SVG/JSX components (sparkline,
+    // source-icons, problem-card-full) that reference DOM/SVG types. The base
+    // (ES2022-only, no jsx) targets non-DOM packages; UI legitimately needs both.
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
