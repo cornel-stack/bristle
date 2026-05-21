@@ -79,6 +79,36 @@ Extracted from `docs/Bristle-Design-Brief.docx` §3. This section is referenced 
 
 > Reading Mode (third theme) is deferred to v1.1; only Editorial Light and Editorial Dark ship in v1.0.
 
+### 4.1a Category tints
+
+Per-category pill tints for the problem-card category chip. Each category has a paired background + foreground in both themes — low-saturation chips (not saturated fills), warm-compatible with the editorial palette, every fg-on-bg pair meeting WCAG AA. `devtools` is anchored to `accent/bristle`. Added in Slice 003 (design tokens + canonical Problem Card) as the documented source for the 8 `categoryColor` keys.
+
+**Editorial Light** — `category/<name>/{bg,fg}`
+
+| Category | `bg` | `fg` |
+|---|---|---|
+| `payments` | `#E3F2EB` | `#1F6B47` |
+| `devtools` | `#FBE9DC` | `#C2410C` |
+| `ai-ml` | `#ECE7F7` | `#5B3C99` |
+| `auth-sso` | `#E4EDF9` | `#1F4E8F` |
+| `deployment` | `#DFF0EE` | `#0F6E68` |
+| `analytics` | `#F6EAD6` | `#8A5512` |
+| `mobile` | `#F8E6EC` | `#A12648` |
+| `email` | `#E9EBF0` | `#3D4860` |
+
+**Editorial Dark** — `category/<name>/{bg,fg}`
+
+| Category | `bg` | `fg` |
+|---|---|---|
+| `payments` | `#142E20` | `#6FD79E` |
+| `devtools` | `#3A1E10` | `#F97316` |
+| `ai-ml` | `#251C3A` | `#B69CE6` |
+| `auth-sso` | `#16263F` | `#8FB6E8` |
+| `deployment` | `#103230` | `#5FD0C7` |
+| `analytics` | `#332710` | `#E0B469` |
+| `mobile` | `#34161F` | `#E891A8` |
+| `email` | `#1E2230` | `#9FB0CC` |
+
 ### 4.2 Typography
 
 Three families, one role each, no exceptions:
