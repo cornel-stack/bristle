@@ -1,4 +1,5 @@
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: new URL("../../.env.local", import.meta.url).pathname }); // repo-root .env.local (package root → root)
 import { defineConfig } from "drizzle-kit";
 
 // drizzle-kit (generate / migrate / studio) uses the DIRECT/session connection
