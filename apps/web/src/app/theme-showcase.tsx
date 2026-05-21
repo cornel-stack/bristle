@@ -18,7 +18,7 @@ export function ThemeShowcase({ children }: { children: ReactNode }) {
   return (
     <main className="mx-auto max-w-5xl px-grid py-section">
       <div className="flex items-center justify-between gap-grid">
-        <h1 className="font-serif text-h2 text-text-primary">Problem cards</h1>
+        <h1 className="font-serif text-h1 text-text-primary">Bristle</h1>
         <button
           type="button"
           onClick={toggle}
@@ -30,7 +30,10 @@ export function ThemeShowcase({ children }: { children: ReactNode }) {
         </button>
       </div>
 
-      <div className="mt-section grid gap-grid md:grid-cols-2">{children}</div>
+      <section className="mt-section">
+        <h2 className="font-serif text-h2 text-text-primary">Problem cards</h2>
+        <div className="mt-grid grid gap-grid md:grid-cols-2">{children}</div>
+      </section>
     </main>
   );
 }
