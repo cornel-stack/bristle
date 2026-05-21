@@ -6,6 +6,11 @@ import {
   type SourceKey,
 } from "@bristle/ui";
 
+// Read at request time, not build time — the DB query isn't a cacheable fetch,
+// so mark the route dynamic (plan §D8). Without this, `next build` tries to
+// statically prerender and fails connecting to the database.
+export const dynamic = "force-dynamic";
+
 // Server Component: reads the seeded problem from the database at request time
 // and renders it through the canonical ProblemCardFull. getFirstProblem throws
 // if no row exists (a missing seed is a deployment defect, not an empty state).
