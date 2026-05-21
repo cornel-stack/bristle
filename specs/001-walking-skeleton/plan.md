@@ -120,11 +120,11 @@ The spec locks majors (TC-001…TC-006). Concrete versions I would use today, 20
 | Node | 20 LTS | `20` (`.nvmrc`), CI/Vercel runtime Node 20 | LTS maintenance line. |
 | pnpm | 9.x | **9.15.9** | Latest stable 9.x. pnpm 10 exists but spec locks 9.x. Declared in `packageManager`. |
 | Turborepo | 2.x | **2.5.4** | Uses `tasks` key (not the 1.x `pipeline`). |
-| Next.js | 15.x | **15.2.4** | App Router. Pulls React 19.x. |
+| Next.js | 15.x | **15.5.18** | App Router. Pulls React 19.x. Bumped from 15.2.4 — Vercel blocks deploying 15.2.4 as a known CVE (commit 9c32291). |
 | React / React-DOM | (via Next) | **19.1.0** | Required peer of Next 15. |
 | Tailwind CSS | 4.x | **4.1.8** | CSS-first; via `@tailwindcss/postcss@4.1.8`. No `tailwind.config.js`. |
 | TypeScript | 5.x | **5.8.3** | `strict`, `moduleResolution: bundler`. |
-| ESLint | (tooling) | **9.24.0** | Flat config. `eslint-config-next@15.2.4`, `typescript-eslint@8.x`. |
+| ESLint | (tooling) | **9.24.0** | Flat config. `eslint-config-next@15.5.18` (bumped from 15.2.4 with Next, commit 9c32291), `typescript-eslint@8.x`. |
 | @types/node | — | **20.x** | Matches Node 20. |
 | @types/react / -dom | — | **19.x** | Matches React 19. |
 
