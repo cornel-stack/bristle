@@ -1,45 +1,31 @@
-import { ProblemCardFull, type ProblemCardFullProps } from "@bristle/ui";
-import { ThemeShowcase } from "./theme-showcase";
+import { getFirstProblem } from "@bristle/db";
+import { CATEGORY_LABELS, type CategoryKey } from "@bristle/shared";
+import {
+  ProblemCardFull,
+  type CategoryColor,
+  type SourceKey,
+} from "@bristle/ui";
 
-// Server-rendered fixtures for the design-system showcase. Cards are rendered
-// here (server) and passed as children to the client ThemeShowcase, so they
-// stay Server Components while only the toggle is client.
-const now = Date.now();
-const hoursAgo = (h: number) => new Date(now - h * 3_600_000).toISOString();
+// Server Component: reads the seeded problem from the database at request time
+// and renders it through the canonical ProblemCardFull. getFirstProblem throws
+// if no row exists (a missing seed is a deployment defect, not an empty state).
+export default async function Home() {
+  const problem = await getFirstProblem();
+  const categoryKey = problem.category as CategoryKey;
 
-const cards: ProblemCardFullProps[] = [
-  {
-    title: "Stripe webhooks fail silently on Vercel cold starts",
-    category: "Payments",
-    categoryColor: "payments",
-    momentum: 312,
-    sparkline: [4, 5, 5, 6, 7, 6, 8, 9, 8, 11, 12, 14, 16, 19],
-    topQuote:
-      "Retries were dropped during cold starts and we lost reconciled revenue for two days before noticing.",
-    quoteSource: "gh",
-    sources: ["gh", "hn", "so"],
-    lastSeenIso: hoursAgo(1),
-  },
-  {
-    title: "LLM streaming chokes through CDN buffering",
-    category: "AI / ML",
-    categoryColor: "ai-ml",
-    momentum: 184,
-    sparkline: [9, 8, 9, 10, 9, 11, 10, 12, 11, 13, 12, 14, 15, 17],
-    topQuote:
-      "Token streaming stalls behind the CDN buffer, so responses arrive in bursts instead of smoothly.",
-    quoteSource: "hn",
-    sources: ["hn", "so"],
-    lastSeenIso: hoursAgo(3),
-  },
-];
-
-export default function Home() {
   return (
-    <ThemeShowcase>
-      {cards.map((card) => (
-        <ProblemCardFull key={card.title} {...card} />
-      ))}
-    </ThemeShowcase>
+    <main className="mx-auto max-w-3xl px-grid py-section">
+      <ProblemCardFull
+        title={problem.title}
+        category={CATEGORY_LABELS[categoryKey]}
+        categoryColor={problem.category as CategoryColor}
+        momentum={problem.momentumPct}
+        sparkline={problem.sparkline}
+        topQuote={problem.topQuote}
+        quoteSource={problem.quoteSource as SourceKey}
+        sources={problem.sources as SourceKey[]}
+        lastSeenIso={problem.lastSeenAt.toISOString()}
+      />
+    </main>
   );
 }
