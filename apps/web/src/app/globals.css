@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Scan the workspace UI package so utilities used only inside @bristle/ui
+   components (problem-card-full, sparkline, source-icons) are generated.
+   Tailwind v4 auto-detects apps/web but not the symlinked workspace package. */
+@source "../../../../packages/ui/src";
+
 /* ---------------------------------------------------------------------------
    Bristle design tokens (CLAUDE.md §4).
    Themeable colors use `@theme inline` so utilities emit var() references and
