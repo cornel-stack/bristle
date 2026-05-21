@@ -1,0 +1,34 @@
+import { sql } from "drizzle-orm";
+import {
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  vector,
+} from "drizzle-orm/pg-core";
+
+// Minimal problems table — one row renders one ProblemCardFull (see contracts/).
+// `slug` is the stable, URL-safe upsert key (also the future /problems/[slug] route).
+// `embedding` exercises pgvector end to end; unpopulated this slice.
+export const problems = pgTable("problems", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  momentumPct: integer("momentum_pct").notNull(),
+  sparkline: integer("sparkline").array().notNull(),
+  topQuote: text("top_quote").notNull(),
+  quoteSource: text("quote_source").notNull(),
+  sources: text("sources").array().notNull(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  embedding: vector("embedding", { dimensions: 1536 }),
+});
+
+export type Problem = typeof problems.$inferSelect;
+export type NewProblem = typeof problems.$inferInsert;
