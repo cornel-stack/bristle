@@ -1,0 +1,4 @@
+packages:
+  - "apps/web"
+  - "packages/*"
+# apps/pipeline intentionally excluded — README-only placeholder, no JS/TS toolchain.

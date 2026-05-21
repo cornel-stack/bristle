@@ -212,3 +212,8 @@ bristle/
 ## 10. How to handle ambiguity
 
 When a spec is unclear, or the design PDFs don't cover a state you need to build (an error variant, an edge case, a token that isn't defined — e.g. Reading Mode theme tokens), **stop and ask before guessing.** Cite the exact reference: filename and page number — for example, *"`design/Core_app.pdf` page 2 shows the Problem Detail populated state but not the <3-quotes empty state; the brief §5.4.2 says such clusters shouldn't render as pages at all — confirm we hide them?"* Prefer a precise question with the relevant PDF page over a plausible invention. The build plan and design brief are detailed; when they're silent, that silence is a decision point for the user, not for you.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
