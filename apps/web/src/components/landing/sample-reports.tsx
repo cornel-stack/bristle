@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProblemCardCompact, type CategoryColor, type SourceKey } from "@bristle/ui";
 import { CATEGORY_LABELS, type CategoryKey } from "@bristle/shared";
 import type { Problem } from "@bristle/db";
@@ -14,9 +15,9 @@ export function SampleReports({ problems }: { problems: Problem[] }) {
             Today&rsquo;s high-signal problems
           </h2>
         </div>
-        <a href="/library" className="shrink-0 text-body-sm font-medium text-accent-bristle">
+        <Link href="/library" className="shrink-0 text-body-sm font-medium text-accent-bristle">
           Browse the library →
-        </a>
+        </Link>
       </div>
       <div className="mt-grid grid gap-grid sm:grid-cols-2 lg:grid-cols-3">
         {problems.map((problem) => {

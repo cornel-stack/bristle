@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // Shared placeholder for routes whose real page ships in a later slice.
 // Server component, design-system tokens only, no hardcoded colors or fonts.
 export function ComingSoon({ version }: { version: string }) {
@@ -13,12 +15,12 @@ export function ComingSoon({ version }: { version: string }) {
       <p className="mt-snug text-body-md text-text-secondary">
         This page is on its way. Check back soon.
       </p>
-      <a
+      <Link
         href="/"
         className="mt-loose rounded-button border border-border-default px-snug py-2 text-body-sm font-medium text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-bristle"
       >
         Back to home
-      </a>
+      </Link>
     </main>
   );
 }

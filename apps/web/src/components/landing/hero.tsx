@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProblemCardFull, type CategoryColor, type SourceKey } from "@bristle/ui";
 import { CATEGORY_LABELS, type CategoryKey } from "@bristle/shared";
 import type { Problem } from "@bristle/db";
@@ -20,9 +21,9 @@ export function Hero({ problem }: { problem: Problem }) {
           by frequency, momentum, and willingness-to-pay.
         </p>
         <div className="mt-loose flex flex-wrap items-center gap-snug">
-          <a href="/signup" className="rounded-button bg-accent-bristle px-grid py-2 text-body-md font-medium text-surface-card">
+          <Link href="/signup" className="rounded-button bg-accent-bristle px-grid py-2 text-body-md font-medium text-surface-card">
             Start free →
-          </a>
+          </Link>
           <a href="#sample" className="rounded-button border border-border-default px-grid py-2 text-body-md font-medium text-text-secondary">
             See sample problems
           </a>

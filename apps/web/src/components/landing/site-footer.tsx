@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const COLUMNS = [
   {
     heading: "Product",
@@ -83,9 +85,9 @@ export function SiteFooter() {
                 <ul className="mt-snug flex flex-col gap-2">
                   {column.links.map((link) => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-body-sm text-text-secondary hover:text-text-primary">
+                      <Link href={link.href} className="text-body-sm text-text-secondary hover:text-text-primary">
                         {link.label}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>

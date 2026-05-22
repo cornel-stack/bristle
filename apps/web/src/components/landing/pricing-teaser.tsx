@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const TIERS = [
   { name: "Starter", price: "$29", desc: "Five categories, daily digest, CSV export." },
   { name: "Pro", price: "$79", desc: "Unlimited categories, instant alerts, API comparisons." },
@@ -19,12 +21,12 @@ export function PricingTeaser() {
           <p className="mt-grid max-w-xl text-body-md text-text-secondary">
             Starter for solo builders. Pro for shipping founders. Team for agencies and innovation labs.
           </p>
-          <a
+          <Link
             href="/pricing"
             className="mt-loose inline-block rounded-button border border-border-strong px-grid py-2 text-body-sm font-medium text-text-primary"
           >
             See full pricing →
-          </a>
+          </Link>
         </div>
         <dl className="flex flex-col gap-grid">
           {TIERS.map((tier) => (
