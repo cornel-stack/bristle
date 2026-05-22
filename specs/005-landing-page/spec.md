@@ -157,7 +157,15 @@ A visitor clicking the nav's Pricing / About / Blog / Changelog links reaches a 
 - **Section count (resolved)**: **seven** sections — nav, hero, source strip, how-it-works, sample reports, pricing teaser, footer.
 - **Footer status string vs design**: the design page shows a different version label; per explicit instruction the literal is **"v0.2.0 · status: operational"** this slice. The string is hard-coded (real status integration is a later slice).
 - **Request-time rendering**: the landing reads the database (hero + sample row) at request time, so the route renders dynamically (not statically prerendered at build), consistent with the persistence slice's homepage.
-- **Link targets (resolved)**: Sign in → `/login`, Start free → `/signup`, and "See full pricing →" → `/pricing` resolve to soft-404 **stub routes** built this slice (FR-016). "See sample problems" is an **in-page anchor** to the sample-reports section (FR-004/FR-008). "Browse the library →" → `/library` and the canonical card's "Open report →" → `/problems/{slug}` are **known, documented out-of-scope 404s** until later Tier-2 slices — not 2.1 defects.
+- **Link targets (resolved)**: Sign in → `/login`, Start free → `/signup`, and "See full pricing →" → `/pricing` resolve to soft-404 **stub routes** built this slice (FR-016). "See sample problems" and the footer "Sample reports" are **in-page anchors** to the sample-reports section (`/#sample`). All other links point at their **intended-but-not-yet-built canonical routes** and 404 until their slices ship — never masked behind anchors or redirects.
+- **Known out-of-scope 404s (this slice)** — links present in the chrome whose destinations are not built yet (each points at its real intended path and returns 404 until the owning slice ships; not 2.1 defects):
+  - "Browse the library →" → `/library`
+  - canonical card "Open report →" → `/problems/{slug}`
+  - footer **Product**: Roadmap → `/roadmap`
+  - footer **Company**: Contact → `/contact`, Press → `/press`
+  - footer **Resources**: Documentation → `/docs`, API → `/api`, Help center → `/help`, Status → `/status`
+  - footer **Legal**: Terms → `/terms`, Privacy → `/privacy`, Security → `/security`, GDPR → `/gdpr`
+  - (The only routes that get a ComingSoon stub page this slice are `/pricing`, `/about`, `/blog`, `/changelog`, `/login`, `/signup`.)
 - **Open Graph image (resolved)**: a hand-authored static raster `og-image.png` (1200×630; wordmark + headline on `surface/canvas`, brand tokens) in the web app's public assets, referenced by absolute URL on the canonical origin `https://bristle.vercel.app` (FR-019/FR-024). No dynamic OG generation.
 - **Compact card contract**: derived as a subset of the canonical card's props; the category key→label mapping reuses the shared label map; source markers reuse the existing inline source-icon component.
 - **Stub copy (resolved)**: per-route version strings — `/pricing` "Coming in v0.2.2", `/about` "Coming in v0.2.3", `/blog` "Coming in v0.2.4", `/changelog` "Coming in v0.2.5", `/login` & `/signup` "Coming in v0.3.X (Tier 3)".
