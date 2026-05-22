@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./problem-card-full": "./src/problem-card-full.tsx",
+    "./problem-card-compact": "./src/problem-card-compact.tsx",
     "./sparkline": "./src/sparkline.tsx",
     "./source-icons": "./src/source-icons/index.tsx"
   },
