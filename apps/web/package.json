@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@bristle/db": "workspace:*",
+    "@bristle/shared": "workspace:*",
     "@bristle/ui": "workspace:*",
     "next": "15.5.18",
     "react": "19.1.0",
