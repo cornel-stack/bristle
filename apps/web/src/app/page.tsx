@@ -1,36 +1,51 @@
-import { getFirstProblem } from "@bristle/db";
-import { CATEGORY_LABELS, type CategoryKey } from "@bristle/shared";
-import {
-  ProblemCardFull,
-  type CategoryColor,
-  type SourceKey,
-} from "@bristle/ui";
+import type { Metadata } from "next";
+import { getProblemBySlug, getRecentProblems } from "@bristle/db";
+import { SITE_URL } from "@bristle/shared";
+import { TopNav } from "@/components/landing/top-nav";
+import { Hero } from "@/components/landing/hero";
+import { SourceStrip } from "@/components/landing/source-strip";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { SampleReports } from "@/components/landing/sample-reports";
+import { PricingTeaser } from "@/components/landing/pricing-teaser";
+import { SiteFooter } from "@/components/landing/site-footer";
 
-// Read at request time, not build time — the DB query isn't a cacheable fetch,
-// so mark the route dynamic (plan §D8). Without this, `next build` tries to
-// statically prerender and fails connecting to the database.
+const HERO_SLUG = "stripe-webhooks-vercel-cold-starts";
+const DESCRIPTION =
+  "Bristle finds real problems worth solving — evidence-backed problem reports from GitHub, Hacker News, Stack Overflow, Product Hunt, and the App Stores, ranked by frequency, momentum, and willingness-to-pay.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: "Bristle — Find real problems worth solving",
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/`,
+    title: "Bristle — Find real problems worth solving",
+    description: DESCRIPTION,
+    images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630 }],
+  },
+};
+
+// Read at request time, not build time — the DB queries aren't cacheable fetches,
+// so mark the route dynamic (plan §D8); otherwise `next build` prerenders and
+// fails connecting to the database.
 export const dynamic = "force-dynamic";
 
-// Server Component: reads the seeded problem from the database at request time
-// and renders it through the canonical ProblemCardFull. getFirstProblem throws
-// if no row exists (a missing seed is a deployment defect, not an empty state).
 export default async function Home() {
-  const problem = await getFirstProblem();
-  const categoryKey = problem.category as CategoryKey;
+  const [hero, recent] = await Promise.all([
+    getProblemBySlug(HERO_SLUG),
+    getRecentProblems({ limit: 3, excludeSlug: HERO_SLUG }),
+  ]);
 
   return (
-    <main className="mx-auto max-w-3xl px-grid py-section">
-      <ProblemCardFull
-        title={problem.title}
-        category={CATEGORY_LABELS[categoryKey]}
-        categoryColor={problem.category as CategoryColor}
-        momentum={problem.momentumPct}
-        sparkline={problem.sparkline}
-        topQuote={problem.topQuote}
-        quoteSource={problem.quoteSource as SourceKey}
-        sources={problem.sources as SourceKey[]}
-        lastSeenIso={problem.lastSeenAt.toISOString()}
-      />
-    </main>
+    <>
+      <TopNav />
+      <Hero problem={hero} />
+      <SourceStrip />
+      <HowItWorks />
+      <SampleReports problems={recent} />
+      <PricingTeaser />
+      <SiteFooter />
+    </>
   );
 }
