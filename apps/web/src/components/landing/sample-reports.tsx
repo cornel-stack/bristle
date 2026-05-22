@@ -8,7 +8,7 @@ export function SampleReports({ problems }: { problems: Problem[] }) {
     <section id="sample" className="mx-auto max-w-6xl px-grid py-section">
       <div className="flex items-end justify-between gap-grid">
         <div>
-          <p className="text-body-sm font-medium uppercase tracking-wide text-text-tertiary">
+          <p className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">
             Sample reports · Public
           </p>
           <h2 className="mt-snug font-serif text-h2 text-text-primary">

@@ -6,7 +6,7 @@ export function SourceStrip() {
   return (
     <section className="bg-surface-raised">
       <div className="mx-auto flex max-w-6xl flex-col gap-grid px-grid py-grid md:flex-row md:items-center md:justify-between">
-        <p className="text-body-sm font-medium uppercase tracking-wide text-text-tertiary">
+        <p className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">
           Evidence from where builders actually complain
         </p>
         <ul className="flex flex-wrap items-center gap-loose">

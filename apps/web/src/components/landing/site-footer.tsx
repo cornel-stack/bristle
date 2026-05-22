@@ -70,7 +70,7 @@ export function SiteFooter() {
                 Subscribe
               </button>
             </form>
-            <p id="newsletter-note" className="mt-snug text-body-sm text-text-tertiary">
+            <p id="newsletter-note" className="mt-snug text-body-sm text-text-secondary">
               Email subscriptions launching soon
             </p>
           </div>
@@ -79,7 +79,7 @@ export function SiteFooter() {
           <div className="grid grid-cols-2 gap-grid sm:grid-cols-4 lg:col-span-2">
             {COLUMNS.map((column) => (
               <div key={column.heading}>
-                <p className="text-body-sm font-medium uppercase tracking-wide text-text-tertiary">
+                <p className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">
                   {column.heading}
                 </p>
                 <ul className="mt-snug flex flex-col gap-2">
@@ -97,7 +97,7 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom row */}
-        <div className="mt-section flex flex-wrap items-center justify-between gap-snug border-t border-border-default pt-grid text-body-sm text-text-tertiary">
+        <div className="mt-section flex flex-wrap items-center justify-between gap-snug border-t border-border-default pt-grid text-body-sm text-text-secondary">
           <span>© 2026 Bristle Research, Inc.</span>
           <span className="font-mono text-mono-sm">v0.2.0 · status: operational</span>
         </div>

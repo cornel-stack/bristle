@@ -24,7 +24,7 @@ const STEPS: { n: string; title: string; Icon: LucideIcon; body: string }[] = [
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-grid py-section">
-      <p className="text-body-sm font-medium uppercase tracking-wide text-text-tertiary">How it works</p>
+      <p className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">How it works</p>
       <h2 className="mt-snug font-serif text-h2 text-text-primary">
         A research journal that doesn&rsquo;t sleep.
       </h2>
@@ -33,7 +33,7 @@ export function HowItWorks() {
           <article key={n} className="rounded-card border border-border-default bg-surface-card p-card">
             <div className="flex items-center justify-between">
               <Icon className="size-5 text-accent-bristle" strokeWidth={1.5} aria-hidden="true" />
-              <span className="font-mono text-mono-sm text-text-tertiary">{n}</span>
+              <span className="font-mono text-mono-sm text-text-secondary">{n}</span>
             </div>
             <h3 className="mt-grid font-serif text-h4 text-text-primary">{title}</h3>
             <p className="mt-snug text-body-sm text-text-secondary">{body}</p>

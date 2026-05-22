@@ -28,11 +28,12 @@ export function Hero({ problem }: { problem: Problem }) {
             See sample problems
           </a>
         </div>
-        <p className="mt-snug text-body-sm text-text-tertiary">
+        <p className="mt-snug text-body-sm text-text-secondary">
           No credit card · Cancel anytime · 7-day Pro trial
         </p>
       </div>
       <div className="md:justify-self-end">
+        <h2 className="sr-only">Example problem report</h2>
         <ProblemCardFull
           title={problem.title}
           category={CATEGORY_LABELS[key]}

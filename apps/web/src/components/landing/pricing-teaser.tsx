@@ -14,7 +14,7 @@ export function PricingTeaser() {
     <section data-theme="dark" className="bg-surface-canvas">
       <div className="mx-auto grid max-w-6xl gap-loose px-grid py-section md:grid-cols-2">
         <div>
-          <p className="text-body-sm font-medium uppercase tracking-wide text-text-tertiary">Pricing</p>
+          <p className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">Pricing</p>
           <h2 className="mt-snug font-serif text-h2 text-text-primary">
             One price for serious research. One for casual.
           </h2>
@@ -28,21 +28,21 @@ export function PricingTeaser() {
             See full pricing →
           </Link>
         </div>
-        <dl className="flex flex-col gap-grid">
+        <div className="flex flex-col gap-grid">
           {TIERS.map((tier) => (
             <div
               key={tier.name}
               className="grid grid-cols-3 items-baseline gap-grid border-b border-border-default pb-grid"
             >
-              <dt className="text-body-sm font-medium uppercase tracking-wide text-text-tertiary">{tier.name}</dt>
-              <div className="flex items-baseline gap-1">
+              <span className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">{tier.name}</span>
+              <span className="flex items-baseline gap-1">
                 <span className="font-serif text-h2 text-text-primary">{tier.price}</span>
-                <span className="text-body-sm text-text-tertiary">/mo</span>
-              </div>
-              <dd className="text-body-sm text-text-secondary">{tier.desc}</dd>
+                <span className="text-body-sm text-text-secondary">/mo</span>
+              </span>
+              <span className="text-body-sm text-text-secondary">{tier.desc}</span>
             </div>
           ))}
-        </dl>
+        </div>
       </div>
     </section>
   );
