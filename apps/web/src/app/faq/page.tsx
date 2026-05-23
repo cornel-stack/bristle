@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { SITE_URL } from "@bristle/shared";
 
+import { FaqBottomCta } from "@/components/faq/bottom-cta";
+import { FaqBody } from "@/components/faq/faq-body";
+import { FaqHero } from "@/components/faq/hero";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { TopNav } from "@/components/landing/top-nav";
-import { PricingBillingSection } from "@/components/pricing/billing-section";
-import { CompareTable } from "@/components/pricing/compare-table";
-import { EnterpriseCard } from "@/components/pricing/enterprise-card";
-import { PricingHero } from "@/components/pricing/hero";
 
-const TITLE = "Pricing — Bristle";
+const TITLE = "FAQ — Bristle";
 const DESCRIPTION =
-  "Three plans for finding real problems worth solving. Cancel any time, annual saves 30%.";
+  "Answers to the most common questions about Bristle's data sources, pricing, privacy, and API.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,20 +19,19 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     type: "website",
-    url: SITE_URL + "/pricing",
+    url: SITE_URL + "/faq",
     images: [{ url: SITE_URL + "/og-image.png", width: 1200, height: 630 }],
   },
 };
 
-export default async function Pricing() {
+export default async function Faq() {
   return (
     <>
       <TopNav />
       <main>
-        <PricingHero />
-        <PricingBillingSection />
-        <CompareTable />
-        <EnterpriseCard />
+        <FaqHero />
+        <FaqBody />
+        <FaqBottomCta />
       </main>
       <SiteFooter />
     </>
