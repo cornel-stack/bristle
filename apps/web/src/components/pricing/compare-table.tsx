@@ -18,11 +18,8 @@ function renderCell(cell: CompareCell) {
 export function CompareTable() {
   return (
     <section className="mx-auto max-w-5xl px-grid py-section">
-      <p className="text-body-sm font-medium uppercase tracking-wide text-text-secondary">
-        COMPARE IN DETAIL
-      </p>
-      <h2 className="mt-grid font-serif text-h2 text-text-primary">
-        Compare plans, feature by feature.
+      <h2 className="font-serif text-display-lg text-text-primary">
+        Compare in detail
       </h2>
       <div className="mt-card overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-left text-body-md">
