@@ -17,7 +17,7 @@ export const TIERS: readonly Tier[] = [
   {
     name: "Starter",
     eyebrow: "STARTER",
-    monthlyPriceUsd: 29,
+    monthlyPriceUsd: 19,
     tagline: "For one builder, finding their next idea.",
     ctaLabel: "Choose Starter",
     ctaHref: "/signup",
@@ -34,7 +34,7 @@ export const TIERS: readonly Tier[] = [
   {
     name: "Pro",
     eyebrow: "PRO",
-    monthlyPriceUsd: 79,
+    monthlyPriceUsd: 49,
     tagline: "For founders shipping against evidence.",
     ctaLabel: "Start Pro trial",
     ctaHref: "/signup",
@@ -52,7 +52,7 @@ export const TIERS: readonly Tier[] = [
   {
     name: "Team",
     eyebrow: "TEAM",
-    monthlyPriceUsd: 199,
+    monthlyPriceUsd: 149,
     tagline: "For agencies, scouts and innovation labs.",
     ctaLabel: "Choose Team",
     ctaHref: "/signup",
