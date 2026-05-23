@@ -90,7 +90,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
     section: "pricing",
     question: "Is there a free tier?",
     answer:
-      "Not currently. Starter at $29 per month is the entry plan. The 7-day Pro trial gives you full access if you want to evaluate before paying.",
+      "Not currently. Starter at $19 per month is the entry plan. The 7-day Pro trial gives you full access if you want to evaluate before paying.",
   },
   {
     id: "faq-q-9",
