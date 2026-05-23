@@ -1,15 +1,28 @@
 // Policy claims needing founder sign-off (FR-012a):
+// - faq-q-2: legal interpretation of Apple Developer Program License Agreement and
+//   Google Play Developer Terms re: research use of public review feeds. Founder/legal
+//   confirm before merge.
+// - faq-q-4: three specific GDPR compliance commitments — (i) "we do not build profiles
+//   on EU data subjects", (ii) "we do not sell or share user data with third parties",
+//   (iii) "account-linked data deletion requests are honored through support@bristle.dev".
+//   Founder/legal sign-off mandatory.
 // - faq-q-5: refund window stated as "14 days" — needs founder confirm.
-// - faq-q-6: ingest cadence stated as "every 4 to 6 hours" — already in internal
-//   docs (CLAUDE.md §3) as the batch cadence, but flagging as a new user-facing claim.
+// - faq-q-6: ingest cadence stated as "every 4 to 6 hours" — already in internal docs
+//   (CLAUDE.md §3) as the batch cadence, but flagging as a new user-facing claim.
+// - faq-q-7: answer states the API returns synthesized text as if the API ships today,
+//   but /api is a documented out-of-scope 404 until Tier 5. Founder confirms either
+//   (a) the answer ships as-is despite no live API, or (b) reword to acknowledge
+//   in-development status.
 // - faq-q-8: "no free tier" stance — needs founder confirm.
+// - faq-q-9: soft SLA commitment ("we prioritize new categories based on overlap across
+//   requests"). Founder confirm.
 //
-// Exempt (already established elsewhere): six-source list (faq-q-1), 7-day Pro
-// trial (faq-q-8), "Cancel any time" (faq-q-3 phrasing).
+// Exempt (already established elsewhere): six-source list (faq-q-1), 7-day Pro trial
+// (faq-q-8), "Cancel any time" (faq-q-3 phrasing).
 //
-// Mirror the bullets above into the PR description under the same heading
-// (`Policy claims needing founder sign-off`) before opening the PR. If the
-// list above changes during review, update both this header AND the PR section.
+// Mirror the seven bullets above into the PR description under the same heading
+// (`Policy claims needing founder sign-off`) before opening the PR. If the list
+// above changes during review, update both this header AND the PR section.
 
 export type FaqSection =
   | "pricing"
@@ -108,6 +121,6 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
     section: "api",
     question: "Can I export data?",
     answer:
-      "Yes. Pro and Team plans include API access and you can pull problem reports as JSON. Additional export formats are tracked on our roadmap.",
+      "Yes. Starter plans include CSV export of problem reports. Pro and Team plans add JSON exports via the API. Additional formats are tracked on our roadmap.",
   },
 ] as const;
