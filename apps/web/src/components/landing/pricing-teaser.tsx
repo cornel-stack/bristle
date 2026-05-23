@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const TIERS = [
-  { name: "Starter", price: "$29", desc: "Five categories, daily digest, CSV export." },
-  { name: "Pro", price: "$79", desc: "Unlimited categories, instant alerts, API comparisons." },
-  { name: "Team", price: "$199", desc: "Five seats, shared collections, Slack and webhooks." },
+  { name: "Starter", price: "$19", desc: "Five categories, daily digest, CSV export." },
+  { name: "Pro", price: "$49", desc: "Unlimited categories, instant alerts, API comparisons." },
+  { name: "Team", price: "$149", desc: "Five seats, shared collections, Slack and webhooks." },
 ];
 
 // Deliberately-dark band on the otherwise-light page: a scoped data-theme="dark"
