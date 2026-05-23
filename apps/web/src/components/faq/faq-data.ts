@@ -1,28 +1,25 @@
-// Policy claims needing founder sign-off (FR-012a):
-// - faq-q-2: legal interpretation of Apple Developer Program License Agreement and
-//   Google Play Developer Terms re: research use of public review feeds. Founder/legal
-//   confirm before merge.
-// - faq-q-4: three specific GDPR compliance commitments — (i) "we do not build profiles
-//   on EU data subjects", (ii) "we do not sell or share user data with third parties",
-//   (iii) "account-linked data deletion requests are honored through support@bristle.dev".
-//   Founder/legal sign-off mandatory.
-// - faq-q-5: refund window stated as "14 days" — needs founder confirm.
-// - faq-q-6: ingest cadence stated as "every 4 to 6 hours" — already in internal docs
-//   (CLAUDE.md §3) as the batch cadence, but flagging as a new user-facing claim.
-// - faq-q-7: answer states the API returns synthesized text as if the API ships today,
-//   but /api is a documented out-of-scope 404 until Tier 5. Founder confirms either
-//   (a) the answer ships as-is despite no live API, or (b) reword to acknowledge
-//   in-development status.
-// - faq-q-8: "no free tier" stance — needs founder confirm.
-// - faq-q-9: soft SLA commitment ("we prioritize new categories based on overlap across
-//   requests"). Founder confirm.
+// Policy claims resolved (FR-012a — founder sign-off 2026-05-23):
+// - faq-q-2: App Store / Google Play review-feed legal interpretation — RESOLVED via
+//   founder edit (replaced specific developer-terms reference with "publicly available
+//   review feeds from each store").
+// - faq-q-4: GDPR compliance commitments — RESOLVED via founder edit (deferred specifics
+//   to the /privacy page; current copy is "Full GDPR details are on our Privacy page").
+// - faq-q-5: refund policy — RESOLVED via founder edit (no automatic refund window;
+//   case-by-case via support email).
+// - faq-q-6: ingest cadence — RESOLVED via founder edit ("regularly throughout the day"
+//   replaces the previous "every 4 to 6 hours" specific claim).
+// - faq-q-7: API synthesis claim — RESOLVED via founder edit (acknowledges roadmap:
+//   "the API endpoint launches in our next release").
+// - faq-q-8: "no free tier" stance — RESOLVED ship-as-stated (slice 007 will swap
+//   "$29" → "$19" in the answer at the price recalibration).
+// - faq-q-9: soft SLA on category requests — RESOLVED ship-as-stated.
 //
 // Exempt (already established elsewhere): six-source list (faq-q-1), 7-day Pro trial
 // (faq-q-8), "Cancel any time" (faq-q-3 phrasing).
 //
-// Mirror the seven bullets above into the PR description under the same heading
-// (`Policy claims needing founder sign-off`) before opening the PR. If the list
-// above changes during review, update both this header AND the PR section.
+// Resolved = "founder has approved the current wording" — the underlying answers still
+// touch policy and any future copy edit must re-trigger this gate. Audit trail mirrored
+// in the PR #5 description under "Policy claims — resolved".
 
 export type FaqSection =
   | "pricing"
@@ -51,7 +48,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
     section: "data-sources",
     question: "Is reading App Store reviews legal?",
     answer:
-      "We use Apple's and Google's official review feeds, which permit research use under their developer terms. We ingest only public review text, ratings, and timestamps, never user-identifying account fields.",
+      "We use the publicly available review feeds from each store. We ingest only public review text, ratings, and timestamps, never user-identifying account fields.",
   },
   {
     id: "faq-q-3",
@@ -65,28 +62,28 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
     section: "privacy",
     question: "What about GDPR?",
     answer:
-      "All ingested content is public. We do not build profiles on EU data subjects and we do not sell or share user data with third parties. Account-linked data deletion requests are honored through support@bristle.dev.",
+      "We process only public content and the email you sign up with. Full GDPR details are on our Privacy page.",
   },
   {
     id: "faq-q-5",
     section: "pricing",
     question: "Do you offer a refund?",
     answer:
-      "Yes. Full refund within 14 days of any paid subscription start, no questions asked. Reach out to support@bristle.dev and we process it manually.",
+      "No automatic refund policy — case-by-case. Email support@bristle.dev with the details and we'll look at it.",
   },
   {
     id: "faq-q-6",
     section: "data-sources",
     question: "How fresh is the data?",
     answer:
-      "Our ingestion pipeline runs every 4 to 6 hours. New mentions surface in the next batch, and clusters with momentum update as new evidence arrives across sources.",
+      "We re-ingest from each source regularly throughout the day. New mentions surface in the next pass; clusters with momentum update as new evidence arrives across sources.",
   },
   {
     id: "faq-q-7",
     section: "api",
     question: "Does the API include synthesis text?",
     answer:
-      "Yes. The API returns the full problem report including the synthesized narrative, evidence quotes, source links, and momentum metrics. The same payload powers the web app.",
+      "Yes — and the API endpoint launches in our next release. The API will return the full problem report including the synthesized narrative, evidence quotes, source links, and momentum metrics.",
   },
   {
     id: "faq-q-8",
