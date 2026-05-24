@@ -10,7 +10,7 @@ import { CONTACT_TOPIC_KEYS } from "./contact-topics";
 
 // Plain-language error messages per CLAUDE.md §6 voice — these surface in the
 // form's `aria-describedby` field-error <p> tags, so they're user-visible copy.
-// No exclamation marks, no emoji, no "amazing/awesome" register.
+// No exclamation marks, no emoji, no hype register.
 export const contactFormSchema = z.object({
   name: z
     .string()

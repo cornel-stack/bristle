@@ -4,8 +4,8 @@
 // FR-004 verbatim per the slice-008 user brief. Founder reviews and revises
 // before the Tier-2 v0.2.0 tag (which ships after all of slices 2.1–2.7 land).
 //
-// Voice rules (§6) apply to every string here: no exclamation marks, no emoji,
-// no "amazing"/"awesome" register. Em-dashes are punctuation, not exclamations.
+// Voice rules (CLAUDE.md §6) apply to every string here: no exclamation marks,
+// no emoji, no hype register. Em-dashes are punctuation, not exclamations.
 
 export interface AboutByline {
   publishedDate: string;
