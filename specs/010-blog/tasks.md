@@ -446,7 +446,7 @@ Imports use the existing slice-005 `TopNav` and `SiteFooter` unchanged. Zero hex
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; renders top nav + main + grid + site footer in order; grid template `md:grid-cols-[1fr_18rem]` present (right rail at 18rem); `BlogRailToc` rendered conditionally on `tocItems.length > 0` (not unconditionally); `TryBristleCard` rendered unconditionally; projection logic present (`s.railTitle ?? s.title`); `grep -E "#[0-9A-Fa-f]{3,8}"` returns 0.
 - **Commit**: `feat(web): add BlogPostLayout (server template, right-rail 18rem, conditional BlogRailToc) (slice 010)`
 
-### T015 · [US1] [US4] `/blog/page.tsx` (REWRITE — slice-005 ComingSoon stub → full Field Notes index)
+### T015 · [US1] [US4] `/blog/page.tsx` (REWRITE — slice-005 ComingSoon stub → full Field Notes index) — ✅ DONE
 **Wholesale rewrite** of `apps/web/src/app/blog/page.tsx`. The slice-005 file content is:
 ```tsx
 import { ComingSoon } from "@/components/coming-soon";
