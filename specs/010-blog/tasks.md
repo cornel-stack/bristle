@@ -394,7 +394,7 @@ Single source of truth for filter state; `BlogFilterChips` receives `selected` +
 - **Verify**: `pnpm --filter web typecheck` exits 0; file starts with `"use client";`; imports `useState` from `react`; imports `BlogArticleCard, BlogCategory` types from `./types`; imports `BlogFilterChips`, `BlogFeaturedCard`, `BlogArticleCard` components; declares `useState<Selection>("all")` exactly once; renders chips + featured slot (conditional on `selected === "all"`) + grid (filtered); grid uses `sm:grid-cols-2 lg:grid-cols-3` (3-col on desktop, 2-col on `sm`-`md`, single-col below); featured-inline-on-filter behavior present (when `selected !== "all"`, featured article — if its category matches — appears in the `grid` array); hex grep clean.
 - **Commit**: `feat(web): add BlogArticleGrid (client, owns filter useState, Pick'd input, featured-inline-on-filter) (slice 010)`
 
-### T014 · [US2] [US3] `BlogPostLayout` (server — shared template, md:grid-cols-[1fr_18rem] right-rail)
+### T014 · [US2] [US3] `BlogPostLayout` (server — shared template, md:grid-cols-[1fr_18rem] right-rail) — ✅ DONE
 Create `apps/web/src/components/blog/blog-post-layout.tsx` — async Server Component. Accepts `props: { article: BlogArticle }`. Per plan §D12b (right-rail at 18rem) / contracts:
 
 ```tsx
