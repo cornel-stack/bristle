@@ -203,7 +203,7 @@ The whole card is keyboard-navigable via the `<h2><Link>` (cards are NOT wrapped
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; renders `<article>` element; `<h2>` wrapping `<Link href={`/blog/${article.slug}`}>`; IN THIS ISSUE `<aside aria-label="In this issue">` renders only when `article.pullQuote` is set; hex grep clean.
 - **Commit**: `feat(web): add BlogFeaturedCard (featured card + IN THIS ISSUE pullquote callout) (slice 010)`
 
-### T009 · [P] [US1] `BlogArticleCard` (server — secondary card)
+### T009 · [P] [US1] `BlogArticleCard` (server — secondary card) — ✅ DONE
 Create `apps/web/src/components/blog/blog-article-card.tsx` — async Server Component. Accepts `props: { article: BlogArticleCard }`. Renders a secondary article card per `design/Public_pages.pdf` page 5 (the 3×2 grid items):
 ```tsx
 <article className="rounded-card border border-border-default bg-surface-card p-card flex flex-col gap-grid hover:border-border-strong transition-colors duration-120">
