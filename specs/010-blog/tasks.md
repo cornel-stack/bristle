@@ -508,7 +508,7 @@ export default async function BlogIndex() {
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; default export is `async function`; metadata has `title: "Field Notes — Bristle"`, `description` matches verbatim, `openGraph.type: "website"`, `openGraph.url: SITE_URL + "/blog"`, absolute OG image; **NO `robots` field** in the new metadata (`grep "robots" apps/web/src/app/blog/page.tsx` returns 0); CARDS projection present (dropping `body` and `sections`); `grep "ComingSoon" apps/web/src/app/blog/page.tsx` returns 0 (full rewrite); imports `BlogArticleCard` as type-only.
 - **Commit**: `feat(web): rewrite /blog → Field Notes index (replaces slice-005 ComingSoon stub) (slice 010)`
 
-### T016 · [US2] [US3] [US4] `/blog/[slug]/page.tsx` (ADD — generateStaticParams + generateMetadata + notFound)
+### T016 · [US2] [US3] [US4] `/blog/[slug]/page.tsx` (ADD — generateStaticParams + generateMetadata + notFound) — ✅ DONE
 Create `apps/web/src/app/blog/[slug]/page.tsx` — brand-new dynamic route. Per plan §D9 + §D10 + §D11 / contracts:
 
 ```tsx
