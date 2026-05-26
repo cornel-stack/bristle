@@ -103,7 +103,7 @@ Create `apps/web/src/components/blog/blog-post-hero.tsx` — async Server Compon
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; imports `BlogArticle` from `./types`; renders `<h1>` with `article.title`; meta row contains `article.displayDate`, category label, `article.authorName`, `article.readTimeMinutes`; avatar carries `aria-hidden="true"`; hex grep clean.
 - **Commit**: `feat(web): add BlogPostHero (eyebrow + serif h1 + meta row + initials avatar) (slice 010)`
 
-### T005 · [P] [US2] `InlinePullQuote` (server)
+### T005 · [P] [US2] `InlinePullQuote` (server) — ✅ DONE
 Create `apps/web/src/components/blog/inline-pull-quote.tsx` — async Server Component. Accepts `props: { quote: BlogPullQuote }`. Renders:
 ```tsx
 <figure className="my-section">
