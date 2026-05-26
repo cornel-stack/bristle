@@ -302,7 +302,7 @@ The `scroll-mt-section` class on each section ensures deep-link anchors (`#scope
 
 ### Phase 4: User Story 1 (index assembly + filter) + US2 (post assembly) + US3 (stub treatment) + US4 (nav-link flip)
 
-### T012 · [US1] `BlogFilterChips` (client — presentational, role="toolbar" + aria-pressed)
+### T012 · [US1] `BlogFilterChips` (client — presentational, role="group" + aria-pressed) — ✅ DONE
 Create `apps/web/src/components/blog/blog-filter-chips.tsx` as the slice's second `"use client"` file. Start file with `"use client";`. Per plan §D7 (Pattern A: `role="toolbar"` + `aria-pressed`). Accepts `props: { selected: BlogCategory | "all"; onSelect: (next: BlogCategory | "all") => void }`. **Presentational** — owns no state.
 
 Define a module-level `CHIPS` constant:
