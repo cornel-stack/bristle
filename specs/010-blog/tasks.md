@@ -245,7 +245,7 @@ Specifics — per plan §D6 / contracts:
 - **Verify**: `pnpm --filter web typecheck` exits 0; file starts with `"use client";`; imports `useState`, `useEffect`, `useRef` from `react` and `type MouseEvent`; imports `BlogTocItem` from `./types`; selector literal `"[data-blog-section]"` present (NOT `"[data-faq-item]"` or `"[data-legal-section]"`); `rootMargin: "-80px 0px -55% 0px"` present; `threshold: 0` present; `<nav aria-label=` present; `aria-current={` present; NO `role="tablist"` / `role="tab"` / `aria-selected` substrings anywhere (`grep` returns 0); reduced-motion read inside `handleClick` and inside the mobile-pill `useEffect` (not at module top); `grep -E "scroll-spy-rail|legal/toc-rail" apps/web/src/components/blog/blog-rail-toc.tsx` returns 0 (additive only — no import of prior rails); hex grep clean.
 - **Commit**: `feat(web): add BlogRailToc (client, IO scroll-spy + current-location nav, third mirror of FAQ/Legal rails) (slice 010)`
 
-### T011 · [US2] [US3] `BlogPostBody` (server — branches on stubBody)
+### T011 · [US2] [US3] `BlogPostBody` (server — branches on stubBody) — ✅ DONE
 Create `apps/web/src/components/blog/blog-post-body.tsx` — async Server Component. Accepts `props: { article: BlogArticle }`. Branches on `article.stubBody` per plan §D12 / contracts:
 
 **Stub branch** (`article.stubBody === true`):
