@@ -569,7 +569,7 @@ export default async function BlogPost(
 
 ### Phase 5: User Story 4 (perf / a11y / SEO / voice / responsive floors + slice integrity + nav-link flip)
 
-### T017 · [US4] VERIFY — local gate
+### T017 · [US4] VERIFY — local gate — ✅ DONE
 Run the local loop + audits against the post-implementation state.
 - **Depends on**: T015, T016
 - **Verify**:
@@ -621,7 +621,7 @@ Run the local loop + audits against the post-implementation state.
   - **Slice-005 top-nav `Blog` link regression check (local)** (SC-022): from `<local>/`, click top-nav `Blog` → lands on `/blog` (HTTP 200; was the slice-005 `ComingSoon` soft-404). From `<local>/`, scroll to footer Company column `Blog` → lands on `/blog` (HTTP 200; same flip). `git diff --stat origin/main..HEAD -- apps/web/src/components/landing/` returns empty (top-nav and site-footer unchanged).
 - **Commit**: none (verification only) — any fix is its own commit referencing the failing SC.
 
-### T018 · [US4] VERIFY — preview parity (gate)
+### T018 · [US4] VERIFY — preview parity (gate) — ✅ DONE
 Push the branch via the gh-token HTTPS workaround (SSH agent currently refusing per the prior session — verify status before push); confirm the Vercel preview.
 - **Depends on**: T017
 - **Verify (SC-024)**:
