@@ -90,7 +90,7 @@ Zero hex literals, zero font-family literals. No props (the hero is identical on
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; renders `BRISTLE BLOG` eyebrow in `text-accent-bristle`; serif `Field Notes` h1; subhead in `text-text-secondary`; `grep -E "#[0-9A-Fa-f]{3,8}" apps/web/src/components/blog/blog-hero.tsx` returns 0; `grep -E "font-family|font-name"` returns 0.
 - **Commit**: `feat(web): add BlogHero (eyebrow + Field Notes serif h1 + subhead) (slice 010)`
 
-### T004 · [P] [US2] [US3] `BlogPostHero` (server — article hero)
+### T004 · [P] [US2] [US3] `BlogPostHero` (server — article hero) — ✅ DONE
 Create `apps/web/src/components/blog/blog-post-hero.tsx` — async Server Component. Accepts `props: { article: BlogArticle }`. Renders per `design/Public_pages.pdf` page 6:
 - `<header className="pt-section pb-loose">`
 - `<p>` eyebrow in `font-mono text-body-sm uppercase tracking-wider text-accent-bristle` reading `BRISTLE BLOG`.
