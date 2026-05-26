@@ -221,7 +221,7 @@ Hover state per §4.5 — 120ms color transition only, no scale or rotate. Card 
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; renders `<article>` with `<h2>` wrapping `<Link href={`/blog/${article.slug}`}>`; hover state on the card border via `hover:border-border-strong` (color-only); `duration-120` (120ms per §4.5); hex grep clean.
 - **Commit**: `feat(web): add BlogArticleCard (secondary card with hover state + Link to /blog/{slug}) (slice 010)`
 
-### T010 · [P] [US2] `BlogRailToc` (client — third structural mirror of slice-006/009 rails)
+### T010 · [P] [US2] `BlogRailToc` (client — third structural mirror of slice-006/009 rails) — ✅ DONE
 Create `apps/web/src/components/blog/blog-rail-toc.tsx` as the slice's first `"use client"` file. Structurally mirrors slice-006 `apps/web/src/components/faq/scroll-spy-rail.tsx` and slice-009 `apps/web/src/components/legal/toc-rail.tsx` **without importing from either** (additive only; FR-013 / plan §D6). Start the file with `"use client";`.
 
 Specifics — per plan §D6 / contracts:
