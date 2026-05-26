@@ -246,5 +246,5 @@ When a spec is unclear, or the design PDFs don't cover a state you need to build
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/009-legal-pages/plan.md`
+`specs/010-blog/plan.md`
 <!-- SPECKIT END -->
