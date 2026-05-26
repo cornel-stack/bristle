@@ -159,7 +159,7 @@ Create `apps/web/src/components/blog/inline-figure.tsx` — async Server Compone
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; SVG `viewBox="0 0 720 200"`; `<path>` has exactly 11 `L` commands (12 data points = 1 `M` + 11 `L`); 5 `<line>` grid elements; 4 `<text>` axis labels; SVG carries `role="img"` and `aria-label={figure.caption}`; `grep "placeholderText" apps/web/src/components/blog/inline-figure.tsx` returns **0 hits** (component must not reference the field); `grep -E "#[0-9A-Fa-f]{3,8}|stroke=\"rgb"` returns 0 (tokens-only); `grep -E "recharts|chart\\.js|victory|nivo|echarts"` returns 0 (no chart library import).
 - **Commit**: `feat(web): add InlineFigure (hand-rolled SVG line chart, tokens-only) (slice 010)`
 
-### T007 · [P] [US2] [US3] `TryBristleCard` (server — fixed conversion CTA)
+### T007 · [P] [US2] [US3] `TryBristleCard` (server — fixed conversion CTA) — ✅ DONE
 Create `apps/web/src/components/blog/try-bristle-card.tsx` — async Server Component. No props (content is fixed module-level constants per FR-017 — same across all 7 article pages). Renders:
 ```tsx
 <aside className="rounded-card border border-border-default bg-surface-card p-card flex flex-col gap-grid">
