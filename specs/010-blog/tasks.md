@@ -23,7 +23,7 @@
 
 ### Phase 1: Setup / Foundational
 
-### T001 · [SETUP] `types.ts` (BlogCategory + BlogArticle + section / pull-quote / figure / TOC / card types)
+### T001 · [SETUP] `types.ts` (BlogCategory + BlogArticle + section / pull-quote / figure / TOC / card types) — ✅ DONE (fc45775)
 Create `apps/web/src/components/blog/types.ts` exporting the canonical type module for the slice per plan §D3 + §D4 / contracts:
 - `BlogCategory` — string-literal union `"data-analysis" | "product-strategy" | "indie-hacker" | "devtools"`.
 - `BlogPullQuote` — `{ text: string; attribution: string }`.
@@ -37,7 +37,7 @@ Create `apps/web/src/components/blog/types.ts` exporting the canonical type modu
 - **Verify**: `pnpm --filter web typecheck` exits 0; file exports all 7 named types/interfaces above (`grep -E "export (interface|type) (BlogCategory|BlogPullQuote|BlogFigure|BlogArticleSection|BlogArticle|BlogArticleCard|BlogTocItem)" apps/web/src/components/blog/types.ts` returns 7 hits); `BlogArticleSection.paragraphs` typed as `ReadonlyArray<string>`; `BlogArticle.sections` typed as `ReadonlyArray<BlogArticleSection>`; `BlogArticle.body` is a nested object with `lead: ReadonlyArray<string>` and `stubLead?: string`; `BlogArticleCard` is a `Pick` over the card-render fields only (NOT including `body` or `sections`); `BlogTocItem` is `{id; displayTitle}` (no other fields — tight rail prop surface per plan §D13).
 - **Commit**: `feat(web): add blog/types.ts (BlogArticle + section + card + TOC shapes) (slice 010)`
 
-### T002 · [P] [US1] [US2] [US3] `blog-articles.ts` (7-article BLOG_ARTICLES with featured full body + 6 stubs)
+### T002 · [P] [US1] [US2] [US3] `blog-articles.ts` (7-article BLOG_ARTICLES with featured full body + 6 stubs) — ✅ DONE (ad96f94)
 Create `apps/web/src/components/blog/blog-articles.ts` exporting `BLOG_ARTICLES: ReadonlyArray<BlogArticle>` containing exactly **7** entries per spec §10 + §11. The file MUST begin with the `// [PLACEHOLDER — article content awaiting founder review before production launch]` header comment on line 1 (FR-019 / SC-005-analog).
 
 **Article 1 (featured)** — full body:
@@ -73,7 +73,7 @@ All 7 articles use `authorName: "Cornel Okoth"` + `authorInitials: "CO"` (FR-021
 
 ### Phase 3: User Story 1 (index primitives) + User Story 2 (post primitives) + User Story 3 (stub treatment primitives)
 
-### T003 · [P] [US1] `BlogHero` (server — index hero)
+### T003 · [P] [US1] `BlogHero` (server — index hero) — ✅ DONE
 Create `apps/web/src/components/blog/blog-hero.tsx` — async Server Component. Renders the `/blog` page hero per `design/Public_pages.pdf` page 5 and contracts:
 ```tsx
 <section className="pt-section pb-loose">
