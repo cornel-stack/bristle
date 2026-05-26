@@ -119,7 +119,7 @@ Used both inline within a section's paragraphs (by `BlogPostBody`) and potential
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; renders `<blockquote>` with serif type + accent-bristle left border; `<cite>` for attribution; hex grep clean.
 - **Commit**: `feat(web): add InlinePullQuote (serif blockquote + attribution) (slice 010)`
 
-### T006 · [P] [US2] `InlineFigure` (server — hand-rolled inline SVG line chart)
+### T006 · [P] [US2] `InlineFigure` (server — hand-rolled inline SVG line chart) — ✅ DONE
 Create `apps/web/src/components/blog/inline-figure.tsx` — async Server Component. Accepts `props: { figure: BlogFigure }`. Renders a hand-rolled inline SVG line chart per plan §D8 / contracts:
 ```tsx
 <figure className="my-section flex flex-col gap-tight">
