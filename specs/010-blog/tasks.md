@@ -346,7 +346,7 @@ Render:
 - **Verify**: `pnpm --filter web typecheck` exits 0; file starts with `"use client";`; imports `BlogCategory` from `./types`; renders `<div role="toolbar" aria-label="Filter articles by category">`; 5 `<button type="button">` chips in order `All`, `Data analysis`, `Product strategy`, `Indie hacker`, `Devtools`; each chip has `aria-pressed={isSelected}`; NO `role="radiogroup"` / `role="radio"` / `aria-checked` (`grep` returns 0); active state = filled dark pill (`bg-text-primary text-surface-card rounded-pill`); inactive = outlined pill (`border-border-default bg-surface-card`); hex grep clean.
 - **Commit**: `feat(web): add BlogFilterChips (client, role="toolbar" + aria-pressed, 5 chips) (slice 010)`
 
-### T013 · [US1] `BlogArticleGrid` (client — owns useState, Pick'd input, featured-inline-on-filter)
+### T013 · [US1] `BlogArticleGrid` (client — owns useState, Pick'd input, featured-inline-on-filter) — ✅ DONE
 Create `apps/web/src/components/blog/blog-article-grid.tsx` as the slice's third `"use client"` file. Start file with `"use client";`. Per plan §D5 + §D13. Accepts `props: { articles: ReadonlyArray<BlogArticleCard> }`. **Owns `useState<BlogCategory | "all">("all")`**; renders chips + featured + secondary grid conditionally based on selection.
 
 ```tsx
