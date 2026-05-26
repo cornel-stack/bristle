@@ -176,7 +176,7 @@ Use Next.js `Link` from `next/link`. The `/signup` destination is a known-out-of
 - **Verify**: `pnpm --filter web typecheck` exits 0; no `"use client"`; eyebrow `TRY BRISTLE` in `text-accent-bristle`; serif h3 with exact text `See today's high-signal problems.`; `Link` from `next/link` with `href="/signup"` and `Start free` label; hex grep clean.
 - **Commit**: `feat(web): add TryBristleCard (TRY BRISTLE eyebrow + serif headline + Start free CTA) (slice 010)`
 
-### T008 · [P] [US1] `BlogFeaturedCard` (server — index featured card with IN THIS ISSUE callout)
+### T008 · [P] [US1] `BlogFeaturedCard` (server — index featured card with IN THIS ISSUE callout) — ✅ DONE
 Create `apps/web/src/components/blog/blog-featured-card.tsx` — async Server Component. Accepts `props: { article: BlogArticleCard }`. Renders the index featured card per `design/Public_pages.pdf` page 5:
 ```tsx
 <article className="rounded-card border border-border-default bg-surface-card p-card flex flex-col gap-grid md:grid md:grid-cols-[1fr_auto] md:gap-section">
