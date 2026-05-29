@@ -1,7 +1,13 @@
-import { desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, gt, ne } from "drizzle-orm";
 import { getDb } from "./client";
 import { problems, type Problem } from "./schema";
-import { sessions, users, verificationTokens, type User } from "./auth-schema";
+import {
+  passwordResetTokens,
+  sessions,
+  users,
+  verificationTokens,
+  type User,
+} from "./auth-schema";
 
 export type ConsumeVerificationResult =
   | { ok: true; email: string; name: string | null }
@@ -86,6 +92,64 @@ export async function createSession(input: {
   expires: Date;
 }): Promise<void> {
   await getDb().insert(sessions).values(input);
+}
+
+// Inserts a password-reset token (1h TTL set by the caller, used=false default).
+export async function createPasswordResetToken(input: {
+  userId: string;
+  token: string;
+  expires: Date;
+}): Promise<void> {
+  await getDb().insert(passwordResetTokens).values(input);
+}
+
+// Read-only validity check for the /reset-password/[token] page pre-check:
+// returns true only if the token exists, is unused, and is not expired. Does NOT
+// consume the token (that is consumePasswordResetToken's atomic job).
+export async function isPasswordResetTokenValid(token: string): Promise<boolean> {
+  const [row] = await getDb()
+    .select({ id: passwordResetTokens.id })
+    .from(passwordResetTokens)
+    .where(
+      and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false),
+        gt(passwordResetTokens.expires, new Date()),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
+}
+
+// Atomically consume a password-reset token: re-check existence + unused +
+// unexpired (TOCTOU — the page pre-check may be stale), update the user's
+// password, mark the token used, and delete ALL of that user's sessions
+// (log out everywhere on password change). One transaction.
+export async function consumePasswordResetToken(
+  token: string,
+  newPasswordHash: string,
+): Promise<{ ok: boolean }> {
+  return getDb().transaction(async (tx) => {
+    const [row] = await tx
+      .select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.token, token))
+      .limit(1);
+    if (!row || row.used || row.expires.getTime() < Date.now()) {
+      return { ok: false };
+    }
+    const now = new Date();
+    await tx
+      .update(users)
+      .set({ passwordHash: newPasswordHash, updatedAt: now })
+      .where(eq(users.id, row.userId));
+    await tx
+      .update(passwordResetTokens)
+      .set({ used: true })
+      .where(eq(passwordResetTokens.id, row.id));
+    await tx.delete(sessions).where(eq(sessions.userId, row.userId));
+    return { ok: true };
+  });
 }
 
 // Fetches the single problem for the homepage. Throws if none exists — a missing

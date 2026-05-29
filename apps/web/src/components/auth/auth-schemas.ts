@@ -37,3 +37,19 @@ export const loginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export const forgotSchema = z.object({ email });
+
+export type ForgotInput = z.infer<typeof forgotSchema>;
+
+export const resetSchema = z
+  .object({
+    password,
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Those passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+export type ResetInput = z.infer<typeof resetSchema>;

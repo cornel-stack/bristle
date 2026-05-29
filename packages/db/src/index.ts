@@ -29,5 +29,8 @@ export {
   createVerificationToken,
   consumeVerificationToken,
   createSession,
+  createPasswordResetToken,
+  isPasswordResetTokenValid,
+  consumePasswordResetToken,
 } from "./queries";
 export type { ConsumeVerificationResult } from "./queries";
