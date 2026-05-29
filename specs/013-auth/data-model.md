@@ -47,9 +47,11 @@ Postgres extension: `gen_random_uuid()` (pgcrypto / built-in in PG13+) — alrea
 Indexes: unique on `email`.
 
 ### `accounts` (provisioned for future OAuth; unused by credentials flow)
+
+> **Adapter-required shape (corrected at T007):** the Drizzle adapter's TS types require the Auth.js-canonical **compound primary key `(provider, providerAccountId)`** — no surrogate `id` column. The original `id uuid PK` + unique constraint was rejected by the adapter types.
+
 | Column | Type | Constraints |
 |---|---|---|
-| `id` | `uuid` | PK, default `gen_random_uuid()` |
 | `userId` | `uuid` | FK → `users.id` ON DELETE CASCADE, NOT NULL |
 | `type` | `text` | NOT NULL |
 | `provider` | `text` | NOT NULL |
@@ -62,17 +64,19 @@ Indexes: unique on `email`.
 | `id_token` | `text` | NULL |
 | `session_state` | `text` | NULL |
 
-Indexes: **UNIQUE(`provider`, `providerAccountId`)** (adapter requirement). Snake_case token columns are the Auth.js standard names — keep them verbatim so the adapter maps OAuth responses without translation later.
+Primary key: **compound (`provider`, `providerAccountId`)** (adapter requirement). Snake_case token columns are the Auth.js standard names — keep them verbatim so the adapter maps OAuth responses without translation later.
 
 ### `sessions` (database session strategy)
+
+> **Adapter-required shape (corrected at T007):** `sessionToken` **is the primary key** (the adapter looks up and deletes sessions by it) — no surrogate `id` column.
+
 | Column | Type | Constraints |
 |---|---|---|
-| `id` | `uuid` | PK, default `gen_random_uuid()` |
-| `sessionToken` | `text` | **UNIQUE**, NOT NULL |
+| `sessionToken` | `text` | **PRIMARY KEY** |
 | `userId` | `uuid` | FK → `users.id` ON DELETE CASCADE, NOT NULL |
 | `expires` | `timestamp` (mode date) | NOT NULL |
 
-Indexes: unique on `sessionToken`. Bulk-deleted by `userId` on password reset (FR-016).
+Bulk-deleted by `userId` on password reset (FR-016).
 
 ### `verificationTokens` (Auth.js standard; 24h email verify)
 | Column | Type | Constraints |

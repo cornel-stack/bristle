@@ -1,6 +1,19 @@
 import { desc, eq, ne } from "drizzle-orm";
 import { getDb } from "./client";
 import { problems, type Problem } from "./schema";
+import { users, type User } from "./auth-schema";
+
+// Fetches one user by (already-normalized) email, or undefined if none. Used by
+// the credentials authorize() and the auth Server Actions. Keeps Drizzle query
+// construction inside @bristle/db so apps/web needs no direct drizzle-orm dep.
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  const [row] = await getDb()
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return row;
+}
 
 // Fetches the single problem for the homepage. Throws if none exists — a missing
 // seed is a deployment defect, not a runtime empty state (Slice 1.4 non-goal).

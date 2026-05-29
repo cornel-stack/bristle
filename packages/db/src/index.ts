@@ -20,4 +20,9 @@ export type {
   NewPasswordResetToken,
 } from "./auth-schema";
 export { getDb } from "./client";
-export { getFirstProblem, getProblemBySlug, getRecentProblems } from "./queries";
+export {
+  getFirstProblem,
+  getProblemBySlug,
+  getRecentProblems,
+  getUserByEmail,
+} from "./queries";

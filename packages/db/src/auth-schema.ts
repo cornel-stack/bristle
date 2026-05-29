@@ -6,7 +6,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -38,12 +37,11 @@ export const users = pgTable("users", {
     .defaultNow(),
 });
 
+// accounts uses the Auth.js-canonical compound PK (provider, providerAccountId)
+// — the DrizzleAdapter's types require this exact shape (no surrogate id).
 export const accounts = pgTable(
   "accounts",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
     userId: uuid("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -59,18 +57,14 @@ export const accounts = pgTable(
     session_state: text("session_state"),
   },
   (table) => [
-    unique("accounts_provider_providerAccountId_key").on(
-      table.provider,
-      table.providerAccountId,
-    ),
+    primaryKey({ columns: [table.provider, table.providerAccountId] }),
   ],
 );
 
+// sessions: sessionToken IS the primary key (adapter requirement — it looks up
+// and deletes sessions by sessionToken). No surrogate id.
 export const sessions = pgTable("sessions", {
-  id: uuid("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  sessionToken: text("sessionToken").notNull().unique(),
+  sessionToken: text("sessionToken").primaryKey(),
   userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
