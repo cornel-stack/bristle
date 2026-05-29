@@ -8,6 +8,7 @@ import "server-only";
 
 import { Resend } from "resend";
 
+import { renderPasswordResetEmailHtml } from "./email/password-reset";
 import { renderVerifyEmailHtml } from "./email/verify-email";
 import { renderWelcomeEmailHtml } from "./email/welcome-email";
 
@@ -64,5 +65,17 @@ export function sendWelcomeEmail(input: {
     input.email,
     "Welcome to Bristle",
     renderWelcomeEmailHtml({ name: input.name, signInUrl: input.signInUrl }),
+  );
+}
+
+export function sendPasswordResetEmail(input: {
+  email: string;
+  name?: string | null;
+  resetUrl: string;
+}): Promise<SendEmailResult> {
+  return send(
+    input.email,
+    "Reset your Bristle password",
+    renderPasswordResetEmailHtml({ resetUrl: input.resetUrl, name: input.name }),
   );
 }
