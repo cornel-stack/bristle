@@ -25,7 +25,7 @@ Locked decisions. Do not introduce alternatives without proposing the addition f
 - **next-themes.** Editorial Light / Editorial Dark switching with no flash.
 - **Database — Supabase Postgres + pgvector.** Managed Postgres; pgvector holds embeddings for clustering and semantic nearest-neighbor joins.
 - **Drizzle ORM (not Prisma).** Type-safe, SQL-shaped queries with lightweight migrations; chosen over Prisma for transparency and edge-friendliness.
-- **Auth — Supabase Auth.** Email/password, Google OAuth, GitHub OAuth. **No SSO/SAML in v1.0** (UI shows an SSO button behind a feature flag; deferred to v1.1).
+- **Auth — Auth.js v5 (`next-auth@5`).** Credentials (email/password) in v1.0 via `@auth/drizzle-adapter` over the existing Supabase Postgres; passwords hashed with `@node-rs/argon2` (argon2id). Google/GitHub OAuth deferred to a later micro-slice (the `accounts` table is provisioned so it is non-breaking). **No SSO/SAML in v1.0.** (Changed from Supabase Auth in slice 013 — maturity decision; exact versions are pinned in `apps/web/package.json`. Supabase Postgres, Drizzle, and Resend are unchanged.)
 - **Payments — Lemon Squeezy.** Merchant of record; handles VAT/tax so we don't.
 - **Email — Resend.** Transactional + digests, with Bristle-voiced templates.
 - **Pipeline — Python 3.12 + FastAPI, orchestrated by Inngest.** Ingest/cluster/enrich/synthesize jobs run on a batch cadence (4–6h); Inngest handles scheduling, retries, and fan-out.
