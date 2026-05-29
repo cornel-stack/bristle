@@ -25,4 +25,9 @@ export {
   getProblemBySlug,
   getRecentProblems,
   getUserByEmail,
+  createUser,
+  createVerificationToken,
+  consumeVerificationToken,
+  createSession,
 } from "./queries";
+export type { ConsumeVerificationResult } from "./queries";
