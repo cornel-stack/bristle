@@ -25,6 +25,10 @@ import {
 } from "@bristle/db";
 
 import { verifyPassword } from "@/lib/auth/password";
+import {
+  SESSION_COOKIE_NAME,
+  SESSION_COOKIE_OPTIONS,
+} from "@/lib/auth/session-cookie";
 
 /** 30 days, in seconds. */
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
@@ -46,6 +50,11 @@ const nextAuth = NextAuth({
   }),
   session: { strategy: "database", maxAge: SESSION_MAX_AGE },
   pages: { signIn: "/login", verifyRequest: "/signup/verify-email-sent" },
+  // Pin the session cookie name/options so the manual writer in the credentials
+  // login action (lib/auth/session.ts) and this reader agree exactly.
+  cookies: {
+    sessionToken: { name: SESSION_COOKIE_NAME, options: SESSION_COOKIE_OPTIONS },
+  },
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
