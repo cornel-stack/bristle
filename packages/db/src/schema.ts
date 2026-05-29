@@ -32,3 +32,8 @@ export const problems = pgTable("problems", {
 
 export type Problem = typeof problems.$inferSelect;
 export type NewProblem = typeof problems.$inferInsert;
+
+// Auth.js v5 tables + custom password-reset table (slice 013). Re-exported here
+// so drizzle-kit (schema: "./src/schema.ts") picks them up for migration
+// generation, and so @auth/drizzle-adapter + apps/web import from one surface.
+export * from "./auth-schema";
