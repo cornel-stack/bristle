@@ -234,6 +234,7 @@ The following decisions were specified with a recommended default. They are reco
 ## Assumptions
 
 - **Stack swap is in-scope and authorized**: Auth.js v5 + Drizzle adapter + Argon2 hasher replace Supabase Auth in the locked stack; this is a deliberate, recorded reversal of `CLAUDE.md` §3 and is committed as part of this slice. Supabase Postgres, Drizzle, and Resend are retained.
+- **Auth.js v5 is pinned at `5.0.0-beta.31` by deliberate choice**: the `beta` tag is the de-facto production line for Auth.js (npm `latest` is the legacy v4 line), and the v5 API has been stable through ~4 years of beta. This is a documented stack decision, not an open risk. Tracked follow-up: bump to `5.0.0` GA when it lands — a version bump, not an architecture revisit.
 - **Credentials-only for v1**: Email + password is the only sign-in method this slice. The external-account entity exists solely to make a later OAuth addition non-breaking.
 - **Email deliverability is available**: The existing transactional email provider (slice 008) is configured and able to deliver verification/reset/welcome emails to test inboxes.
 - **Development database is reachable**: The managed Postgres development database can receive the new migration during the slice.
