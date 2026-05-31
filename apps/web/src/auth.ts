@@ -2,29 +2,33 @@
 // Exports { handlers, signIn, signOut, auth } consumed by the API route handler,
 // middleware, Server Actions, and the auth-aware top nav / protected /account.
 //
-// SESSION STRATEGY — database (FR-012, 30-day). NOTE (execution-time finding):
-// Auth.js's Credentials provider does not, on its own, persist a *database*
-// session — core forces JWT for credentials sign-in. We deliberately keep the
-// database strategy because FR-016 / SC-006 require server-side invalidation of
-// all sessions on password reset (deleting `sessions` rows), which JWT cannot do.
-// The credentials login Server Action (T017) therefore creates the database
-// session explicitly via the adapter after verifying the password. `authorize`
-// here only validates the credential and returns the user; it does NOT enforce
-// email-verification — the login action does, so it can show a resend nudge (C-c).
+// SESSION STRATEGY — database (FR-012, 30-day). We keep the database strategy
+// because FR-016 / SC-006 require server-side invalidation of all sessions on
+// password reset (deleting `sessions` rows), which a stateless JWT cannot do.
+//
+// NO PROVIDERS (execution-time fix — see plan decision 7). @auth/core's
+// assertConfig() throws `UnsupportedStrategy` on EVERY auth() call when a
+// Credentials provider is the *only* provider AND session.strategy is "database"
+// (assert.js: `if (dbStrategy && onlyCredentials)`). With a Credentials provider
+// present that broke every authenticated request — auth() threw, the session
+// resolved to null, and protected pages bounced back to /login in a loop. The
+// credentials login Server Action (T017) never called Auth.js signIn() anyway:
+// it verifies the password and creates the database session itself via the
+// adapter (lib/auth/session.ts), so the Credentials provider was dead code.
+// Dropping it lets auth() read that manual DB session. When OAuth lands
+// (deferred), adding a non-credentials provider is safe — `onlyCredentials`
+// becomes false, so the rule no longer trips.
 
 import NextAuth, { type NextAuthResult } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
   getDb,
-  getUserByEmail,
   users,
   accounts,
   sessions,
   verificationTokens,
 } from "@bristle/db";
 
-import { verifyPassword } from "@/lib/auth/password";
 import {
   SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
@@ -55,34 +59,10 @@ const nextAuth = NextAuth({
   cookies: {
     sessionToken: { name: SESSION_COOKIE_NAME, options: SESSION_COOKIE_OPTIONS },
   },
-  providers: [
-    Credentials({
-      credentials: { email: {}, password: {} },
-      async authorize(credentials) {
-        const email =
-          typeof credentials?.email === "string"
-            ? credentials.email.trim().toLowerCase()
-            : "";
-        const password =
-          typeof credentials?.password === "string" ? credentials.password : "";
-        if (!email || !password) return null;
-
-        const user = await getUserByEmail(email);
-        if (!user) return null;
-
-        const ok = await verifyPassword(user.passwordHash, password);
-        if (!ok) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          emailVerified: user.emailVerified,
-        };
-      },
-    }),
-  ],
+  // Empty by design — see the NO PROVIDERS note in the header. The credentials
+  // login flow is manual (lib/auth/session.ts); auth() is used only to READ the
+  // database session, which needs no provider.
+  providers: [],
   callbacks: {
     // Database strategy: the second arg is the adapter user. Surface id +
     // emailVerified onto session.user for /account and the login gate.
