@@ -46,6 +46,13 @@ if (!process.env.AUTH_SECRET) {
 // cannot be named without a reference to .pnpm/…") — a known Auth.js v5 + pnpm
 // portability quirk when re-exporting the destructured NextAuth() result.
 const nextAuth = NextAuth({
+  // Trust the host header explicitly. Auth.js v5 defaults trustHost to false in
+  // production unless it auto-detects a known platform (the `VERCEL` env var) —
+  // relying on that auto-detection is brittle and breaks any non-Vercel prod
+  // (and local `next start`, which throws `UntrustedHost`). We deploy web behind
+  // Vercel's trusted proxy, so pinning this true is safe and makes host trust
+  // explicit rather than implicit. (Hardening added at the slice-013 STOP 6 gate.)
+  trustHost: true,
   adapter: DrizzleAdapter(getDb(), {
     usersTable: users,
     accountsTable: accounts,
