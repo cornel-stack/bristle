@@ -3,6 +3,18 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "AUTH_SECRET",
+        "EMAIL_FROM",
+        "RESEND_API_KEY",
+        "CONTACT_FORM_FROM",
+        "CONTACT_FORM_RECIPIENT",
+        "DATABASE_URL",
+        "DATABASE_URL_DIRECT",
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SECRET_KEY"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "dev": {
