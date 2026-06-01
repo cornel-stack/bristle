@@ -74,13 +74,13 @@
 
 All under `apps/web/src/components/auth/`; server components; §4 tokens only (no hex, no inline `style`); no `"use client"`.
 
-- [ ] T004 [P] Create `brand-footer-stats.tsx` — mono (JetBrains Mono) ticker "6 SOURCES · 142,318 PROBLEMS · UPDATED 14 SEC AGO", static for v1 (C-b). (dep: T001)
-- [ ] T005 Create `editorial-panel.tsx` — dark-bg panel, zero-prop renderable (FR-007): `showLogo=true`, `overlineText="TODAY ON BRISTLE"`, `headlineText="Real problems, ranked by evidence — not vibes."`, default `bodyText`, Jules Marin `testimonial`+author, `showStats=true` (renders `BrandFooterStats`). (dep: T004)
-- [ ] T006 Create `auth-split-layout.tsx` — props `{ editorialSide: "left"|"right"; children }`; editorial panel on `editorialSide`, form `children` opposite; <768px hides editorial / brand-strip + form full-width (R9). (dep: T005)
-- [ ] T007 [P] Create `auth-overline.tsx` — orange accent caps/mono; variants `simple` | `with-counter` | `multi-step` (§4). (dep: T001)
-- [ ] T008 [P] Create `or-email-divider.tsx` — rule + centered "OR EMAIL" mono caps. (dep: T001)
-- [ ] T009 [P] Create `password-field.tsx` — labeled input + show/hide eye toggle (`aria-label`); optional right-aligned label link `{href,text}` (for "Forgot?"); `htmlFor` association. (dep: T001)
-- [ ] T010 [P] Create `oauth-button-row.tsx` — Google + GitHub as `<a>` (hrefs wired in T018), prop `callbackPath?`; disabled SSO `<button disabled aria-disabled="true" title="Coming soon — SSO available on Enterprise">` (no navigation, FR-019). (dep: T001)
+- [X] T004 [P] Create `brand-footer-stats.tsx` — mono (JetBrains Mono) ticker "6 SOURCES · 142,318 PROBLEMS · UPDATED 14 SEC AGO", static for v1 (C-b). (dep: T001)
+- [X] T005 Create `editorial-panel.tsx` — dark-bg panel, zero-prop renderable (FR-007): `showLogo=true`, `overlineText="TODAY ON BRISTLE"`, `headlineText="Real problems, ranked by evidence — not vibes."`, default `bodyText`, Jules Marin `testimonial`+author, `showStats=true` (renders `BrandFooterStats`). (dep: T004)
+- [X] T006 Create `auth-split-layout.tsx` — props `{ editorialSide: "left"|"right"; children }`; editorial panel on `editorialSide`, form `children` opposite; <768px hides editorial / brand-strip + form full-width (R9). (dep: T005)
+- [X] T007 [P] Create `auth-overline.tsx` — orange accent caps/mono; variants `simple` | `with-counter` | `multi-step` (§4). (dep: T001)
+- [X] T008 [P] Create `or-email-divider.tsx` — rule + centered "OR EMAIL" mono caps. (dep: T001)
+- [X] T009 [P] Create `password-field.tsx` — labeled input + show/hide eye toggle (`aria-label`); optional right-aligned label link `{href,text}` (for "Forgot?"); `htmlFor` association. (dep: T001)
+- [X] T010 [P] Create `oauth-button-row.tsx` — Google + GitHub as `<a>` (hrefs wired in T018), prop `callbackPath?`; disabled SSO `<button disabled aria-disabled="true" title="Coming soon — SSO available on Enterprise">` (no navigation, FR-019). (dep: T001)
 
 **STOP 2 gate** — each primitive renders in isolation with §4 tokens; the zero-prop `EditorialPanel` renders logo/overline/headline/subhead/testimonial/stats; `AuthSplitLayout` mirrors correctly and collapses at 768px; no `"use client"` introduced; typecheck/lint clean.
 
