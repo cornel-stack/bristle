@@ -74,12 +74,15 @@ export async function signInWithCredentials(
   let emailVerified = false;
   try {
     const user = await getUserByEmail(email);
-    if (user) {
+    if (user && user.passwordHash) {
       if (await verifyPassword(user.passwordHash, password)) {
         userId = user.id;
         emailVerified = user.emailVerified !== null;
       }
     } else {
+      // No user, OR an OAuth-only account with no password hash (slice 014:
+      // passwordHash is nullable). Run a dummy hash to keep timing comparable
+      // (enumeration defense), then fall through to generic invalid-credentials.
       await hashPassword(password);
     }
   } catch (err) {

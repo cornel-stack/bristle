@@ -28,13 +28,31 @@ export const users = pgTable("users", {
     withTimezone: true,
   }),
   image: text("image"),
-  passwordHash: text("passwordHash").notNull(),
+  // Nullable since slice 014 (migration 0002): OAuth-only users (Google/GitHub)
+  // are created by the Auth.js adapter with no password. The credentials login
+  // path treats a null hash as "no password set" → generic invalid-credentials.
+  passwordHash: text("passwordHash"),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .notNull()
     .defaultNow(),
   updatedAt: timestamp("updatedAt", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  // Slice 014 (migration 0002) — Bristle-custom code-verification + Terms fields
+  // (snake_case, not adapter-managed). See specs/014-auth-fidelity/data-model.md.
+  emailVerificationCode: text("email_verification_code"),
+  emailVerificationCodeExpires: timestamp("email_verification_code_expires", {
+    mode: "date",
+    withTimezone: true,
+  }),
+  emailVerificationAttempts: integer("email_verification_attempts")
+    .notNull()
+    .default(0),
+  termsAcceptedAt: timestamp("terms_accepted_at", {
+    mode: "date",
+    withTimezone: true,
+  }),
+  termsVersion: text("terms_version"),
 });
 
 // accounts uses the Auth.js-canonical compound PK (provider, providerAccountId)
