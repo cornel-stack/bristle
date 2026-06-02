@@ -49,7 +49,11 @@ export function PasswordStrengthMeter({
         ))}
       </div>
       {label ? (
-        <p id={labelId} className="text-body-sm text-text-secondary">
+        <p
+          id={labelId}
+          aria-live="polite"
+          className="text-body-sm text-text-secondary"
+        >
           {label}
         </p>
       ) : null}
