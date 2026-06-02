@@ -157,13 +157,13 @@ Under `apps/web/src/components/auth/`; `"use client"`; dependency-free (no zxcvb
 
 ## Phase F — Gates (STOP 8) · T037–T038
 
-- [ ] T037 **Local gate** against a clean production build (`pnpm typecheck && pnpm lint && pnpm build`). Verify:
+- [X] T037 **Local gate** against a clean production build (`pnpm typecheck && pnpm lint && pnpm build`). Verify:
   - typecheck/lint/build exit 0; lockfile diff EMPTY (no new deps — count matrix).
   - **Slice-integrity diff vs `52dd247`** (D8): `git diff --stat 52dd247 -- apps/web packages/db turbo.json CLAUDE.md` shows exactly — 5 page rewrites, 2 deletions (verify-email-sent dir + verify-email/route.ts) + verify-email.ts template deletion, 4 form-island rewrites, the new components/page/email/lib/actions, and edits to `auth.ts`/`session.ts`/`rate-limit.ts`/`auth-schema.ts`/`queries.ts`/`index.ts`/`turbo.json`/`CLAUDE.md` — **nothing else**. Any unexpected file = flag.
   - **Cross-slice regression**: curl `/`, `/pricing`, `/faq`, `/about`, `/blog`, a `/blog/{slug}`, a `/problems/{slug}` signed-out → chrome byte-identical to baseline (slices 005–012); `/account` behavior unchanged (slice 013).
   - Voice/token greps clean across `components/auth/` + the rebuilt routes + the code email.
   - **Re-assert the STOP-1 count cross-check matrix verbatim.** (dep: T036 + all prior)
-- [ ] T038 **Preview gate** — push to `014-auth-fidelity`; on the Vercel preview:
+- [X] T038 **Preview gate** — push to `014-auth-fidelity`; on the Vercel preview:
   - **OAuth env present in BOTH Production AND Preview scopes** (`vercel env ls | grep -E 'GOOGLE|GITHUB'` → all 4 × 2); `turbo.json build.env` has all 4; preview build did NOT die at page-data collection (R1).
   - **Migration `0002` applied** to the DB (same shared dev/prod Supabase project per slice-013 discovery; the 6 changes are live).
   - **5 end-to-end walks**: (1) email signup → code email → enter code → `/login?verified=true` → sign in → `/account`; (2) Google OAuth → `/auth/callback/google` → `/account`; (3) GitHub OAuth → `/account`; (4) forgot-password → reset email → reset form → sign in → `/account`; (5) sign out → `/`.
