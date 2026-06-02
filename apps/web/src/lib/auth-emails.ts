@@ -10,7 +10,12 @@ import { Resend } from "resend";
 
 import { renderPasswordResetEmailHtml } from "./email/password-reset";
 import { renderVerifyEmailHtml } from "./email/verify-email";
+import {
+  renderVerifyEmailCodeHtml,
+  renderVerifyEmailCodeText,
+} from "./email/verify-email-code";
 import { renderWelcomeEmailHtml } from "./email/welcome-email";
+import { CODE_TTL_MS } from "./auth/email-verification-code";
 
 export type SendEmailResult =
   | { ok: true }
@@ -20,6 +25,7 @@ async function send(
   to: string,
   subject: string,
   html: string,
+  text?: string,
 ): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -32,6 +38,7 @@ async function send(
       to,
       subject,
       html,
+      ...(text ? { text } : {}),
     });
     if (error) {
       console.error("[auth-emails] send failed:", error);
@@ -44,6 +51,8 @@ async function send(
   }
 }
 
+// Slice-013 link sender — kept additively; T026 removes it once its consumers
+// (createAccount switches in T022, verify-email-sent deleted in T026) are gone.
 export function sendVerificationEmail(input: {
   email: string;
   name?: string | null;
@@ -53,6 +62,29 @@ export function sendVerificationEmail(input: {
     input.email,
     "Verify your Bristle email",
     renderVerifyEmailHtml({ verifyUrl: input.verifyUrl, name: input.name }),
+  );
+}
+
+export function sendVerificationCodeEmail(input: {
+  email: string;
+  name?: string | null;
+  code: string;
+}): Promise<SendEmailResult> {
+  const expiresInMinutes = Math.round(CODE_TTL_MS / 60_000);
+  return send(
+    input.email,
+    // Code in the subject for fast scanning (spec C-d).
+    `Your Bristle verification code: ${input.code}`,
+    renderVerifyEmailCodeHtml({
+      code: input.code,
+      expiresInMinutes,
+      name: input.name,
+    }),
+    renderVerifyEmailCodeText({
+      code: input.code,
+      expiresInMinutes,
+      name: input.name,
+    }),
   );
 }
 
