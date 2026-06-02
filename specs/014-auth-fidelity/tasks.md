@@ -146,10 +146,10 @@ Under `apps/web/src/components/auth/`; `"use client"`; dependency-free (no zxcvb
 
 ## Phase E — Edge cases + polish + bundle recheck (STOP 7) · T033–T036
 
-- [ ] T033 Polish copy + states: confirm login subhead placeholder (C-c), the verify-email sender-contact pill, success/error banner styling across all forms, and voice compliance (no `!`/emoji/"amazing"/"awesome") on all new microcopy + the code email. (dep: STOP 6)
-- [ ] T034 Accessibility pass: `CodeInput` full keyboard sweep (Tab/Shift-Tab/Backspace/Arrow/Cmd+V spread) + `aria-live` completion; OAuth callback `aria-live` progress region; labeled fields + associated errors on all forms; disabled-SSO `aria-disabled`; verify the "use a different email" flow end-to-end. (dep: STOP 6)
-- [ ] T035 Responsive sweep at 1280 / 768 / 375: split layout → form-only with editorial collapsed/brand-strip <768px; name+email grid stacks <640px; no overflow/break at 375px. (dep: STOP 6)
-- [ ] T036 **Bundle recheck #2 (authoritative)**: production build; record First Load JS for `/signup`, `/login`, `/forgot-password`, `/reset-password/[token]`, `/signup/verify-email`, `/auth/callback/[provider]`. **Report all six; surface any route >110 KB as a watch item; any route >130 KB is a HARD BLOCK** (C-k/D7) — fix before STOP 8. (dep: T033, T034, T035)
+- [X] T033 Polish copy + states: confirm login subhead placeholder (C-c), the verify-email sender-contact pill, success/error banner styling across all forms, and voice compliance (no `!`/emoji/"amazing"/"awesome") on all new microcopy + the code email. (dep: STOP 6)
+- [X] T034 Accessibility pass: `CodeInput` full keyboard sweep (Tab/Shift-Tab/Backspace/Arrow/Cmd+V spread) + `aria-live` completion; OAuth callback `aria-live` progress region; labeled fields + associated errors on all forms; disabled-SSO `aria-disabled`; verify the "use a different email" flow end-to-end. (dep: STOP 6)
+- [X] T035 Responsive sweep at 1280 / 768 / 375: split layout → form-only with editorial collapsed/brand-strip <768px; name+email grid stacks <640px; no overflow/break at 375px. (dep: STOP 6)
+- [X] T036 **Bundle recheck #2 (authoritative)**: production build; record First Load JS for `/signup`, `/login`, `/forgot-password`, `/reset-password/[token]`, `/signup/verify-email`, `/auth/callback/[provider]`. **Report all six; surface any route >110 KB as a watch item; any route >130 KB is a HARD BLOCK** (C-k/D7) — fix before STOP 8. (dep: T033, T034, T035)
 
 **STOP 7 gate** — a11y + responsive + voice all green; **per-route First Load JS ≤130 KB for all six auth routes** (the authoritative measurement, vs STOP 3's island-cost baseline).
 
