@@ -7,16 +7,26 @@ import {
   consumeEmailVerificationCode,
   getUserByEmail,
   incrementEmailVerificationAttempts,
+  setEmailVerificationCode,
 } from "@bristle/db";
 import { SITE_URL } from "@bristle/shared";
 
 import { verifyCodeSchema } from "@/components/auth/auth-schemas";
 import {
   CODE_MAX_ATTEMPTS,
+  codeExpiry,
+  generateCode,
+  hashCode,
+  RESEND_COOLDOWN_MS,
   verifyCode,
 } from "@/lib/auth/email-verification-code";
-import { sendWelcomeEmail } from "@/lib/auth-emails";
+import {
+  sendVerificationCodeEmail,
+  sendWelcomeEmail,
+} from "@/lib/auth-emails";
 import { check, clientIp, RATE_LIMITS } from "@/lib/rate-limit";
+
+const RESEND_COOLDOWN_SECONDS = Math.round(RESEND_COOLDOWN_MS / 1000);
 
 /**
  * Discriminated state for VerifyEmailCodeForm (useActionState). Order of checks:
@@ -123,4 +133,61 @@ export async function verifyEmailCode(
     signInUrl: `${SITE_URL}/login`,
   });
   redirect("/login?verified=true");
+}
+
+/** State for the resend control; `retryAfter` drives the client countdown. */
+export type ResendCodeState =
+  | { status: "idle" }
+  | { status: "sent"; retryAfter: number }
+  | { status: "cooldown"; retryAfter: number }
+  | { status: "rate-limited"; message: string }
+  | { status: "error"; message: string };
+
+// Issue a fresh code, enforcing a 24s per-email cooldown (server-side, not just
+// the client countdown) plus a per-IP cap. Behaves identically for an unknown or
+// already-verified email (reports "sent" without doing work — no enumeration).
+export async function resendVerificationCode(
+  formData: FormData,
+): Promise<ResendCodeState> {
+  const email = formData.get("email")?.toString().trim().toLowerCase() ?? "";
+  if (!email) return { status: "error", message: GENERIC_ERROR };
+
+  const cooldown = check({
+    key: `resend-code:${email}`,
+    limit: 1,
+    windowMs: RESEND_COOLDOWN_MS,
+  });
+  if (!cooldown.allowed) {
+    return {
+      status: "cooldown",
+      retryAfter: cooldown.retryAfter ?? RESEND_COOLDOWN_SECONDS,
+    };
+  }
+
+  const ip = clientIp(await headers());
+  if (!check({ key: `resend-code-ip:${ip}`, ...RATE_LIMITS.verifyCode }).allowed) {
+    return {
+      status: "rate-limited",
+      message: "Too many attempts. Please try again later.",
+    };
+  }
+
+  const user = await getUserByEmail(email);
+  if (!user || user.emailVerified) {
+    return { status: "sent", retryAfter: RESEND_COOLDOWN_SECONDS };
+  }
+
+  try {
+    const code = generateCode();
+    await setEmailVerificationCode({
+      userId: user.id,
+      codeHash: await hashCode(code),
+      expires: codeExpiry(),
+    });
+    await sendVerificationCodeEmail({ email, name: user.name, code });
+  } catch (err) {
+    console.error("[verify-email] resendVerificationCode failed:", err);
+    return { status: "error", message: GENERIC_ERROR };
+  }
+  return { status: "sent", retryAfter: RESEND_COOLDOWN_SECONDS };
 }
