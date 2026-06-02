@@ -5,15 +5,19 @@ import { redirect } from "next/navigation";
 
 import {
   createUser,
-  createVerificationToken,
   getUserByEmail,
+  setEmailVerificationCode,
 } from "@bristle/db";
-import { SITE_URL } from "@bristle/shared";
 
 import { signupSchema, type SignupInput } from "@/components/auth/auth-schemas";
 import { hashPassword } from "@/lib/auth/password";
-import { generateToken, expiresIn, VERIFY_TOKEN_TTL_MS } from "@/lib/auth/tokens";
-import { sendVerificationEmail } from "@/lib/auth-emails";
+import {
+  generateCode,
+  hashCode,
+  codeExpiry,
+  TERMS_VERSION,
+} from "@/lib/auth/email-verification-code";
+import { sendVerificationCodeEmail } from "@/lib/auth-emails";
 import { check, clientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 /** Non-password values echoed back to the form on any error path. */
@@ -63,16 +67,24 @@ export async function createAccount(
   }
 
   // 2) Validate.
+  const termsValue = formData.get("terms")?.toString();
   const parsed = signupSchema.safeParse({
     email: raw.email,
     password: formData.get("password")?.toString() ?? "",
     confirmPassword: formData.get("confirmPassword")?.toString() ?? "",
     name: raw.name ? raw.name : undefined,
+    terms: termsValue === "on" || termsValue === "true",
   });
   if (!parsed.success) {
     const flat = parsed.error.flatten().fieldErrors;
     const fieldErrors: Partial<Record<keyof SignupInput, string>> = {};
-    for (const key of ["email", "password", "confirmPassword", "name"] as const) {
+    for (const key of [
+      "email",
+      "password",
+      "confirmPassword",
+      "name",
+      "terms",
+    ] as const) {
       const msg = flat[key]?.[0];
       if (msg) fieldErrors[key] = msg;
     }
@@ -91,29 +103,33 @@ export async function createAccount(
     };
   }
 
-  // 4) Create + issue verification token + send email (transport).
+  // 4) Create user (capturing Terms acceptance) + issue a 6-digit code + send
+  // the code email (transport). A credentials user always gets a passwordHash;
+  // the schema-level nullable passwordHash is only for OAuth users (D15).
   try {
     const passwordHash = await hashPassword(password);
-    await createUser({ email, name: name ?? null, passwordHash });
-    const token = generateToken();
-    await createVerificationToken({
-      identifier: email,
-      token,
-      expires: expiresIn(VERIFY_TOKEN_TTL_MS),
-    });
-    // Email send is best-effort: the account exists regardless, and the
-    // confirmation page offers a rate-limited resend. A not-configured/transport
-    // failure is logged by the sender, not surfaced as a hard error.
-    await sendVerificationEmail({
+    const user = await createUser({
       email,
       name: name ?? null,
-      verifyUrl: `${SITE_URL}/signup/verify-email?token=${token}`,
+      passwordHash,
+      termsAcceptedAt: new Date(),
+      termsVersion: TERMS_VERSION,
     });
+    const code = generateCode();
+    await setEmailVerificationCode({
+      userId: user.id,
+      codeHash: await hashCode(code),
+      expires: codeExpiry(),
+    });
+    // Email send is best-effort: the account exists regardless, and the verify
+    // page offers a rate-limited resend. A not-configured/transport failure is
+    // logged by the sender, not surfaced as a hard error.
+    await sendVerificationCodeEmail({ email, name: name ?? null, code });
   } catch (err) {
     console.error("[signup] createAccount failed:", err);
     return { status: "transport-error", message: GENERIC_CREATE_ERROR, values: raw };
   }
 
   // 5) Success — outside try/catch so redirect()'s control-flow throw is not caught.
-  redirect(`/signup/verify-email-sent?email=${encodeURIComponent(email)}`);
+  redirect(`/signup/verify-email?email=${encodeURIComponent(email)}`);
 }
