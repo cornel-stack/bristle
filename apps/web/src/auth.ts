@@ -77,9 +77,9 @@ const nextAuth = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   session: { strategy: "database", maxAge: SESSION_MAX_AGE },
-  // signIn only — verifyRequest is dropped (slice 014): it pointed at the
-  // deleted /signup/verify-email-sent and is only used by the unconfigured
-  // Auth.js Email provider.
+  // signIn only. The Auth.js Email-provider `verifyRequest` page is
+  // intentionally unset — Bristle verifies email with its own 6-digit code flow
+  // (/signup/verify-email), not a provider magic link.
   pages: { signIn: "/login" },
   // Pin the session cookie name/options so the manual writer in the credentials
   // login action (lib/auth/session.ts) and this reader agree exactly.
