@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_URL } from "@bristle/shared";
 
-import { AuthCard } from "@/components/auth/auth-card";
+import { AuthOverline } from "@/components/auth/auth-overline";
+import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
 import { LoginForm } from "@/components/auth/login-form";
-import { SiteFooter } from "@/components/landing/site-footer";
-import { TopNav } from "@/components/landing/top-nav";
+import { OAuthButtonRow } from "@/components/auth/oauth-button-row";
+import { OrEmailDivider } from "@/components/auth/or-email-divider";
 
 const TITLE = "Sign in — Bristle";
 const DESCRIPTION = "Sign in to your Bristle account.";
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Login({
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -40,37 +41,39 @@ export default async function Login({
       : undefined;
 
   return (
-    <>
-      <TopNav />
-      <main className="mx-auto max-w-6xl px-grid py-16">
-        <AuthCard
-          title="Sign in"
-          subtitle="Welcome back."
-          footer={
-            <>
-              New to Bristle?{" "}
-              <Link
-                href="/signup"
-                className="font-medium text-accent-bristle hover:underline"
-              >
-                Create an account
-              </Link>
-            </>
-          }
-        >
-          {notice ? (
-            <p
-              role="status"
-              aria-live="polite"
-              className="text-body-sm text-status-success"
-            >
-              {notice}
-            </p>
-          ) : null}
-          <LoginForm callbackUrl={callbackUrl} />
-        </AuthCard>
-      </main>
-      <SiteFooter />
-    </>
+    <AuthSplitLayout editorialSide="right">
+      <div className="flex flex-col gap-grid">
+        <AuthOverline>WELCOME BACK</AuthOverline>
+        <div className="flex flex-col gap-tight">
+          <h1 className="font-serif text-h1 font-semibold text-text-primary">
+            Sign in to Bristle.
+          </h1>
+          <p className="text-body-md text-text-secondary">
+            Sign in to your research journal.
+          </p>
+        </div>
+        {notice ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="rounded-card border border-border-default bg-surface-raised p-snug text-body-sm text-status-success"
+          >
+            {notice}
+          </p>
+        ) : null}
+        <OAuthButtonRow />
+        <OrEmailDivider />
+        <LoginForm callbackUrl={callbackUrl} />
+        <p className="text-body-sm text-text-secondary">
+          New here?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-accent-bristle hover:underline"
+          >
+            Create account
+          </Link>
+        </p>
+      </div>
+    </AuthSplitLayout>
   );
 }
