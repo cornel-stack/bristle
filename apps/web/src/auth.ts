@@ -1,25 +1,25 @@
-// Auth.js v5 (next-auth@5) configuration — the heart of slice 013.
-// Exports { handlers, signIn, signOut, auth } consumed by the API route handler,
-// middleware, Server Actions, and the auth-aware top nav / protected /account.
+// Auth.js v5 (next-auth@5) configuration — established slice 013, extended
+// slice 014 (Google + GitHub OAuth). Exports { handlers, signIn, signOut, auth }
+// consumed by the API route handler, middleware, Server Actions, and the
+// auth-aware top nav / protected /account.
 //
 // SESSION STRATEGY — database (FR-012, 30-day). We keep the database strategy
 // because FR-016 / SC-006 require server-side invalidation of all sessions on
 // password reset (deleting `sessions` rows), which a stateless JWT cannot do.
 //
-// NO PROVIDERS (execution-time fix — see plan decision 7). @auth/core's
-// assertConfig() throws `UnsupportedStrategy` on EVERY auth() call when a
-// Credentials provider is the *only* provider AND session.strategy is "database"
-// (assert.js: `if (dbStrategy && onlyCredentials)`). With a Credentials provider
-// present that broke every authenticated request — auth() threw, the session
-// resolved to null, and protected pages bounced back to /login in a loop. The
-// credentials login Server Action (T017) never called Auth.js signIn() anyway:
-// it verifies the password and creates the database session itself via the
-// adapter (lib/auth/session.ts), so the Credentials provider was dead code.
-// Dropping it lets auth() read that manual DB session. When OAuth lands
-// (deferred), adding a non-credentials provider is safe — `onlyCredentials`
-// becomes false, so the rule no longer trips.
+// PROVIDERS — Google + GitHub (slice 014; was `[]` in slice 013). @auth/core's
+// assertConfig() throws `UnsupportedStrategy` only when a Credentials provider
+// is the *only* provider AND session.strategy is "database" (`dbStrategy &&
+// onlyCredentials`). We ship NON-credentials providers and NO Credentials
+// provider, so `onlyCredentials` is false and the rule cannot trip. OAuth
+// sign-ins are persisted by the DrizzleAdapter (sessions + accounts rows). The
+// credentials login path remains MANUAL (lib/auth/session.ts verifies the
+// password and writes the DB session itself); auth() reads either uniformly via
+// the pinned session cookie.
 
 import NextAuth, { type NextAuthResult } from "next-auth";
+import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
   getDb,
@@ -42,6 +42,23 @@ if (!process.env.AUTH_SECRET) {
   throw new Error("AUTH_SECRET is not set — generate one with `openssl rand -base64 32`");
 }
 
+// Fail loud (same shape as AUTH_SECRET) if any OAuth credential is missing —
+// surfaces a missing secret at build/boot, not as a broken sign-in button.
+// These MUST also be listed in turbo.json build.env or the Vercel build dies at
+// "Collecting page data" even when set in Vercel (the slice-013 AUTH_SECRET trap).
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+if (!GOOGLE_CLIENT_ID)
+  throw new Error("GOOGLE_CLIENT_ID is not set — add it to .env.local, Vercel (Production+Preview), and turbo.json build.env");
+if (!GOOGLE_CLIENT_SECRET)
+  throw new Error("GOOGLE_CLIENT_SECRET is not set — add it to .env.local, Vercel (Production+Preview), and turbo.json build.env");
+if (!GITHUB_CLIENT_ID)
+  throw new Error("GITHUB_CLIENT_ID is not set — add it to .env.local, Vercel (Production+Preview), and turbo.json build.env");
+if (!GITHUB_CLIENT_SECRET)
+  throw new Error("GITHUB_CLIENT_SECRET is not set — add it to .env.local, Vercel (Production+Preview), and turbo.json build.env");
+
 // Explicit annotations via NextAuthResult sidestep TS2742 ("inferred type
 // cannot be named without a reference to .pnpm/…") — a known Auth.js v5 + pnpm
 // portability quirk when re-exporting the destructured NextAuth() result.
@@ -60,16 +77,32 @@ const nextAuth = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   session: { strategy: "database", maxAge: SESSION_MAX_AGE },
-  pages: { signIn: "/login", verifyRequest: "/signup/verify-email-sent" },
+  // signIn only — verifyRequest is dropped (slice 014): it pointed at the
+  // deleted /signup/verify-email-sent and is only used by the unconfigured
+  // Auth.js Email provider.
+  pages: { signIn: "/login" },
   // Pin the session cookie name/options so the manual writer in the credentials
   // login action (lib/auth/session.ts) and this reader agree exactly.
   cookies: {
     sessionToken: { name: SESSION_COOKIE_NAME, options: SESSION_COOKIE_OPTIONS },
   },
-  // Empty by design — see the NO PROVIDERS note in the header. The credentials
-  // login flow is manual (lib/auth/session.ts); auth() is used only to READ the
-  // database session, which needs no provider.
-  providers: [],
+  // Google + GitHub OAuth (slice 014). Non-credentials providers, so the v5
+  // `onlyCredentials`+database-strategy assertion does not trip (it required a
+  // Credentials provider to be the ONLY provider — we have none). OAuth sessions
+  // are created by the DrizzleAdapter; the credentials login path stays manual
+  // (lib/auth/session.ts). Scopes are profile+email only (FR-016).
+  providers: [
+    Google({
+      clientId: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      authorization: { params: { scope: "openid email profile" } },
+    }),
+    GitHub({
+      clientId: GITHUB_CLIENT_ID,
+      clientSecret: GITHUB_CLIENT_SECRET,
+      authorization: { params: { scope: "read:user user:email" } },
+    }),
+  ],
   callbacks: {
     // Database strategy: the second arg is the adapter user. Surface id +
     // emailVerified onto session.user for /account and the login gate.
