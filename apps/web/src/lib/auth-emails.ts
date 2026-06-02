@@ -9,7 +9,6 @@ import "server-only";
 import { Resend } from "resend";
 
 import { renderPasswordResetEmailHtml } from "./email/password-reset";
-import { renderVerifyEmailHtml } from "./email/verify-email";
 import {
   renderVerifyEmailCodeHtml,
   renderVerifyEmailCodeText,
@@ -49,20 +48,6 @@ async function send(
     console.error("[auth-emails] threw:", err);
     return { ok: false, reason: "transport" };
   }
-}
-
-// Slice-013 link sender — kept additively; T026 removes it once its consumers
-// (createAccount switches in T022, verify-email-sent deleted in T026) are gone.
-export function sendVerificationEmail(input: {
-  email: string;
-  name?: string | null;
-  verifyUrl: string;
-}): Promise<SendEmailResult> {
-  return send(
-    input.email,
-    "Verify your Bristle email",
-    renderVerifyEmailHtml({ verifyUrl: input.verifyUrl, name: input.name }),
-  );
 }
 
 export function sendVerificationCodeEmail(input: {
