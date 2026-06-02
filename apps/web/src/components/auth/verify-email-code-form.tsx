@@ -18,6 +18,7 @@ import {
   type VerifyCodeState,
 } from "@/app/signup/verify-email/actions";
 
+import { AuthFormBanner } from "./auth-form-banner";
 import { CodeInput } from "./code-input";
 
 const RESEND_COOLDOWN_SECONDS = 24;
@@ -103,11 +104,7 @@ export function VerifyEmailCodeForm({ email }: { email: string }) {
       >
         <input type="hidden" name="email" value={email} />
         <CodeInput value={code} onChange={setCode} name="code" autoFocus />
-        {error ? (
-          <p role="alert" className="text-body-sm text-status-error">
-            {error}
-          </p>
-        ) : null}
+        {error ? <AuthFormBanner key={error}>{error}</AuthFormBanner> : null}
         <button
           type="submit"
           disabled={pending || code.length !== 6}

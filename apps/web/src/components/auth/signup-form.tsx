@@ -13,6 +13,7 @@ import { useActionState, useState } from "react";
 import { createAccount, type SignupFormState } from "@/app/signup/actions";
 
 import { AuthField } from "./auth-field";
+import { AuthFormBanner } from "./auth-form-banner";
 import { PasswordField } from "./password-field";
 import { PasswordStrengthMeter } from "./password-strength-meter";
 
@@ -47,11 +48,7 @@ export function SignupForm() {
       noValidate
       className="flex flex-col gap-grid"
     >
-      {banner ? (
-        <p role="alert" className="text-body-sm text-status-error">
-          {banner}
-        </p>
-      ) : null}
+      {banner ? <AuthFormBanner key={banner}>{banner}</AuthFormBanner> : null}
       <div className="grid grid-cols-1 gap-grid sm:grid-cols-2">
         <AuthField
           id="signup-name"

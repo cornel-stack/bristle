@@ -15,6 +15,7 @@ import {
 } from "@/app/login/actions";
 
 import { AuthField } from "./auth-field";
+import { AuthFormBanner } from "./auth-form-banner";
 import { PasswordField } from "./password-field";
 
 const INITIAL_STATE: LoginFormState = { status: "idle" };
@@ -50,13 +51,9 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
       {callbackUrl ? (
         <input type="hidden" name="callbackUrl" defaultValue={callbackUrl} />
       ) : null}
-      {banner ? (
-        <p role="alert" className="text-body-sm text-status-error">
-          {banner}
-        </p>
-      ) : null}
+      {banner ? <AuthFormBanner key={banner}>{banner}</AuthFormBanner> : null}
       {state.status === "unverified" ? (
-        <p role="alert" className="text-body-sm text-status-error">
+        <AuthFormBanner>
           Verify your email before signing in.{" "}
           <Link
             href={`/signup/verify-email?email=${encodeURIComponent(state.email)}`}
@@ -64,7 +61,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           >
             Enter your code
           </Link>
-        </p>
+        </AuthFormBanner>
       ) : null}
       <AuthField
         id="login-email"

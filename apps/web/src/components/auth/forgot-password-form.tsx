@@ -14,6 +14,7 @@ import {
 } from "@/app/forgot-password/actions";
 
 import { AuthField } from "./auth-field";
+import { AuthFormBanner } from "./auth-form-banner";
 
 const INITIAL_STATE: ForgotPasswordState = { status: "idle" };
 
@@ -51,9 +52,7 @@ export function ForgotPasswordForm() {
       className="flex flex-col gap-grid"
     >
       {state.status === "rate-limited" ? (
-        <p role="alert" className="text-body-sm text-status-error">
-          {state.message}
-        </p>
+        <AuthFormBanner>{state.message}</AuthFormBanner>
       ) : null}
       <AuthField
         id="forgot-email"

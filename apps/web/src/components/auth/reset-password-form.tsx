@@ -16,6 +16,7 @@ import {
   type ResetPasswordState,
 } from "@/app/reset-password/[token]/actions";
 
+import { AuthFormBanner } from "./auth-form-banner";
 import { PasswordField } from "./password-field";
 import { PasswordRequirementsList } from "./password-requirements-list";
 import { PasswordStrengthMeter } from "./password-strength-meter";
@@ -50,13 +51,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
       className="flex flex-col gap-grid"
     >
       <input type="hidden" name="token" defaultValue={token} />
-      {banner ? (
-        <p role="alert" className="text-body-sm text-status-error">
-          {banner}
-        </p>
-      ) : null}
+      {banner ? <AuthFormBanner key={banner}>{banner}</AuthFormBanner> : null}
       {formError ? (
-        <p role="alert" className="text-body-sm text-status-error">
+        <AuthFormBanner>
           {formError}{" "}
           <Link
             href="/forgot-password"
@@ -64,7 +61,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           >
             Request a new link
           </Link>
-        </p>
+        </AuthFormBanner>
       ) : null}
       <div className="flex flex-col gap-tight">
         <PasswordField
