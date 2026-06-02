@@ -222,6 +222,29 @@ export async function isPasswordResetTokenValid(token: string): Promise<boolean>
   return Boolean(row);
 }
 
+// Read-only: the email tied to a VALID (unused, unexpired) reset token — for the
+// reset page's "Resetting password for [email]" context pill (slice 014, design
+// 2_4). Returns null when the token is invalid, so the page can render its
+// "no longer valid" state from the same call. consumePasswordResetToken still
+// re-validates atomically at submit (this is advisory, not the boundary).
+export async function getValidResetTokenEmail(
+  token: string,
+): Promise<string | null> {
+  const [row] = await getDb()
+    .select({ email: users.email })
+    .from(passwordResetTokens)
+    .innerJoin(users, eq(users.id, passwordResetTokens.userId))
+    .where(
+      and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false),
+        gt(passwordResetTokens.expires, new Date()),
+      ),
+    )
+    .limit(1);
+  return row?.email ?? null;
+}
+
 // Atomically consume a password-reset token: re-check existence + unused +
 // unexpired (TOCTOU — the page pre-check may be stale), update the user's
 // password, mark the token used, and delete ALL of that user's sessions

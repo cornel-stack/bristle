@@ -31,6 +31,7 @@ export {
   createSession,
   createPasswordResetToken,
   isPasswordResetTokenValid,
+  getValidResetTokenEmail,
   consumePasswordResetToken,
   setEmailVerificationCode,
   incrementEmailVerificationAttempts,
