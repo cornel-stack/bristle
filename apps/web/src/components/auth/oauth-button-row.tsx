@@ -19,7 +19,7 @@ import { KeyRound } from "lucide-react";
 const BUTTON_CLASS =
   "flex flex-1 items-center justify-center gap-tight rounded-button border border-border-default bg-surface-card px-snug py-2 text-body-sm font-medium text-text-primary hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle";
 
-function GoogleMark() {
+export function GoogleMark() {
   return (
     <svg viewBox="0 0 48 48" className="size-4" aria-hidden="true">
       <path
@@ -42,7 +42,7 @@ function GoogleMark() {
   );
 }
 
-function GitHubMark() {
+export function GitHubMark() {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -55,22 +55,23 @@ function GitHubMark() {
   );
 }
 
-interface OAuthButtonRowProps {
-  /** Post-auth destination, appended as ?callbackUrl=… (Batch B wires this). */
-  callbackPath?: string;
+// Each provider's signin links through to its own progress page
+// (/auth/callback/{provider}) so Auth.js redirects there after creating the
+// session; that page short-circuits to /account once the session is readable
+// (Option B — see plan R7/D6).
+function signinHref(provider: "google" | "github"): string {
+  const callbackUrl = encodeURIComponent(`/auth/callback/${provider}`);
+  return `/api/auth/signin/${provider}?callbackUrl=${callbackUrl}`;
 }
 
-export function OAuthButtonRow({ callbackPath }: OAuthButtonRowProps) {
-  const query = callbackPath
-    ? `?callbackUrl=${encodeURIComponent(callbackPath)}`
-    : "";
+export function OAuthButtonRow() {
   return (
     <div className="flex gap-snug">
-      <a href={`/api/auth/signin/google${query}`} className={BUTTON_CLASS}>
+      <a href={signinHref("google")} className={BUTTON_CLASS}>
         <GoogleMark />
         Google
       </a>
-      <a href={`/api/auth/signin/github${query}`} className={BUTTON_CLASS}>
+      <a href={signinHref("github")} className={BUTTON_CLASS}>
         <GitHubMark />
         GitHub
       </a>
