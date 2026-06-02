@@ -71,20 +71,13 @@ export async function createAccount(
   const parsed = signupSchema.safeParse({
     email: raw.email,
     password: formData.get("password")?.toString() ?? "",
-    confirmPassword: formData.get("confirmPassword")?.toString() ?? "",
     name: raw.name ? raw.name : undefined,
     terms: termsValue === "on" || termsValue === "true",
   });
   if (!parsed.success) {
     const flat = parsed.error.flatten().fieldErrors;
     const fieldErrors: Partial<Record<keyof SignupInput, string>> = {};
-    for (const key of [
-      "email",
-      "password",
-      "confirmPassword",
-      "name",
-      "terms",
-    ] as const) {
+    for (const key of ["email", "password", "name", "terms"] as const) {
       const msg = flat[key]?.[0];
       if (msg) fieldErrors[key] = msg;
     }

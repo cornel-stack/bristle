@@ -13,7 +13,7 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import type { ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
 interface PasswordFieldProps {
   id: string;
@@ -26,6 +26,8 @@ interface PasswordFieldProps {
   minLength?: number;
   defaultValue?: string;
   error?: string;
+  /** Forwarded input change — lets a parent drive a live strength meter. */
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function PasswordField({
@@ -38,6 +40,7 @@ export function PasswordField({
   minLength,
   defaultValue,
   error,
+  onChange,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
   const errorId = `${id}-error`;
@@ -58,6 +61,7 @@ export function PasswordField({
           minLength={minLength}
           autoComplete={autoComplete}
           defaultValue={defaultValue}
+          onChange={onChange}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className="w-full rounded-button border border-border-default bg-surface-card px-snug py-2 pr-10 text-body-md text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle"
