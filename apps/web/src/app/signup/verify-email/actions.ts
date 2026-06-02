@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import {
   consumeEmailVerificationCode,
+  deleteUnverifiedUserByEmail,
   getUserByEmail,
   incrementEmailVerificationAttempts,
   setEmailVerificationCode,
@@ -190,4 +191,38 @@ export async function resendVerificationCode(
     return { status: "error", message: GENERIC_ERROR };
   }
   return { status: "sent", retryAfter: RESEND_COOLDOWN_SECONDS };
+}
+
+/** State for the "use a different email" affordance. */
+export type UseDifferentEmailState =
+  | { status: "idle" }
+  | { status: "done" }
+  | { status: "rate-limited"; message: string }
+  | { status: "error"; message: string };
+
+// Hard-delete the UNVERIFIED account so the user can re-register with a different
+// email. The DB helper's `emailVerified IS NULL` guard makes deleting a verified
+// account impossible. Returns a state; the client navigates to /signup (the email
+// is intentionally NOT pre-populated — the user is changing it).
+export async function useDifferentEmail(
+  formData: FormData,
+): Promise<UseDifferentEmailState> {
+  const email = formData.get("email")?.toString().trim().toLowerCase() ?? "";
+  if (!email) return { status: "error", message: GENERIC_ERROR };
+
+  const ip = clientIp(await headers());
+  if (!check({ key: `use-diff-email:${ip}`, ...RATE_LIMITS.verifyCode }).allowed) {
+    return {
+      status: "rate-limited",
+      message: "Too many attempts. Please try again later.",
+    };
+  }
+
+  try {
+    await deleteUnverifiedUserByEmail(email);
+  } catch (err) {
+    console.error("[verify-email] useDifferentEmail failed:", err);
+    return { status: "error", message: GENERIC_ERROR };
+  }
+  return { status: "done" };
 }
