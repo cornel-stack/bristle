@@ -16,14 +16,24 @@ import {
   SESSION_MAX_AGE_MS,
 } from "./session-cookie";
 
-/** Create a 30-day DB session for `userId` and set the session cookie. */
-export async function createUserSession(userId: string): Promise<void> {
+/**
+ * Create a DB session for `userId` and set the session cookie.
+ * `rememberMe` (slice 014, default true to preserve the prior 30-day behavior):
+ * true → persistent cookie expiring in 30 days; false → session-only cookie
+ * (dropped at browser close). The DB `sessions` row always carries the 30-day
+ * expiry either way (a session-only cookie is discarded by the browser
+ * regardless; the stale row is harmless and lazily cleaned).
+ */
+export async function createUserSession(
+  userId: string,
+  rememberMe = true,
+): Promise<void> {
   const sessionToken = generateToken();
   const expires = new Date(Date.now() + SESSION_MAX_AGE_MS);
   await createSession({ sessionToken, userId, expires });
   const store = await cookies();
   store.set(SESSION_COOKIE_NAME, sessionToken, {
     ...SESSION_COOKIE_OPTIONS,
-    expires,
+    ...(rememberMe ? { expires } : {}),
   });
 }

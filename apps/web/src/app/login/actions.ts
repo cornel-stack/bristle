@@ -41,6 +41,8 @@ export async function signInWithCredentials(
 ): Promise<LoginFormState> {
   const raw: LoginRawValues = { email: formData.get("email")?.toString() ?? "" };
   const callbackUrl = formData.get("callbackUrl")?.toString() ?? "";
+  const rememberValue = formData.get("rememberMe")?.toString();
+  const rememberMe = rememberValue === "on" || rememberValue === "true";
 
   // 1) Rate limit (per IP).
   const ip = clientIp(await headers());
@@ -109,8 +111,9 @@ export async function signInWithCredentials(
   }
 
   // 5) Create the DB session (Credentials path; see lib/auth/session.ts).
+  // "Keep me signed in" → persistent 30-day cookie; unchecked → session-only.
   try {
-    await createUserSession(userId);
+    await createUserSession(userId, rememberMe);
   } catch (err) {
     console.error("[login] session creation failed:", err);
     return {
