@@ -12,6 +12,8 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+import { users } from "./auth-schema";
+
 // Minimal problems table — one row renders one ProblemCardFull (see contracts/).
 // `slug` is the stable, URL-safe upsert key (also the future /problems/[slug] route).
 // `embedding` exercises pgvector end to end; unpopulated this slice.
@@ -167,6 +169,46 @@ export type NewProblemFrequencyPoint =
   typeof problemFrequencyPoints.$inferInsert;
 export type ProblemRelated = typeof problemRelated.$inferSelect;
 export type NewProblemRelated = typeof problemRelated.$inferInsert;
+
+// === Slice 016 — catalog + dashboard ========================================
+
+// Canonical product categories (the 8 §4.1a-tinted keys this slice — D9). tint_*
+// reference existing design-token names; problem_count is a displayed literal
+// (NOT count(*) over fixtures); momentum_series holds the dashboard weekly chart.
+export const categories = pgTable("categories", {
+  id: pk(),
+  key: text("key").notNull().unique(),
+  label: text("label").notNull(),
+  tintBgKey: text("tint_bg_key"),
+  tintFgKey: text("tint_fg_key"),
+  problemCount: integer("problem_count").notNull().default(0),
+  isCustom: boolean("is_custom").notNull().default(false),
+  createdByUserId: uuid("created_by_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  momentumSeries: jsonb("momentum_series"),
+  position: integer("position").notNull().default(0),
+});
+
+// Per-user dashboard singletons (e.g. weekly_momentum caption + series). Typed at
+// the read boundary by WeeklyMomentumSchema (packages/shared).
+export const dashboardFixtures = pgTable(
+  "dashboard_fixtures",
+  {
+    id: pk(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    payload: jsonb("payload").notNull(),
+  },
+  (t) => [unique().on(t.userId, t.key)],
+);
+
+export type Category = typeof categories.$inferSelect;
+export type NewCategory = typeof categories.$inferInsert;
+export type DashboardFixture = typeof dashboardFixtures.$inferSelect;
+export type NewDashboardFixture = typeof dashboardFixtures.$inferInsert;
 
 // Auth.js v5 tables + custom password-reset table (slice 013). Re-exported here
 // so drizzle-kit (schema: "./src/schema.ts") picks them up for migration
