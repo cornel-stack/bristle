@@ -136,8 +136,8 @@ export const HERO: ProblemFixture = {
     mentionCount: 11,
     priceMinUsd: 20,
     priceMaxUsd: 99,
-    medianUsd: 60,
-    note: "Median stated price: $60/mo. Three commenters say they'd pay annually. Two would consider an open-source tool with paid support.",
+    medianUsd: 40,
+    note: "Median stated price: $40/mo. Three commenters say they'd pay annually. Two would consider an open-source tool with paid support.",
   },
   personas: [
     { label: "Indie founders", count: 22, percentage: 47 },

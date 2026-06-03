@@ -25,7 +25,8 @@ export const OTHER_FIXTURES: ProblemFixture[] = [
     solutions: [
       { name: "Cloudflare Workers proxy", priceRange: "Free–$5/mo", matchType: "partial", description: "Bypass buffering by streaming through a Worker. DIY.", mentionCount: 5 },
       { name: "Fly.io passthrough", priceRange: "~$10/mo", matchType: "partial", description: "Run the stream route on a non-buffering host.", mentionCount: 3 },
-    ],
+      { name: "Vercel Edge (no buffering)", priceRange: "Free–$20/mo", matchType: "adjacent", description: "Edge functions stream without CDN buffering; lock-in trade-off.", mentionCount: 4 },
+    ], // 3 solutions, 0 direct (page 6)
     wtp: { mentionCount: 7, priceMinUsd: 15, priceMaxUsd: 60, medianUsd: 25, note: "Median $25/mo. Mostly indie hackers shipping chat UIs." },
     personas: [
       { label: "Indie founders", count: 14, percentage: 38 },
@@ -59,9 +60,7 @@ export const OTHER_FIXTURES: ProblemFixture[] = [
       { authorHandle: "mobile_lead", sourceKey: "forum", engagementValue: 8, engagementLabel: "replies", quoteText: "Rolled back to a store build to be safe. OTA is our whole release flow.", isWtpSignal: true, statedPriceUsd: 20 },
       { authorHandle: "appdev_kim", sourceKey: "appstore", rating: 2, quoteText: "Three releases stuck. Had to ship a full review just to push a one-line fix.", isWtpSignal: false },
     ],
-    solutions: [
-      { name: "Expo EAS Update", priceRange: "Free–$99/mo", matchType: "partial", description: "The affected product; fix expected upstream.", mentionCount: 6 },
-    ],
+    solutions: [], // genuine 0 — page 6 shows "—" ("Expo will fix"); no real existing solution
     wtp: { mentionCount: 1, priceMinUsd: 20, priceMaxUsd: 20, medianUsd: 20, note: "One mention; mostly an upstream wait." },
     personas: [
       { label: "Mobile dev", count: 24, percentage: 78 },
