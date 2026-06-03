@@ -2,10 +2,11 @@ import { config } from "dotenv";
 config({ path: new URL("../../../.env.local", import.meta.url).pathname }); // repo-root .env.local (src/ → root)
 import { isSourceKey } from "@bristle/shared";
 import { closeDb, getDb } from "./client";
-import { categories, problems } from "./schema";
+import { categories, problems, users } from "./schema";
 import { redactConnectionString } from "./redact";
 import { CATEGORIES } from "./seed/categories";
 import { OTHER_FIXTURES } from "./seed/children";
+import { DEMO_USER } from "./seed/demo-user";
 import { HERO } from "./seed/hero";
 import { PROBLEMS } from "./seed/problems";
 import { seedProblemChildren } from "./seed/types";
@@ -55,6 +56,17 @@ async function seed() {
     await seedProblemChildren(db, fx, problemIdBySlug);
   }
   console.log(`seeded ${OTHER_FIXTURES.length} non-hero fixtures' children`);
+
+  // --- Demo user (fixed; upsert on email; watches 7 categories) ---
+  await db
+    .insert(users)
+    .values(DEMO_USER)
+    .onConflictDoUpdate({ target: users.email, set: DEMO_USER });
+  const demoId = DEMO_USER.id;
+  if (!demoId) throw new Error("demo user id missing");
+  console.log(
+    `seeded demo user (${DEMO_USER.watchedCategories?.length ?? 0} watched categories)`,
+  );
 }
 
 try {
