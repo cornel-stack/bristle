@@ -1,11 +1,7 @@
-// OAuth provider button row for the signup + login pages (server component —
-// the providers are plain <a> links to Auth.js's signin endpoints, no client JS).
-//
-// Hrefs target /api/auth/signin/{provider}; the optional `callbackPath` appends
-// ?callbackUrl=… (Batch B / T018 passes "/auth/callback/{provider}"). The Auth.js
-// handlers exist from slice 013, but the providers array is still [] until Batch
-// B (T015), so these links 404 if clicked before then — expected: A1 ships the
-// markup, B wires the destinations.
+// OAuth provider button row for the signup + login pages (server component, no
+// client JS). Google/GitHub submit a tiny <form> whose action is a Server Action
+// (signInWithGoogle/GitHub) — Auth.js v5 initiates OAuth via signIn() server-side
+// (the v4 GET-to-anchor pattern throws UnknownAction on v5; slice-014 hotfix).
 //
 // Logos are inline SVG (no network fetch on a sign-in page). The Google mark
 // keeps its four OFFICIAL brand hex values — a deliberate, documented exception
@@ -16,8 +12,13 @@
 
 import { KeyRound } from "lucide-react";
 
+import {
+  signInWithGitHub,
+  signInWithGoogle,
+} from "@/lib/auth/oauth-actions";
+
 const BUTTON_CLASS =
-  "flex flex-1 items-center justify-center gap-tight rounded-button border border-border-default bg-surface-card px-snug py-2 text-body-sm font-medium text-text-primary hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle";
+  "flex w-full items-center justify-center gap-tight rounded-button border border-border-default bg-surface-card px-snug py-2 text-body-sm font-medium text-text-primary hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle";
 
 export function GoogleMark() {
   return (
@@ -55,32 +56,37 @@ export function GitHubMark() {
   );
 }
 
-// Each provider's signin links through to its own progress page
-// (/auth/callback/{provider}) so Auth.js redirects there after creating the
-// session; that page short-circuits to /account once the session is readable
-// (Option B — see plan R7/D6).
-function signinHref(provider: "google" | "github"): string {
-  const callbackUrl = encodeURIComponent(`/auth/callback/${provider}`);
-  return `/api/auth/signin/${provider}?callbackUrl=${callbackUrl}`;
-}
-
+// Each provider's Server Action redirects, after the OAuth callback, to its own
+// progress page (/auth/callback/{provider}), which short-circuits to /account
+// once the session is readable (Option B — plan R7/D6). The callback path is
+// bound as the action's first arg so the form's FormData doesn't land there.
 export function OAuthButtonRow() {
   return (
     <div className="flex gap-snug">
-      <a href={signinHref("google")} className={BUTTON_CLASS}>
-        <GoogleMark />
-        Google
-      </a>
-      <a href={signinHref("github")} className={BUTTON_CLASS}>
-        <GitHubMark />
-        GitHub
-      </a>
+      <form
+        action={signInWithGoogle.bind(null, "/auth/callback/google")}
+        className="flex-1"
+      >
+        <button type="submit" className={BUTTON_CLASS}>
+          <GoogleMark />
+          Google
+        </button>
+      </form>
+      <form
+        action={signInWithGitHub.bind(null, "/auth/callback/github")}
+        className="flex-1"
+      >
+        <button type="submit" className={BUTTON_CLASS}>
+          <GitHubMark />
+          GitHub
+        </button>
+      </form>
       <button
         type="button"
         disabled
         aria-disabled="true"
         title="Coming soon — SSO available on Enterprise"
-        className={`${BUTTON_CLASS} cursor-not-allowed text-text-tertiary hover:bg-surface-card`}
+        className={`${BUTTON_CLASS} flex-1 cursor-not-allowed text-text-tertiary hover:bg-surface-card`}
       >
         <KeyRound className="size-4" strokeWidth={1.5} aria-hidden="true" />
         SSO
