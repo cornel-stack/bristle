@@ -5,7 +5,9 @@ import { getDb } from "./client";
 import { categories, problems } from "./schema";
 import { redactConnectionString } from "./redact";
 import { CATEGORIES } from "./seed/categories";
+import { HERO } from "./seed/hero";
 import { PROBLEMS } from "./seed/problems";
+import { seedProblemChildren } from "./seed/types";
 
 // Slice 016 fixtures seed. Idempotent (D6): natural-key upsert where a key exists;
 // replace-children for unkeyed lists. Run: pnpm --filter @bristle/db db:seed.
@@ -42,6 +44,10 @@ async function seed() {
     problemIdBySlug.set(row.slug, row.id);
   }
   console.log(`seeded ${PROBLEMS.length} problems (${problemIdBySlug.size} ids)`);
+
+  // --- Hero (Stripe webhooks) full depth: child rows + compare_card ---
+  await seedProblemChildren(db, HERO, problemIdBySlug);
+  console.log("seeded hero children + compare_card");
 }
 
 try {
