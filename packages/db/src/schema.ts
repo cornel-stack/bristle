@@ -210,6 +210,124 @@ export type NewCategory = typeof categories.$inferInsert;
 export type DashboardFixture = typeof dashboardFixtures.$inferSelect;
 export type NewDashboardFixture = typeof dashboardFixtures.$inferInsert;
 
+// === Slice 016 — user-scoped product tables =================================
+// The demo user (D5) owns all of these; the Tier-5 product writes them per real
+// user later. No tier-enforcement logic this slice (usage_meters are displays).
+
+export const savedCollections = pgTable(
+  "saved_collections",
+  {
+    id: pk(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    color: text("color"),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => [unique().on(t.userId, t.name)],
+);
+
+export const userSavedProblems = pgTable(
+  "user_saved_problems",
+  {
+    id: pk(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    problemId: uuid("problem_id")
+      .notNull()
+      .references(() => problems.id, { onDelete: "cascade" }),
+    collectionId: uuid("collection_id").references(() => savedCollections.id, {
+      onDelete: "set null",
+    }),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => [unique().on(t.userId, t.problemId)],
+);
+
+export const alertRules = pgTable(
+  "alert_rules",
+  {
+    id: pk(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    categoryKey: text("category_key"),
+    ruleType: text("rule_type").notNull(), // momentum | new | wtp | threshold
+    threshold: integer("threshold"),
+    channels: text("channels").array(), // email | slack | webhook | in-app
+    enabled: boolean("enabled").notNull().default(true),
+    firedCount: integer("fired_count").notNull().default(0),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => [unique().on(t.userId, t.name)],
+);
+
+export const alertNotifications = pgTable("alert_notifications", {
+  id: pk(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // momentum | new | wtp | digest | threshold | weekly
+  title: text("title").notNull(),
+  body: text("body"),
+  problemId: uuid("problem_id").references(() => problems.id, {
+    onDelete: "set null",
+  }),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Typed activity entries. user_id null = a global event (e.g. "3 problems added
+// in Auth & SSO"); set = a user event (e.g. "saved pgvector").
+export const problemActivityLog = pgTable("problem_activity_log", {
+  id: pk(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  problemId: uuid("problem_id").references(() => problems.id, {
+    onDelete: "set null",
+  }),
+  type: text("type").notNull(), // threshold_crossed | quotes_added | problem_added | saved
+  title: text("title").notNull(),
+  deltaLabel: text("delta_label"), // "+312%" | "NEW" | "SAVED"
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Per-user metric/used/quota for tier displays ("28 of 50"). Seeded values only.
+export const usageMeters = pgTable(
+  "usage_meters",
+  {
+    id: pk(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    used: integer("used").notNull(),
+    quota: integer("quota"),
+    deltaPct: integer("delta_pct"),
+    secondaryLabel: text("secondary_label"),
+  },
+  (t) => [unique().on(t.userId, t.metric)],
+);
+
+export type SavedCollection = typeof savedCollections.$inferSelect;
+export type NewSavedCollection = typeof savedCollections.$inferInsert;
+export type UserSavedProblem = typeof userSavedProblems.$inferSelect;
+export type NewUserSavedProblem = typeof userSavedProblems.$inferInsert;
+export type AlertRule = typeof alertRules.$inferSelect;
+export type NewAlertRule = typeof alertRules.$inferInsert;
+export type AlertNotification = typeof alertNotifications.$inferSelect;
+export type NewAlertNotification = typeof alertNotifications.$inferInsert;
+export type ProblemActivity = typeof problemActivityLog.$inferSelect;
+export type NewProblemActivity = typeof problemActivityLog.$inferInsert;
+export type UsageMeter = typeof usageMeters.$inferSelect;
+export type NewUsageMeter = typeof usageMeters.$inferInsert;
+
 // Auth.js v5 tables + custom password-reset table (slice 013). Re-exported here
 // so drizzle-kit (schema: "./src/schema.ts") picks them up for migration
 // generation, and so @auth/drizzle-adapter + apps/web import from one surface.
