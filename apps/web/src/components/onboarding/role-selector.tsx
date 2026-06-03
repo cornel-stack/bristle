@@ -73,6 +73,8 @@ export function RoleSelector({
       {banner ? <AuthFormBanner key={banner}>{banner}</AuthFormBanner> : null}
 
       <div
+        role="radiogroup"
+        aria-label="Choose the role that fits you"
         onChange={(event) => {
           const target = event.target as HTMLInputElement;
           if (target.name === "role") setSelected(target.value as Role);

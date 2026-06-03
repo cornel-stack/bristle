@@ -123,7 +123,7 @@ Under `components/onboarding/`; `"use client"`; dependency-free (plain substring
 
 ## Phase D — Edge cases + polish + bundle recheck (STOP 6) · T019–T020
 
-- [ ] T019 Polish + edge cases: partial-resume (role saved → resume at categories), "other" textarea required-validation + ≤200, search/min-3/max-5 enforcement, removable pills + counter/hint copy, no-name welcome fallback, `AuthFormBanner` error states across both actions, a11y (radio group single-choice / checkbox group multi-choice keyboard + non-visual state/counts), voice greps (no `!`/emoji/hype). (dep: STOP 4 + STOP 5)
+- [X] T019 Polish + edge cases: partial-resume (role saved → resume at categories), "other" textarea required-validation + ≤200, search/min-3/max-5 enforcement, removable pills + counter/hint copy, no-name welcome fallback, `AuthFormBanner` error states across both actions, a11y (radio group single-choice / checkbox group multi-choice keyboard + non-visual state/counts), voice greps (no `!`/emoji/hype). (dep: STOP 4 + STOP 5)
 - [ ] T020 **Bundle recheck #2 (authoritative)**: production build; record First Load JS for `/onboarding/role` + `/onboarding/categories`. **Watch >110 KB; HARD BLOCK >130 KB** — fix before STOP 7. (dep: T019)
 
 **STOP 6 gate** — a11y + edge cases green; **per-route First Load JS < 110 KB** for both onboarding routes (authoritative).

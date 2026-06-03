@@ -22,7 +22,7 @@ export function CategoryCard({
 }: CategoryCardProps) {
   return (
     <label
-      className={`flex items-center gap-snug rounded-modal border p-card transition-colors ${
+      className={`flex items-center gap-snug rounded-modal border p-card transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent-bristle ${
         disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
       } ${
         selected

@@ -44,7 +44,7 @@ export function RoleCard({
   const Icon = ROLE_ICONS[iconName] ?? Plus;
   return (
     <label
-      className={`relative flex cursor-pointer flex-col gap-snug rounded-modal border p-card transition-colors ${
+      className={`relative flex cursor-pointer flex-col gap-snug rounded-modal border p-card transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent-bristle ${
         selected
           ? "border-accent-bristle bg-accent-bristle/10"
           : "border-border-default bg-surface-card hover:border-border-strong"

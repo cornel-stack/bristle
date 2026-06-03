@@ -125,7 +125,11 @@ export function CategorySelector({
         <p className="text-body-sm text-text-secondary">Showing all</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-grid md:grid-cols-3">
+      <div
+        role="group"
+        aria-label="Choose 3 to 5 categories"
+        className="grid grid-cols-1 gap-grid md:grid-cols-3"
+      >
         {CATEGORIES.map((category) => {
           const isSelected = selected.includes(category.slug);
           const visible = visibleSlugs === null || visibleSlugs.has(category.slug);
@@ -142,6 +146,12 @@ export function CategorySelector({
         })}
       </div>
 
+      {visibleSlugs !== null && visibleSlugs.size === 0 ? (
+        <p className="text-body-sm text-text-secondary">
+          Nothing matches that search.
+        </p>
+      ) : null}
+
       <div className="flex items-center justify-between gap-grid">
         <div className="flex flex-1 flex-wrap items-center gap-tight">
           {selected.map((slug) => (
@@ -156,7 +166,10 @@ export function CategorySelector({
               <span aria-hidden="true">×</span>
             </button>
           ))}
-          <span className="text-body-sm text-text-secondary">
+          <span
+            aria-live="polite"
+            className="text-body-sm text-text-secondary"
+          >
             {count} of {CATEGORIES_MAX} selected — {hint}
           </span>
         </div>
