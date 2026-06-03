@@ -1,0 +1,298 @@
+import type { NewProblem } from "../schema";
+
+// The 15 fixture problems (slice 016 data-model §5) — card-level fields + synthesis.
+// 13 depicted across Core_app.pdf pages 1–7 + 2 fillers (PostHog = Analytics
+// coverage; Vercel cache = second filler). Ordered momentum-desc. The 4 pre-existing
+// slugs (stripe/llm/expo/pgvector) are upserted-on-slug → backfilled in place (the
+// Tier-2 landing hero + /problems/[slug] keep reading them). source keys are the 5
+// live registry keys only (gh/hn/so/se/appstore/forum) — no PH/Play. compare_card is
+// set later (hero T011, others T012). "today" anchor = 2026-05-12T09:14Z.
+const ISO = (s: string) => new Date(s);
+
+export const PROBLEMS: NewProblem[] = [
+  {
+    slug: "stripe-webhooks-vercel-cold-starts",
+    title: "Stripe webhooks fail silently on Vercel cold starts",
+    category: "payments",
+    demandStatus: "validated",
+    momentumPct: 312,
+    momentumBucket: "surging",
+    mentionCount60d: 47,
+    sparkline: [4, 5, 5, 6, 7, 6, 8, 9, 8, 11, 12, 14, 16, 19],
+    topQuote:
+      "Lost $4,200 in failed retries before catching it. Webhook signature passed, handler ran, but Vercel killed the function at 9.8s.",
+    quoteSource: "gh",
+    sources: ["gh", "hn", "so", "appstore", "forum"],
+    synthesis:
+      "Across 47 mentions in the last 60 days, builders consistently describe the same failure mode: a Stripe webhook arrives, the handler runs, but the function is killed at the Vercel timeout (9.8s on hobby, 60s on Pro), and Stripe's retry policy compounds the problem into a cascading set of duplicate retries — or, more dangerously, a silent missed event when retries exhaust.\n\nThe problem is structural rather than per-customer. Serverless runtimes treat webhook handlers as ordinary HTTP requests; Stripe's retry policy assumes a long-lived endpoint. Three workarounds dominate community discussion — queue and ack within 200ms, use a stateful runtime, or move to a dedicated server. None are obvious for newcomers; all three require infrastructure decisions made before the first paying customer.\n\nWillingness-to-pay signals are unusually strong for an infrastructure problem. Eleven commenters across HN and GitHub explicitly mention amounts between $20 and $99 a month for a hosted \"webhook delivery insurance\" service. Two existing solutions (Hookdeck, Inngest) are mentioned, but consistently described as overkill or underpriced for the narrow Stripe + Vercel slice of the problem.",
+    firstSeenAt: ISO("2026-02-07T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T08:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T08:14:00Z"),
+  },
+  {
+    slug: "llm-streaming-cdn-buffering",
+    title: "LLM streaming chokes through CDN buffering",
+    category: "ai-ml",
+    demandStatus: "validated",
+    momentumPct: 184,
+    momentumBucket: "surging",
+    mentionCount60d: 38,
+    sparkline: [6, 7, 7, 8, 9, 8, 10, 11, 12, 13, 15, 17, 19, 22],
+    topQuote:
+      "Cloudflare buffers SSE despite explicit headers. Three weeks to find this.",
+    quoteSource: "hn",
+    sources: ["hn", "so", "gh"],
+    synthesis:
+      "Builders shipping token-streaming LLM apps repeatedly hit a CDN that buffers Server-Sent Events despite explicit no-buffering headers, so the user sees nothing until the full response lands. The fix (disable buffering at the edge, or bypass the CDN for the stream route) is non-obvious and costs days to diagnose. Demand is validated across 38 mentions; several commenters would pay for a streaming proxy that \"just works.\"",
+    firstSeenAt: ISO("2026-03-11T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T07:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T07:14:00Z"),
+  },
+  {
+    slug: "expo-ota-ios-18-4",
+    title: "Expo OTA updates silently fail on iOS 18.4",
+    category: "mobile",
+    demandStatus: "validated",
+    momentumPct: 96,
+    momentumBucket: "climbing",
+    mentionCount60d: 31,
+    sparkline: [3, 4, 4, 5, 5, 6, 6, 7, 8, 8, 9, 10, 12, 14],
+    topQuote:
+      "Users on 18.4 stuck on last build. No error, no telemetry, no acknowledgment.",
+    quoteSource: "appstore",
+    sources: ["appstore", "gh", "forum"],
+    synthesis:
+      "After iOS 18.4, Expo over-the-air updates silently stop applying for a subset of users — no error surfaces in telemetry, the app just stays on the last build. The mention curve doubled overnight when 18.4 shipped. Likely an upstream Apple/Expo interaction that may resolve without intervention, which tempers the build case despite strong, recent demand.",
+    firstSeenAt: ISO("2026-04-21T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T06:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T06:14:00Z"),
+  },
+  {
+    slug: "pgvector-index-degradation-2m",
+    title: "pgvector indexes degrade past 2M rows",
+    category: "devtools",
+    demandStatus: "trending",
+    momentumPct: 72,
+    momentumBucket: "climbing",
+    mentionCount60d: 29,
+    sparkline: [5, 6, 6, 7, 8, 7, 9, 9, 10, 11, 12, 12, 13, 15],
+    topQuote:
+      "Hybrid search query went from 80ms to 4.2s once we crossed 2M embeddings.",
+    quoteSource: "gh",
+    sources: ["gh", "hn", "so"],
+    synthesis:
+      "Teams running pgvector hit a sharp latency cliff past roughly 2M embeddings — hybrid queries jump from tens of milliseconds to multiple seconds as the index stops fitting working memory. The fix is real but technical (index tuning, partitioning, or a dedicated vector store); LanceDB and similar are mentioned as adjacent options. Trending rather than validated, and strongly defensible if solved well.",
+    firstSeenAt: ISO("2025-12-15T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T05:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T05:14:00Z"),
+  },
+  {
+    slug: "oauth-refresh-google-sso",
+    title: "OAuth refresh token rotation breaks Google SSO",
+    category: "auth-sso",
+    demandStatus: "trending",
+    momentumPct: 58,
+    momentumBucket: "climbing",
+    mentionCount60d: 24,
+    sparkline: [4, 4, 5, 5, 6, 6, 7, 7, 8, 9, 9, 10, 11, 12],
+    topQuote:
+      "Token rotation on the 7th day silently logs out half the team. No useful logs.",
+    quoteSource: "so",
+    sources: ["so", "gh"],
+    synthesis:
+      "Google's refresh-token rotation silently invalidates sessions around the 7-day mark for apps that don't persist the rotated token correctly, logging out users with no useful error. First surfaced on Stack Overflow with a dozen corroborating reports; an emerging, fixable footgun in the SSO integration path.",
+    firstSeenAt: ISO("2026-04-02T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T04:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T04:14:00Z"),
+  },
+  {
+    slug: "flyio-wake-from-zero-p95",
+    title: "Fly.io machine wake-from-zero hits 3.2s p95",
+    category: "deployment",
+    demandStatus: "trending",
+    momentumPct: 41,
+    momentumBucket: "climbing",
+    mentionCount60d: 22,
+    sparkline: [3, 4, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 10],
+    topQuote:
+      "Cold-starts crept up after the November platform update. Users notice.",
+    quoteSource: "hn",
+    sources: ["hn", "forum"],
+    synthesis:
+      "Fly.io machines waking from zero now show a 3.2s p95 cold-start after a platform update, enough that end users notice the first request. Mostly a platform-side regression; builders want either a fix or a reliable keep-warm pattern.",
+    firstSeenAt: ISO("2026-04-07T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T03:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T03:14:00Z"),
+  },
+  {
+    slug: "supabase-realtime-safari-18",
+    title: "Supabase Realtime drops on Safari 18",
+    category: "devtools",
+    demandStatus: "trending",
+    momentumPct: 37,
+    momentumBucket: "climbing",
+    mentionCount60d: 19,
+    sparkline: [3, 3, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 9],
+    topQuote:
+      "WebSocket silently closes on Safari 18 after ~30s. Works everywhere else.",
+    quoteSource: "gh",
+    sources: ["gh", "forum"],
+    synthesis:
+      "Supabase Realtime WebSocket connections silently drop on Safari 18 after about thirty seconds, while every other browser holds. A narrow but reproducible compatibility break with a clear repro and no upstream fix yet.",
+    firstSeenAt: ISO("2026-04-14T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T02:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T02:14:00Z"),
+  },
+  {
+    slug: "notion-api-bulk-write-throttle",
+    title: "Notion API rate-limits silently throttle bulk writes",
+    category: "devtools",
+    demandStatus: "emerging",
+    momentumPct: 29,
+    momentumBucket: "climbing",
+    mentionCount60d: 16,
+    sparkline: [2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8],
+    topQuote:
+      "Bulk sync silently drops writes past the rate limit. No 429, just missing rows.",
+    quoteSource: "gh",
+    sources: ["gh", "so"],
+    synthesis:
+      "The Notion API throttles bulk writes without always returning a 429 — rows simply go missing, making sync jobs unreliable in ways that are hard to detect. Emerging demand from teams building Notion-backed tooling.",
+    firstSeenAt: ISO("2026-03-23T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T01:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T01:14:00Z"),
+  },
+  {
+    slug: "cursor-agent-multifile-context",
+    title: "Cursor agent loses context on multi-file edits",
+    category: "ai-ml",
+    demandStatus: "emerging",
+    momentumPct: 24,
+    momentumBucket: "flat",
+    mentionCount60d: 14,
+    sparkline: [2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7],
+    topQuote:
+      "Agent forgets files it edited two steps ago and reverts its own changes.",
+    quoteSource: "hn",
+    sources: ["hn", "forum"],
+    synthesis:
+      "Cursor's agent loses track of files it edited earlier in a multi-file change, sometimes reverting its own work. Emerging chatter, flat momentum; likely to move upstream as the tool matures.",
+    firstSeenAt: ISO("2026-04-12T00:00:00Z"),
+    updatedAt: ISO("2026-05-12T00:14:00Z"),
+    lastSeenAt: ISO("2026-05-12T00:14:00Z"),
+  },
+  {
+    slug: "astro-webhook-signature-mismatch",
+    title: "Webhook signature mismatch on Astro endpoints",
+    category: "payments",
+    demandStatus: "emerging",
+    momentumPct: 19,
+    momentumBucket: "flat",
+    mentionCount60d: 13,
+    sparkline: [2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6],
+    topQuote:
+      "Astro's body parsing mangles the raw payload, so Stripe signature checks fail.",
+    quoteSource: "gh",
+    sources: ["gh", "so"],
+    synthesis:
+      "Astro's default body parsing alters the raw request payload, so Stripe webhook signature verification fails on Astro endpoints until you opt out of parsing. A narrow, fixable framework gotcha adjacent to the Stripe-webhooks hero.",
+    firstSeenAt: ISO("2026-04-09T00:00:00Z"),
+    updatedAt: ISO("2026-05-11T23:14:00Z"),
+    lastSeenAt: ISO("2026-05-11T23:14:00Z"),
+  },
+  {
+    slug: "posthog-replay-mobile-sampling",
+    title: "PostHog session replay drops mobile events under sampling",
+    category: "analytics",
+    demandStatus: "emerging",
+    momentumPct: 15,
+    momentumBucket: "flat",
+    mentionCount60d: 17,
+    sparkline: [2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6],
+    topQuote:
+      "Under sampling, mobile replays lose the events that actually matter for funnels.",
+    quoteSource: "forum",
+    sources: ["forum", "gh", "hn"],
+    synthesis:
+      "When PostHog session-replay sampling is enabled, mobile clients disproportionately drop the events teams rely on for funnel analysis, so sampled mobile data under-reports conversions. Emerging demand from analytics-heavy teams; the only Analytics fixture (no screen depicts one).",
+    firstSeenAt: ISO("2026-04-04T00:00:00Z"),
+    updatedAt: ISO("2026-05-11T22:14:00Z"),
+    lastSeenAt: ISO("2026-05-11T22:14:00Z"),
+  },
+  {
+    slug: "stripe-connect-onboarding-422",
+    title: "Stripe Connect onboarding 422 on test mode",
+    category: "payments",
+    demandStatus: "emerging",
+    momentumPct: 12,
+    momentumBucket: "flat",
+    mentionCount60d: 18,
+    sparkline: [2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6],
+    topQuote:
+      "Connect onboarding returns a 422 in test mode with no field-level detail.",
+    quoteSource: "so",
+    sources: ["so", "gh"],
+    synthesis:
+      "Stripe Connect's hosted onboarding intermittently returns a 422 in test mode with no field-level explanation, blocking developers from completing the integration locally. Emerging, low-momentum, but a recurring support-thread topic.",
+    firstSeenAt: ISO("2026-03-28T00:00:00Z"),
+    updatedAt: ISO("2026-05-11T21:14:00Z"),
+    lastSeenAt: ISO("2026-05-11T21:14:00Z"),
+  },
+  {
+    slug: "ses-bounce-resend-dashboard",
+    title: "SES bounce handling not surfaced in Resend dashboard",
+    category: "email",
+    demandStatus: "emerging",
+    momentumPct: 11,
+    momentumBucket: "flat",
+    mentionCount60d: 12,
+    sparkline: [1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5],
+    topQuote:
+      "Bounces pile up in SES but never surface in Resend, so the suppression list rots.",
+    quoteSource: "gh",
+    sources: ["gh", "forum"],
+    synthesis:
+      "Teams routing email through Resend on top of SES find bounce and complaint events stay in SES and never surface in the Resend dashboard, so the suppression list silently rots and deliverability drifts. Emerging demand in the Email/Comms category.",
+    firstSeenAt: ISO("2026-04-09T00:00:00Z"),
+    updatedAt: ISO("2026-05-11T20:14:00Z"),
+    lastSeenAt: ISO("2026-05-11T20:14:00Z"),
+  },
+  {
+    slug: "vercel-build-cache-monorepo-miss",
+    title: "Vercel build cache misses monorepo package changes",
+    category: "deployment",
+    demandStatus: "emerging",
+    momentumPct: 6,
+    momentumBucket: "new",
+    mentionCount60d: 9,
+    sparkline: [1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5],
+    topQuote:
+      "Cache served a stale build because a changed internal package wasn't in the key.",
+    quoteSource: "gh",
+    sources: ["gh", "forum"],
+    synthesis:
+      "Vercel's build cache can serve a stale build when a changed internal monorepo package isn't reflected in the cache key, shipping out-of-date code without warning. Newly surfaced (under 30 days); second filler fixture, fully fleshed.",
+    firstSeenAt: ISO("2026-04-24T00:00:00Z"),
+    updatedAt: ISO("2026-05-11T18:14:00Z"),
+    lastSeenAt: ISO("2026-05-11T18:14:00Z"),
+  },
+  {
+    slug: "appstore-connect-phone-reverify",
+    title: "App Store Connect login requires phone re-verification weekly",
+    category: "mobile",
+    demandStatus: "emerging",
+    momentumPct: 8,
+    momentumBucket: "flat",
+    mentionCount60d: 11,
+    sparkline: [1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5],
+    topQuote:
+      "Every week App Store Connect forces phone re-verification. CI tokens break constantly.",
+    quoteSource: "appstore",
+    sources: ["appstore"],
+    synthesis:
+      "App Store Connect forces phone-based re-verification roughly weekly, breaking CI tokens and automation for mobile teams. Single-source (App Store reviews), low momentum, and likely an Apple-side policy nobody can build around.",
+    firstSeenAt: ISO("2026-04-21T00:00:00Z"),
+    updatedAt: ISO("2026-05-11T19:14:00Z"),
+    lastSeenAt: ISO("2026-05-11T19:14:00Z"),
+  },
+];
