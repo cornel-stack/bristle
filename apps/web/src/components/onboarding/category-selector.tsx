@@ -20,11 +20,10 @@ import { useActionState, useMemo, useRef, useState } from "react";
 
 import { CATEGORIES } from "@bristle/shared";
 
+import { CATEGORIES_MAX, CATEGORIES_MIN } from "@/lib/onboarding/constants";
+
 import { AuthFormBanner } from "../auth/auth-form-banner";
 import { CategoryCard } from "./category-card";
-
-const CATEGORIES_MIN = 3;
-const CATEGORIES_MAX = 5;
 
 export type SaveCategoriesState =
   | { status: "idle" }

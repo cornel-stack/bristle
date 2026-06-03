@@ -13,12 +13,11 @@
 
 import { useActionState, useState } from "react";
 
+import { ROLE_CUSTOM_MAX } from "@/lib/onboarding/constants";
 import { ROLE_OPTIONS, type Role } from "@/lib/onboarding/role-options";
 
 import { AuthFormBanner } from "../auth/auth-form-banner";
 import { RoleCard } from "./role-card";
-
-const ROLE_CUSTOM_MAX = 200;
 
 export type SaveRoleState =
   | { status: "idle" }
@@ -40,12 +39,16 @@ interface RoleSelectorProps {
   action: SaveRoleAction;
   initialRole?: Role | null;
   initialRoleCustom?: string | null;
+  // Step 1 is the onboarding entry point, so "← Back" is hidden by default. The
+  // prop keeps the component composable for any future mid-flow step that needs it.
+  showBack?: boolean;
 }
 
 export function RoleSelector({
   action,
   initialRole = null,
   initialRoleCustom = "",
+  showBack = false,
 }: RoleSelectorProps) {
   const [state, formAction, pending] = useActionState(action, INITIAL_STATE);
   const [selected, setSelected] = useState<Role | null>(initialRole);
@@ -115,13 +118,15 @@ export function RoleSelector({
       ) : null}
 
       <div className="flex items-center justify-between gap-grid">
-        <button
-          type="button"
-          onClick={() => history.back()}
-          className="text-body-sm text-text-secondary transition-colors hover:text-text-primary"
-        >
-          ← Back
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            onClick={() => history.back()}
+            className="text-body-sm text-text-secondary transition-colors hover:text-text-primary"
+          >
+            ← Back
+          </button>
+        ) : null}
         <p className="text-body-sm text-text-secondary">{previewLine}</p>
         <button
           type="submit"
