@@ -8,6 +8,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { TopNav } from "@/components/landing/top-nav";
 import { signOutAction } from "@/lib/auth/actions";
+import { requireOnboardingComplete } from "@/lib/onboarding/guard";
 import { formatLongDate } from "@/lib/format-date";
 
 export const metadata: Metadata = {
@@ -22,6 +23,8 @@ export default async function Account() {
   if (!session?.user?.email) redirect("/login?callbackUrl=/account");
   const user = await getUserByEmail(session.user.email);
   if (!user) redirect("/login?callbackUrl=/account");
+  // Incomplete onboarding → finish it first (slice 015).
+  requireOnboardingComplete(user);
 
   return (
     <>

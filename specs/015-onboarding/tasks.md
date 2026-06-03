@@ -115,7 +115,7 @@ Under `components/onboarding/`; `"use client"`; dependency-free (plain substring
 ## Phase C — Routing tweaks (STOP 5) · T017–T018 · ROUTINE (not discipline moments)
 
 - [X] T017 [P] Edit `apps/web/src/middleware.ts` — add `"/onboarding/:path*"` to the `config.matcher` array. **One line; cookie-gate logic unchanged** (signed-out → `/login?callbackUrl=<pathname>`). (dep: none — but lands after Batch B so the gated routes exist)
-- [ ] T018 Edit `apps/web/src/app/account/page.tsx` — import `requireOnboardingComplete` from `lib/onboarding/guard.ts` and call it on the loaded `user` (one line) so an onboarding-incomplete user → `/onboarding/role`. Everything else in `/account` unchanged. (dep: T013, T015 — the `/onboarding/role` redirect target must exist)
+- [X] T018 Edit `apps/web/src/app/account/page.tsx` — import `requireOnboardingComplete` from `lib/onboarding/guard.ts` and call it on the loaded `user` (one line) so an onboarding-incomplete user → `/onboarding/role`. Everything else in `/account` unchanged. (dep: T013, T015 — the `/onboarding/role` redirect target must exist)
 
 **STOP 5 gate** — all four gating rules hold (signed-out `/onboarding/*` → login; incomplete `/account` → `/onboarding/role`; complete `/onboarding/*` → `/account`; signed-out `/account` → login) for credentials AND OAuth users. **Confirm the diff shows ZERO edits to `auth.ts`, `next-auth.d.ts`, `verify-email/actions.ts`.**
 
