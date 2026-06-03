@@ -5,6 +5,7 @@ import { getDb } from "./client";
 import { categories, problems } from "./schema";
 import { redactConnectionString } from "./redact";
 import { CATEGORIES } from "./seed/categories";
+import { OTHER_FIXTURES } from "./seed/children";
 import { HERO } from "./seed/hero";
 import { PROBLEMS } from "./seed/problems";
 import { seedProblemChildren } from "./seed/types";
@@ -48,6 +49,12 @@ async function seed() {
   // --- Hero (Stripe webhooks) full depth: child rows + compare_card ---
   await seedProblemChildren(db, HERO, problemIdBySlug);
   console.log("seeded hero children + compare_card");
+
+  // --- Other 14: compact-but-complete child rows + compare_card each ---
+  for (const fx of OTHER_FIXTURES) {
+    await seedProblemChildren(db, fx, problemIdBySlug);
+  }
+  console.log(`seeded ${OTHER_FIXTURES.length} non-hero fixtures' children`);
 }
 
 try {
