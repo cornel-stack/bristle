@@ -229,6 +229,8 @@ bristle/
 └── .claude/commands/          # Spec Kit slash commands
 ```
 
+> **Product surface — onboarding (slice 015, Tier 3.2)**: `apps/web/src/app/onboarding/{role,categories}` capture each new user's role + watched categories onto `users` (`role`, `role_custom`, `watched_categories`, `onboarding_completed_at`), gated after sign-in by the auth (cookie) + completion-state (page-guard) layers.
+
 ## 9. Critical "never do this" rules
 
 1. **Never modify files in `design/`.** They are read-only references — the visual contract.
@@ -246,5 +248,5 @@ When a spec is unclear, or the design PDFs don't cover a state you need to build
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/014-auth-fidelity/plan.md`
+`specs/015-onboarding/plan.md`
 <!-- SPECKIT END -->

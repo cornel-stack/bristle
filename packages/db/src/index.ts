@@ -37,6 +37,9 @@ export {
   incrementEmailVerificationAttempts,
   consumeEmailVerificationCode,
   deleteUnverifiedUserByEmail,
+  saveUserRole,
+  saveUserCategories,
+  completeOnboarding,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
