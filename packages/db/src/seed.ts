@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config({ path: new URL("../../../.env.local", import.meta.url).pathname }); // repo-root .env.local (src/ → root)
 import { isSourceKey } from "@bristle/shared";
-import { getDb } from "./client";
+import { closeDb, getDb } from "./client";
 import { categories, problems } from "./schema";
 import { redactConnectionString } from "./redact";
 import { CATEGORIES } from "./seed/categories";
@@ -65,4 +65,6 @@ try {
     err instanceof Error ? err.message : err,
   );
   process.exitCode = 1;
+} finally {
+  await closeDb(); // let the one-shot script exit + flush stdout
 }
