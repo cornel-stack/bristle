@@ -310,3 +310,54 @@ export async function getRecentProblems(opts: {
     : base;
   return filtered.orderBy(desc(problems.lastSeenAt)).limit(limit);
 }
+
+// --- Slice 015: onboarding capture helpers ----------------------------------
+// All three are single-statement UPDATEs (inherently atomic). `getUserByEmail`
+// above is reused for the page guards — it already returns the four new columns
+// once auth-schema declares them, so no dedicated read helper is needed. The
+// `role`/`categories` values are validated (enum / 3–5 known slugs) by the
+// Server Actions before they reach here; this layer takes plain string inputs.
+
+// Step 1: persist the chosen role (+ optional free-text for "other"). Does NOT
+// set onboarding_completed_at — picking a role is not completing onboarding.
+export async function saveUserRole(input: {
+  userId: string;
+  role: string;
+  roleCustom?: string | null;
+}): Promise<void> {
+  await getDb()
+    .update(users)
+    .set({
+      role: input.role,
+      roleCustom: input.roleCustom ?? null,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, input.userId));
+}
+
+// Step 2: persist the watched categories AND complete onboarding in one
+// statement — the slug array and the completion timestamp land together.
+export async function saveUserCategories(input: {
+  userId: string;
+  categories: string[];
+}): Promise<void> {
+  const now = new Date();
+  await getDb()
+    .update(users)
+    .set({
+      watchedCategories: input.categories,
+      onboardingCompletedAt: now,
+      updatedAt: now,
+    })
+    .where(eq(users.id, input.userId));
+}
+
+// The "Skip for now" path: complete onboarding without recording role or
+// categories. Leaves whatever partial state already exists untouched.
+export async function completeOnboarding(userId: string): Promise<void> {
+  const now = new Date();
+  await getDb()
+    .update(users)
+    .set({ onboardingCompletedAt: now, updatedAt: now })
+    .where(eq(users.id, userId));
+}
