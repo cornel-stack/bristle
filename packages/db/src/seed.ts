@@ -2,13 +2,17 @@ import { config } from "dotenv";
 config({ path: new URL("../../../.env.local", import.meta.url).pathname }); // repo-root .env.local (src/ → root)
 import { isSourceKey } from "@bristle/shared";
 import { closeDb, getDb } from "./client";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
+import { WeeklyMomentumSchema } from "@bristle/shared";
 import {
   alertNotifications,
   alertRules,
   categories,
+  dashboardFixtures,
+  problemActivityLog,
   problems,
   savedCollections,
+  usageMeters,
   userSavedProblems,
   users,
 } from "./schema";
@@ -16,6 +20,12 @@ import { redactConnectionString } from "./redact";
 import { ALERT_NOTIFICATIONS, ALERT_RULES } from "./seed/alerts";
 import { CATEGORIES } from "./seed/categories";
 import { OTHER_FIXTURES } from "./seed/children";
+import {
+  ACTIVITY,
+  DELIVERY,
+  USAGE_METERS,
+  WEEKLY_MOMENTUM,
+} from "./seed/dashboard";
 import { DEMO_USER } from "./seed/demo-user";
 import { HERO } from "./seed/hero";
 import { PROBLEMS } from "./seed/problems";
@@ -140,6 +150,51 @@ async function seed() {
   const unread = ALERT_NOTIFICATIONS.filter((n) => !n.isRead).length;
   console.log(
     `seeded ${ALERT_RULES.length} alert rules, ${ALERT_NOTIFICATIONS.length} notifications (${unread} unread)`,
+  );
+
+  // --- Activity log (replace-all): global + demo-user events ---
+  await db
+    .delete(problemActivityLog)
+    .where(eq(problemActivityLog.userId, demoId));
+  await db.delete(problemActivityLog).where(isNull(problemActivityLog.userId));
+  await db.insert(problemActivityLog).values(
+    ACTIVITY.map((a) => ({
+      userId: a.global ? null : demoId,
+      problemId: a.slug ? (problemIdBySlug.get(a.slug) ?? null) : null,
+      type: a.type,
+      title: a.title,
+      deltaLabel: a.deltaLabel ?? null,
+      createdAt: new Date(a.createdAt),
+    })),
+  );
+
+  // --- Usage meters (upsert on metric) ---
+  for (const m of USAGE_METERS) {
+    await db
+      .insert(usageMeters)
+      .values({ userId: demoId, ...m })
+      .onConflictDoUpdate({
+        target: [usageMeters.userId, usageMeters.metric],
+        set: { ...m },
+      });
+  }
+
+  // --- Dashboard fixtures: weekly momentum (Zod-validated) + delivery panel ---
+  WeeklyMomentumSchema.parse(WEEKLY_MOMENTUM);
+  for (const [key, payload] of [
+    ["weekly_momentum", WEEKLY_MOMENTUM],
+    ["delivery", DELIVERY],
+  ] as const) {
+    await db
+      .insert(dashboardFixtures)
+      .values({ userId: demoId, key, payload })
+      .onConflictDoUpdate({
+        target: [dashboardFixtures.userId, dashboardFixtures.key],
+        set: { payload },
+      });
+  }
+  console.log(
+    `seeded ${ACTIVITY.length} activity entries, ${USAGE_METERS.length} usage meters, 2 dashboard fixtures`,
   );
 }
 
