@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -28,6 +29,17 @@ export const problems = pgTable("problems", {
     .notNull()
     .defaultNow(),
   embedding: vector("embedding", { dimensions: 1536 }),
+  // Slice 016 (migration 0004) — additive product fields. ALL nullable or
+  // defaulted: the live Tier-2 landing hero + /problems/[slug] read only the
+  // columns above, so extending here cannot regress them. The 4 existing rows'
+  // new fields are backfilled by the seed (T010), not the migration.
+  synthesis: text("synthesis"),
+  demandStatus: text("demand_status"),
+  momentumBucket: text("momentum_bucket"),
+  mentionCount60d: integer("mention_count_60d"),
+  firstSeenAt: timestamp("first_seen_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  compareCard: jsonb("compare_card"),
 });
 
 export type Problem = typeof problems.$inferSelect;
