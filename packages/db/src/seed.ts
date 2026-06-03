@@ -2,7 +2,10 @@ import { config } from "dotenv";
 config({ path: new URL("../../../.env.local", import.meta.url).pathname }); // repo-root .env.local (src/ → root)
 import { isSourceKey } from "@bristle/shared";
 import { closeDb, getDb } from "./client";
+import { eq } from "drizzle-orm";
 import {
+  alertNotifications,
+  alertRules,
   categories,
   problems,
   savedCollections,
@@ -10,6 +13,7 @@ import {
   users,
 } from "./schema";
 import { redactConnectionString } from "./redact";
+import { ALERT_NOTIFICATIONS, ALERT_RULES } from "./seed/alerts";
 import { CATEGORIES } from "./seed/categories";
 import { OTHER_FIXTURES } from "./seed/children";
 import { DEMO_USER } from "./seed/demo-user";
@@ -109,6 +113,33 @@ async function seed() {
   }
   console.log(
     `seeded ${SAVED_COLLECTIONS.length} collections, ${savedCardCount} saved cards`,
+  );
+
+  // --- Alert rules (upsert on name) + notifications (replace-all) ---
+  for (const r of ALERT_RULES) {
+    await db
+      .insert(alertRules)
+      .values({ userId: demoId, ...r })
+      .onConflictDoUpdate({
+        target: [alertRules.userId, alertRules.name],
+        set: { ...r },
+      });
+  }
+  await db.delete(alertNotifications).where(eq(alertNotifications.userId, demoId));
+  await db.insert(alertNotifications).values(
+    ALERT_NOTIFICATIONS.map((n) => ({
+      userId: demoId,
+      type: n.type,
+      title: n.title,
+      body: n.body,
+      isRead: n.isRead,
+      problemId: n.slug ? (problemIdBySlug.get(n.slug) ?? null) : null,
+      createdAt: new Date(n.createdAt),
+    })),
+  );
+  const unread = ALERT_NOTIFICATIONS.filter((n) => !n.isRead).length;
+  console.log(
+    `seeded ${ALERT_RULES.length} alert rules, ${ALERT_NOTIFICATIONS.length} notifications (${unread} unread)`,
   );
 }
 
