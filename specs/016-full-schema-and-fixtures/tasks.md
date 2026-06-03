@@ -73,9 +73,9 @@ All schema edits in `packages/db/src/schema.ts`; **edit BEFORE `db:generate`** (
 
 Reusable contracts in `packages/shared` (CLAUDE.md §5). T006/T007 are separate files → **[P]**.
 
-- [ ] T006 [P] [US3] Create `packages/shared/src/sources.ts` — `SourceKey` (`gh,hn,so,se,appstore,forum`), `BadgeKey` (`github,hackernews,stackexchange,appstore,forums`), `SOURCE_REGISTRY: Record<SourceKey,{key,label,badgeKey}>`, `resolveBadge(key)` (so+se→`stackexchange`, forum→`forums`), `SOURCE_BADGES: readonly BadgeKey[]` (the 5, facet order). **NO Product Hunt / Google Play, no `isLive` flag** (Design-delta). No screen-facing type hardcodes a key. (dep: none)
-- [ ] T007 [P] [US1] Create `packages/shared/src/fixtures-contracts.ts` — Zod `CompareCardSchema` (5 scorecard cells `{value,tone}` + `bristlesRead {verdict,prose}`) and `WeeklyMomentumSchema` (`series[{categoryKey,points[]}]` + `caption`); export inferred types `CompareCard`, `WeeklyMomentum` (contracts §2). These are the v1.1-LLM target shapes (FR-031). (dep: none)
-- [ ] T008 [US1] Re-export `sources.ts` + `fixtures-contracts.ts` from `packages/shared/src/index.ts`. `pnpm typecheck && pnpm lint`. Assert `SOURCE_BADGES.length === 5` and the set contains no `producthunt`/`googleplay`. (dep: T006, T007)
+- [X] T006 [P] [US3] Create `packages/shared/src/sources.ts` — `SourceKey` (`gh,hn,so,se,appstore,forum`), `BadgeKey` (`github,hackernews,stackexchange,appstore,forums`), `SOURCE_REGISTRY: Record<SourceKey,{key,label,badgeKey}>`, `resolveBadge(key)` (so+se→`stackexchange`, forum→`forums`), `SOURCE_BADGES: readonly BadgeKey[]` (the 5, facet order). **NO Product Hunt / Google Play, no `isLive` flag** (Design-delta). No screen-facing type hardcodes a key. (dep: none)
+- [X] T007 [P] [US1] Create `packages/shared/src/fixtures-contracts.ts` — Zod `CompareCardSchema` (5 scorecard cells `{value,tone}` + `bristlesRead {verdict,prose}`) and `WeeklyMomentumSchema` (`series[{categoryKey,points[]}]` + `caption`); export inferred types `CompareCard`, `WeeklyMomentum` (contracts §2). These are the v1.1-LLM target shapes (FR-031). (dep: none)
+- [X] T008 [US1] Re-export `sources.ts` + `fixtures-contracts.ts` from `packages/shared/src/index.ts`. `pnpm typecheck && pnpm lint`. Assert `SOURCE_BADGES.length === 5` and the set contains no `producthunt`/`googleplay`. (dep: T006, T007)
 
 **STOP 2 gate** — shared contracts compile + export; 5 source badges, SO/SE collapse to one, forums collapse to one; no PH/Play anywhere; no source key in a UI-facing type. Re-assert the Design-delta.
 
