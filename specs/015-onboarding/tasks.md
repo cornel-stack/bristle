@@ -138,7 +138,7 @@ Under `components/onboarding/`; `"use client"`; dependency-free (plain substring
   - **Cross-slice regression**: curl `/`, `/pricing`, `/faq`, `/blog`, `/problems/{slug}` signed-out → unchanged (005–014); **`/account` for a completed user renders (not redirected to onboarding)**.
   - **`CATEGORIES` placeholders replaced** (no `// TODO` left — C-a).
   - **Re-assert the STOP-1 count matrix.** (dep: T020 + all prior)
-- [ ] T022 **Preview gate** — push to `015-onboarding`; on the Vercel preview (reuses slice-014 OAuth env — no new setup):
+- [X] T022 **Preview gate** — push to `015-onboarding`; on the Vercel preview (reuses slice-014 OAuth env — no new setup):
   - migration `0003` applied (4 columns live); build Ready.
   - **5 e2e walks**: (1) signup → verify → sign in → onboarding role → categories → `/account`; (2) skip on step 1 → `/account`; (3) skip on step 2 → `/account`; (4) OAuth (Google/GitHub) new user → onboarding → `/account`; (5) a completed user re-visits `/onboarding/role` → `/account`.
   - **Bundle regression** vs STOP 3/6 numbers (≤110 KB).
