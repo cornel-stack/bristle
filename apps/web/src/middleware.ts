@@ -21,5 +21,5 @@ export function middleware(request: NextRequest) {
 
 // Future product slices add their protected paths to this array.
 export const config = {
-  matcher: ["/account/:path*"],
+  matcher: ["/account/:path*", "/onboarding/:path*"],
 };
