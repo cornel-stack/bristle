@@ -53,6 +53,16 @@ export const users = pgTable("users", {
     withTimezone: true,
   }),
   termsVersion: text("terms_version"),
+  // Slice 015 (migration 0003) — onboarding capture (snake_case, Bristle-custom).
+  // All nullable: null = skipped / onboarding not yet resolved. See
+  // specs/015-onboarding/data-model.md. watched_categories is the first text[].
+  role: text("role"),
+  roleCustom: text("role_custom"),
+  watchedCategories: text("watched_categories").array(),
+  onboardingCompletedAt: timestamp("onboarding_completed_at", {
+    mode: "date",
+    withTimezone: true,
+  }),
 });
 
 // accounts uses the Auth.js-canonical compound PK (provider, providerAccountId)
