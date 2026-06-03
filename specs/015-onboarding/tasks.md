@@ -132,7 +132,7 @@ Under `components/onboarding/`; `"use client"`; dependency-free (plain substring
 
 ## Phase E — Gates (STOP 7) · T021–T022
 
-- [ ] T021 **Local gate** against a clean production build (`pnpm typecheck && pnpm lint && pnpm build`, all 4/4). Verify:
+- [X] T021 **Local gate** against a clean production build (`pnpm typecheck && pnpm lint && pnpm build`, all 4/4). Verify:
   - lockfile diff EMPTY (0 new deps); voice/token greps clean across `components/onboarding` + `app/onboarding` + `packages/shared/categories.ts`.
   - **Slice-integrity diff vs `c6f8025`**: NEW `components/onboarding/*`, `app/onboarding/*`, `lib/onboarding/{guard,role-options}.ts`, `packages/shared/categories.ts`, `drizzle/0003*` + meta; EDIT db `auth-schema/queries/index`, `middleware.ts` (matcher), `account/page.tsx` (guard), `CLAUDE.md` (§8 note). **ZERO edits to `auth.ts` / `next-auth.d.ts` / `verify-email/actions.ts`.** Any other file = flag.
   - **Cross-slice regression**: curl `/`, `/pricing`, `/faq`, `/blog`, `/problems/{slug}` signed-out → unchanged (005–014); **`/account` for a completed user renders (not redirected to onboarding)**.
