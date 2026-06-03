@@ -2,13 +2,20 @@ import { config } from "dotenv";
 config({ path: new URL("../../../.env.local", import.meta.url).pathname }); // repo-root .env.local (src/ → root)
 import { isSourceKey } from "@bristle/shared";
 import { closeDb, getDb } from "./client";
-import { categories, problems, users } from "./schema";
+import {
+  categories,
+  problems,
+  savedCollections,
+  userSavedProblems,
+  users,
+} from "./schema";
 import { redactConnectionString } from "./redact";
 import { CATEGORIES } from "./seed/categories";
 import { OTHER_FIXTURES } from "./seed/children";
 import { DEMO_USER } from "./seed/demo-user";
 import { HERO } from "./seed/hero";
 import { PROBLEMS } from "./seed/problems";
+import { SAVED_COLLECTIONS } from "./seed/saved";
 import { seedProblemChildren } from "./seed/types";
 
 // Slice 016 fixtures seed. Idempotent (D6): natural-key upsert where a key exists;
@@ -66,6 +73,42 @@ async function seed() {
   if (!demoId) throw new Error("demo user id missing");
   console.log(
     `seeded demo user (${DEMO_USER.watchedCategories?.length ?? 0} watched categories)`,
+  );
+
+  // --- Saved collections + the real visible Kanban cards (Image 4) ---
+  let savedCardCount = 0;
+  for (const col of SAVED_COLLECTIONS) {
+    const [crow] = await db
+      .insert(savedCollections)
+      .values({
+        userId: demoId,
+        name: col.name,
+        color: col.color,
+        position: col.position,
+      })
+      .onConflictDoUpdate({
+        target: [savedCollections.userId, savedCollections.name],
+        set: { color: col.color, position: col.position },
+      })
+      .returning({ id: savedCollections.id });
+    if (!crow) throw new Error(`collection upsert failed: ${col.name}`);
+    for (let i = 0; i < col.slugs.length; i++) {
+      const slug = col.slugs.at(i);
+      if (!slug) continue;
+      const problemId = problemIdBySlug.get(slug);
+      if (!problemId) throw new Error(`saved: no problem for slug "${slug}"`);
+      await db
+        .insert(userSavedProblems)
+        .values({ userId: demoId, problemId, collectionId: crow.id, position: i })
+        .onConflictDoUpdate({
+          target: [userSavedProblems.userId, userSavedProblems.problemId],
+          set: { collectionId: crow.id, position: i },
+        });
+      savedCardCount++;
+    }
+  }
+  console.log(
+    `seeded ${SAVED_COLLECTIONS.length} collections, ${savedCardCount} saved cards`,
   );
 }
 
