@@ -41,6 +41,8 @@ export async function signInWithCredentials(
 ): Promise<LoginFormState> {
   const raw: LoginRawValues = { email: formData.get("email")?.toString() ?? "" };
   const callbackUrl = formData.get("callbackUrl")?.toString() ?? "";
+  const rememberValue = formData.get("rememberMe")?.toString();
+  const rememberMe = rememberValue === "on" || rememberValue === "true";
 
   // 1) Rate limit (per IP).
   const ip = clientIp(await headers());
@@ -74,12 +76,15 @@ export async function signInWithCredentials(
   let emailVerified = false;
   try {
     const user = await getUserByEmail(email);
-    if (user) {
+    if (user && user.passwordHash) {
       if (await verifyPassword(user.passwordHash, password)) {
         userId = user.id;
         emailVerified = user.emailVerified !== null;
       }
     } else {
+      // No user, OR an OAuth-only account with no password hash (slice 014:
+      // passwordHash is nullable). Run a dummy hash to keep timing comparable
+      // (enumeration defense), then fall through to generic invalid-credentials.
       await hashPassword(password);
     }
   } catch (err) {
@@ -106,8 +111,9 @@ export async function signInWithCredentials(
   }
 
   // 5) Create the DB session (Credentials path; see lib/auth/session.ts).
+  // "Keep me signed in" → persistent 30-day cookie; unchecked → session-only.
   try {
-    await createUserSession(userId);
+    await createUserSession(userId, rememberMe);
   } catch (err) {
     console.error("[login] session creation failed:", err);
     return {

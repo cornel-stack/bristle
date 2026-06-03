@@ -25,7 +25,7 @@ Locked decisions. Do not introduce alternatives without proposing the addition f
 - **next-themes.** Editorial Light / Editorial Dark switching with no flash.
 - **Database — Supabase Postgres + pgvector.** Managed Postgres; pgvector holds embeddings for clustering and semantic nearest-neighbor joins.
 - **Drizzle ORM (not Prisma).** Type-safe, SQL-shaped queries with lightweight migrations; chosen over Prisma for transparency and edge-friendliness.
-- **Auth — Auth.js v5 (`next-auth@5`).** Credentials (email/password) in v1.0 via `@auth/drizzle-adapter` over the existing Supabase Postgres; passwords hashed with `@node-rs/argon2` (argon2id). Google/GitHub OAuth deferred to a later micro-slice (the `accounts` table is provisioned so it is non-breaking). **No SSO/SAML in v1.0.** (Changed from Supabase Auth in slice 013 — maturity decision; exact versions are pinned in `apps/web/package.json`. Supabase Postgres, Drizzle, and Resend are unchanged.)
+- **Auth — Auth.js v5 (`next-auth@5`).** Credentials (email/password) via `@auth/drizzle-adapter` over the existing Supabase Postgres; passwords hashed with `@node-rs/argon2` (argon2id). **Google + GitHub OAuth ship in slice 014** — the `providers` array in `apps/web/src/auth.ts` goes from `[]` (slice 013) to `[Google, GitHub]`, and the `accounts` table (provisioned but dormant in slice 013) is now actively written on social sign-in. Google/GitHub are submodules of the already-installed `next-auth`, so no new dependency is added. **SSO/SAML is NOT added in v1.0** — the SSO button renders visibly disabled ("Coming soon — SSO available on Enterprise"); real SSO is a v1.1+ Enterprise feature. (Auth stack changed from Supabase Auth in slice 013 — maturity decision; exact versions are pinned in `apps/web/package.json`. Supabase Postgres, Drizzle, `@node-rs/argon2`, and Resend are unchanged.)
 - **Payments — Lemon Squeezy.** Merchant of record; handles VAT/tax so we don't.
 - **Email — Resend.** Transactional + digests, with Bristle-voiced templates.
 - **Pipeline — Python 3.12 + FastAPI, orchestrated by Inngest.** Ingest/cluster/enrich/synthesize jobs run on a batch cadence (4–6h); Inngest handles scheduling, retries, and fan-out.
@@ -246,5 +246,5 @@ When a spec is unclear, or the design PDFs don't cover a state you need to build
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/013-auth/plan.md`
+`specs/014-auth-fidelity/plan.md`
 <!-- SPECKIT END -->

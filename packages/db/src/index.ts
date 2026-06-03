@@ -31,6 +31,14 @@ export {
   createSession,
   createPasswordResetToken,
   isPasswordResetTokenValid,
+  getValidResetTokenEmail,
   consumePasswordResetToken,
+  setEmailVerificationCode,
+  incrementEmailVerificationAttempts,
+  consumeEmailVerificationCode,
+  deleteUnverifiedUserByEmail,
 } from "./queries";
-export type { ConsumeVerificationResult } from "./queries";
+export type {
+  ConsumeVerificationResult,
+  ConsumeEmailCodeResult,
+} from "./queries";

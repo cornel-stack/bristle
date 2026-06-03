@@ -68,4 +68,7 @@ export const RATE_LIMITS = {
   signup: { limit: 3, windowMs: 60 * 60 * 1000 }, // 3 / hour
   login: { limit: 5, windowMs: 60 * 1000 }, // 5 / minute
   forgot: { limit: 3, windowMs: 60 * 60 * 1000 }, // 3 / hour
+  // 10 / min per IP — a coarse abuse cap; the precise 5-attempts-per-code limit
+  // is enforced by the email_verification_attempts column (slice 014).
+  verifyCode: { limit: 10, windowMs: 60 * 1000 },
 } as const;

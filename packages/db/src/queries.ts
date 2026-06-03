@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, ne } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import { problems, type Problem } from "./schema";
 import {
@@ -68,10 +68,111 @@ export async function createUser(input: {
   email: string;
   name: string | null;
   passwordHash: string;
+  termsAcceptedAt?: Date | null;
+  termsVersion?: string | null;
 }): Promise<User> {
   const [row] = await getDb().insert(users).values(input).returning();
   if (!row) throw new Error("user insert returned no row");
   return row;
+}
+
+// --- Slice 014: 6-digit email-verification-code helpers ---------------------
+
+// Store a fresh (hashed) verification code on a user: sets the hash + expiry and
+// resets the attempt counter. Used by createAccount (initial) and resend.
+export async function setEmailVerificationCode(input: {
+  userId: string;
+  codeHash: string;
+  expires: Date;
+}): Promise<void> {
+  const now = new Date();
+  await getDb()
+    .update(users)
+    .set({
+      emailVerificationCode: input.codeHash,
+      emailVerificationCodeExpires: input.expires,
+      emailVerificationAttempts: 0,
+      updatedAt: now,
+    })
+    .where(eq(users.id, input.userId));
+}
+
+// Atomically bump the wrong-code attempt counter; returns the new count so the
+// action can report remaining attempts. Called after a failed argon2 verify.
+export async function incrementEmailVerificationAttempts(
+  userId: string,
+): Promise<number> {
+  const [row] = await getDb()
+    .update(users)
+    .set({
+      emailVerificationAttempts: sql`${users.emailVerificationAttempts} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning({ attempts: users.emailVerificationAttempts });
+  return row?.attempts ?? 0;
+}
+
+export type ConsumeEmailCodeResult =
+  | { ok: true; email: string; name: string | null }
+  | {
+      ok: false;
+      reason: "not-found" | "already-verified" | "expired" | "too-many-attempts";
+    };
+
+// Atomically flip an unverified user to verified and clear the code state. The
+// argon2 verify happens in the calling action (argon2 must not live in the DB
+// package); this re-checks the DB-side conditions inside the transaction so a
+// concurrent request cannot double-consume (TOCTOU-safe). Mirrors the
+// consumeVerificationToken pattern. `maxAttempts` is passed in to avoid a
+// cross-package constant import.
+export async function consumeEmailVerificationCode(input: {
+  userId: string;
+  maxAttempts: number;
+}): Promise<ConsumeEmailCodeResult> {
+  return getDb().transaction(async (tx) => {
+    const [u] = await tx
+      .select()
+      .from(users)
+      .where(eq(users.id, input.userId))
+      .limit(1);
+    if (!u) return { ok: false, reason: "not-found" };
+    if (u.emailVerified) return { ok: false, reason: "already-verified" };
+    if (u.emailVerificationAttempts >= input.maxAttempts) {
+      return { ok: false, reason: "too-many-attempts" };
+    }
+    if (
+      !u.emailVerificationCodeExpires ||
+      u.emailVerificationCodeExpires.getTime() < Date.now()
+    ) {
+      return { ok: false, reason: "expired" };
+    }
+    const now = new Date();
+    await tx
+      .update(users)
+      .set({
+        emailVerified: now,
+        emailVerificationCode: null,
+        emailVerificationCodeExpires: null,
+        emailVerificationAttempts: 0,
+        updatedAt: now,
+      })
+      .where(eq(users.id, input.userId));
+    return { ok: true, email: u.email, name: u.name };
+  });
+}
+
+// Hard-delete an UNVERIFIED user by email (the "use a different email"
+// affordance). The `emailVerified IS NULL` guard makes it impossible to delete a
+// verified account. Returns whether a row was removed.
+export async function deleteUnverifiedUserByEmail(
+  email: string,
+): Promise<boolean> {
+  const rows = await getDb()
+    .delete(users)
+    .where(and(eq(users.email, email), isNull(users.emailVerified)))
+    .returning({ id: users.id });
+  return rows.length > 0;
 }
 
 // Inserts an email-verification token (24h TTL set by the caller).
@@ -119,6 +220,29 @@ export async function isPasswordResetTokenValid(token: string): Promise<boolean>
     )
     .limit(1);
   return Boolean(row);
+}
+
+// Read-only: the email tied to a VALID (unused, unexpired) reset token — for the
+// reset page's "Resetting password for [email]" context pill (slice 014, design
+// 2_4). Returns null when the token is invalid, so the page can render its
+// "no longer valid" state from the same call. consumePasswordResetToken still
+// re-validates atomically at submit (this is advisory, not the boundary).
+export async function getValidResetTokenEmail(
+  token: string,
+): Promise<string | null> {
+  const [row] = await getDb()
+    .select({ email: users.email })
+    .from(passwordResetTokens)
+    .innerJoin(users, eq(users.id, passwordResetTokens.userId))
+    .where(
+      and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false),
+        gt(passwordResetTokens.expires, new Date()),
+      ),
+    )
+    .limit(1);
+  return row?.email ?? null;
 }
 
 // Atomically consume a password-reset token: re-check existence + unused +

@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_URL } from "@bristle/shared";
 
-import { AuthCard } from "@/components/auth/auth-card";
+import { AuthOverline } from "@/components/auth/auth-overline";
+import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
+import { OAuthButtonRow } from "@/components/auth/oauth-button-row";
+import { OrEmailDivider } from "@/components/auth/or-email-divider";
 import { SignupForm } from "@/components/auth/signup-form";
-import { SiteFooter } from "@/components/landing/site-footer";
-import { TopNav } from "@/components/landing/top-nav";
 
-const TITLE = "Sign up — Bristle";
+const TITLE = "Create your Bristle account — Bristle";
 const DESCRIPTION =
-  "Create a Bristle account to track problems worth solving — with evidence, not vibes.";
+  "Create your Bristle account — no card required. Find problems worth solving, with evidence, not vibes.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -24,30 +25,32 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SignUp() {
+export default function SignUpPage() {
   return (
-    <>
-      <TopNav />
-      <main className="mx-auto max-w-6xl px-grid py-16">
-        <AuthCard
-          title="Create your account"
-          subtitle="Find problems worth solving — with evidence, not vibes."
-          footer={
-            <>
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-accent-bristle hover:underline"
-              >
-                Sign in
-              </Link>
-            </>
-          }
-        >
-          <SignupForm />
-        </AuthCard>
-      </main>
-      <SiteFooter />
-    </>
+    <AuthSplitLayout editorialSide="left">
+      <div className="flex flex-col gap-grid">
+        <AuthOverline>CREATE ACCOUNT · 1 OF 2</AuthOverline>
+        <div className="flex flex-col gap-tight">
+          <h1 className="font-serif text-h1 font-semibold text-text-primary">
+            Start your research journal.
+          </h1>
+          <p className="text-body-md text-text-secondary">
+            Create your account · no card required
+          </p>
+        </div>
+        <OAuthButtonRow />
+        <OrEmailDivider />
+        <SignupForm />
+        <p className="text-body-sm text-text-secondary">
+          Have an account?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-accent-bristle hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </AuthSplitLayout>
   );
 }
