@@ -19,7 +19,7 @@ Add migration **0004**: extend the slice-004 `problems` table (additive, non-bre
 
 | Constitution rule | Status |
 |---|---|
-| §3 locked stack (Drizzle, Supabase+pgvector, Zod in shared) | ✅ used as-is; **0 new deps, 0 new env** |
+| §3 locked stack (Drizzle, Supabase+pgvector, Zod in shared) | ✅ used as-is; **0 new third-party deps, 0 new env**. Internal wiring only: `zod` (repo-pinned) → `packages/shared`; `@bristle/shared` (workspace) → `packages/db` — both inherent to FR-031's shared Zod contracts the seed validates against. |
 | §5 all DB access via Drizzle; Zod shared in `packages/shared` | ✅ schema in `packages/db`, JSON/source contracts in `packages/shared` |
 | §5 TS strict, no `any`, `noUncheckedIndexedAccess` | ✅ honored (fixture arrays iterated with for-of / `.at`) |
 | §4 design tokens; §4.1a category tints | ✅ `categories` rows reference existing §4.1a token keys; **no new tokens, no UI** |
