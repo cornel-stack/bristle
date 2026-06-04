@@ -1,5 +1,24 @@
 export { problems } from "./schema";
 export type { Problem, NewProblem } from "./schema";
+// Slice 016 product row types (screens 4.2–4.8 type their props against these;
+// raw tables stay in @bristle/db — apps/web reads via query helpers).
+export type {
+  ProblemQuote,
+  ProblemSource,
+  ExistingSolution,
+  WtpSignal,
+  ProblemPersona,
+  ProblemFrequencyPoint,
+  ProblemRelated,
+  Category,
+  DashboardFixture,
+  SavedCollection,
+  UserSavedProblem,
+  AlertRule,
+  AlertNotification,
+  ProblemActivity,
+  UsageMeter,
+} from "./schema";
 export {
   users,
   accounts,
@@ -40,8 +59,11 @@ export {
   saveUserRole,
   saveUserCategories,
   completeOnboarding,
+  getDashboardProblems,
+  getProblemDetail,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
   ConsumeEmailCodeResult,
+  ProblemDetail,
 } from "./queries";

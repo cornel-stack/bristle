@@ -1,6 +1,23 @@
 import { and, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "./client";
-import { problems, type Problem } from "./schema";
+import {
+  existingSolutions,
+  problemFrequencyPoints,
+  problemPersonas,
+  problemQuotes,
+  problemRelated,
+  problemSources,
+  problems,
+  wtpSignals,
+  type ExistingSolution,
+  type Problem,
+  type ProblemFrequencyPoint,
+  type ProblemPersona,
+  type ProblemQuote,
+  type ProblemRelated,
+  type ProblemSource,
+  type WtpSignal,
+} from "./schema";
 import {
   passwordResetTokens,
   sessions,
@@ -360,4 +377,81 @@ export async function completeOnboarding(userId: string): Promise<void> {
     .update(users)
     .set({ onboardingCompletedAt: now, updatedAt: now })
     .where(eq(users.id, userId));
+}
+
+// --- Slice 016: product read queries ----------------------------------------
+
+// Dashboard / Library problems, momentum-descending (SC-004). Fully typed.
+export async function getDashboardProblems(): Promise<Problem[]> {
+  return getDb().select().from(problems).orderBy(desc(problems.momentumPct));
+}
+
+export interface ProblemDetail {
+  problem: Problem;
+  sources: ProblemSource[];
+  quotes: ProblemQuote[];
+  solutions: ExistingSolution[];
+  wtp: WtpSignal | null;
+  personas: ProblemPersona[];
+  related: ProblemRelated[];
+  frequency: ProblemFrequencyPoint[];
+}
+
+// One problem + all its child rows for the page-2 detail screen. undefined if the
+// slug is unknown.
+export async function getProblemDetail(
+  slug: string,
+): Promise<ProblemDetail | undefined> {
+  const db = getDb();
+  const [problem] = await db
+    .select()
+    .from(problems)
+    .where(eq(problems.slug, slug))
+    .limit(1);
+  if (!problem) return undefined;
+  const pid = problem.id;
+  const [sources, quotes, solutions, wtpRows, personas, related, frequency] =
+    await Promise.all([
+      db.select().from(problemSources).where(eq(problemSources.problemId, pid)),
+      db
+        .select()
+        .from(problemQuotes)
+        .where(eq(problemQuotes.problemId, pid))
+        .orderBy(problemQuotes.position),
+      db
+        .select()
+        .from(existingSolutions)
+        .where(eq(existingSolutions.problemId, pid))
+        .orderBy(existingSolutions.position),
+      db
+        .select()
+        .from(wtpSignals)
+        .where(eq(wtpSignals.problemId, pid))
+        .limit(1),
+      db
+        .select()
+        .from(problemPersonas)
+        .where(eq(problemPersonas.problemId, pid))
+        .orderBy(problemPersonas.position),
+      db
+        .select()
+        .from(problemRelated)
+        .where(eq(problemRelated.problemId, pid))
+        .orderBy(problemRelated.position),
+      db
+        .select()
+        .from(problemFrequencyPoints)
+        .where(eq(problemFrequencyPoints.problemId, pid))
+        .orderBy(problemFrequencyPoints.observedOn),
+    ]);
+  return {
+    problem,
+    sources,
+    quotes,
+    solutions,
+    wtp: wtpRows[0] ?? null,
+    personas,
+    related,
+    frequency,
+  };
 }

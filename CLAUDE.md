@@ -231,6 +231,8 @@ bristle/
 
 > **Product surface — onboarding (slice 015, Tier 3.2)**: `apps/web/src/app/onboarding/{role,categories}` capture each new user's role + watched categories onto `users` (`role`, `role_custom`, `watched_categories`, `onboarding_completed_at`), gated after sign-in by the auth (cookie) + completion-state (page-guard) layers.
 
+> **Product data model — full schema + fixtures (slice 016, Tier 4.1)**: migration `0004` extends `problems` (additive) and adds 15 product tables (`problem_quotes/sources/personas/frequency_points/related`, `existing_solutions`, `wtp_signals`, `categories`, `dashboard_fixtures`, `saved_collections`, `user_saved_problems`, `alert_rules`, `alert_notifications`, `problem_activity_log`, `usage_meters`), seeded with 15 fixture problems via `packages/db/src/seed/*`. **Source convention**: the 5 live source badges + key→badge mapping live in `packages/shared/src/sources.ts` (no Product Hunt / Google Play; SO/SE → one badge, forums → one). **Demo-user convention**: a fixed demo user (`demo@bristle.dev`, deterministic id) owns all user-scoped fixtures; watches the 7 sidebar categories (catalog has 8). **Follow-up TF-019**: converge the onboarding 18-slug `watched_categories` array onto the canonical 8-key `categories` catalog before the Tier-5.5 fixtures→live swap.
+
 ## 9. Critical "never do this" rules
 
 1. **Never modify files in `design/`.** They are read-only references — the visual contract.
@@ -248,5 +250,5 @@ When a spec is unclear, or the design PDFs don't cover a state you need to build
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/015-onboarding/plan.md`
+`specs/016-full-schema-and-fixtures/plan.md`
 <!-- SPECKIT END -->
