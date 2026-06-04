@@ -11,6 +11,14 @@ export type MomentumBucket = "gte100" | "p25to99" | "flat" | "new";
 export type SignalKey = "wtp" | "solution" | "validated";
 export type LibraryView = "list" | "grid";
 
+// Display labels for the sort control + "sorted by X" line (one source).
+export const SORT_LABELS: Record<SortKey, string> = {
+  momentum: "momentum",
+  frequency: "frequency",
+  newest: "newest",
+  wtp: "willingness-to-pay",
+};
+
 export interface LibraryQuery {
   categories: string[];
   sources: BadgeKey[];
