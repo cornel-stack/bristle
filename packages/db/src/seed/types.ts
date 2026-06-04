@@ -15,6 +15,20 @@ import {
 
 type Db = ReturnType<typeof getDb>;
 
+// TF-023: every time-derived fixture value is anchored to `now()` at seed time
+// (one SEED_NOW for the whole run), so the demo always reads the design's relative
+// times — "12m ago", "94 days since first seen" — regardless of view date, and a
+// re-seed refreshes it. (Seed is a one-shot Node script; Date.now() is fine here.)
+const SEED_NOW = Date.now();
+const DAY_MS = 86_400_000;
+export const minsAgo = (m: number): Date => new Date(SEED_NOW - m * 60_000);
+export const hoursAgo = (h: number): Date => new Date(SEED_NOW - h * 3_600_000);
+export const daysAgo = (d: number): Date => new Date(SEED_NOW - d * DAY_MS);
+export const todayISO = (): string =>
+  new Date(SEED_NOW).toISOString().slice(0, 10);
+export const daysAgoISO = (d: number): string =>
+  daysAgo(d).toISOString().slice(0, 10);
+
 export interface ChildQuote {
   authorHandle: string;
   sourceKey: string;

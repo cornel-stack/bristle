@@ -1,4 +1,5 @@
 import type { WeeklyMomentum } from "@bristle/shared";
+import { hoursAgo, minsAgo } from "./types";
 
 // Dashboard fixtures: the recent-activity rail (Image 1), the KPI/usage meters,
 // the weekly-momentum chart payload, and the alert-delivery panel (Image 5).
@@ -15,11 +16,11 @@ export interface ActivitySeed {
 }
 
 export const ACTIVITY: ActivitySeed[] = [
-  { type: "threshold_crossed", title: "Stripe webhooks crossed Pro threshold", deltaLabel: "+312%", slug: "stripe-webhooks-vercel-cold-starts", createdAt: "2026-05-12T09:02:00Z" },
-  { type: "quotes_added", title: "LLM streaming added 8 new quotes", deltaLabel: "+184%", slug: "llm-streaming-cdn-buffering", createdAt: "2026-05-12T08:18:00Z" },
-  { type: "problem_added", title: "3 problems added in Auth & SSO", deltaLabel: "NEW", global: true, createdAt: "2026-05-12T07:14:00Z" },
-  { type: "threshold_crossed", title: "iOS 18.4 OTA mentions doubled overnight", deltaLabel: "+96%", slug: "expo-ota-ios-18-4", createdAt: "2026-05-12T06:14:00Z" },
-  { type: "saved", title: "Marlon saved pgvector indexes", deltaLabel: "SAVED", slug: "pgvector-index-degradation-2m", global: true, createdAt: "2026-05-12T04:14:00Z" },
+  { type: "threshold_crossed", title: "Stripe webhooks crossed Pro threshold", deltaLabel: "+312%", slug: "stripe-webhooks-vercel-cold-starts", createdAt: minsAgo(12).toISOString() },
+  { type: "quotes_added", title: "LLM streaming added 8 new quotes", deltaLabel: "+184%", slug: "llm-streaming-cdn-buffering", createdAt: minsAgo(56).toISOString() },
+  { type: "problem_added", title: "3 problems added in Auth & SSO", deltaLabel: "NEW", global: true, createdAt: hoursAgo(2).toISOString() },
+  { type: "threshold_crossed", title: "iOS 18.4 OTA mentions doubled overnight", deltaLabel: "+96%", slug: "expo-ota-ios-18-4", createdAt: hoursAgo(3).toISOString() },
+  { type: "saved", title: "Marlon saved pgvector indexes", deltaLabel: "SAVED", slug: "pgvector-index-degradation-2m", global: true, createdAt: hoursAgo(5).toISOString() },
 ];
 
 // KPI tiles (Image 1) + tier displays. saved_problems 28/50 is the headline literal
