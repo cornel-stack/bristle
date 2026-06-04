@@ -1,5 +1,10 @@
 import { and, count, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
-import { WeeklyMomentumSchema, type WeeklyMomentum } from "@bristle/shared";
+import {
+  WeeklyMomentumSchema,
+  isSourceKey,
+  resolveBadge,
+  type WeeklyMomentum,
+} from "@bristle/shared";
 import { getDb } from "./client";
 import {
   alertNotifications,
@@ -591,4 +596,58 @@ export async function getProblemActivity(
     .where(eq(problemActivityLog.problemId, problemId))
     .orderBy(desc(problemActivityLog.createdAt))
     .limit(limit);
+}
+
+// --- Slice 4.4 (019): library faceted-browse read helper ---------------------
+// The Library is GLOBAL (all 15, all 8 categories, display-only) — no getAppUser,
+// no user scoping. This one read-only helper returns the full set enriched with
+// the three facet/search inputs that aren't on the Problem row: WTP presence,
+// existing-solution presence, and a precomputed search haystack (title + resolved
+// source labels + all quote text). Everything else the facets/columns need is
+// already on the Problem row. The pure filterLibrary() engine (apps/web) consumes
+// this. No schema change.
+
+export interface LibraryProblem extends Problem {
+  hasWtpSignal: boolean;
+  wtpMentionCount: number; // for the reused WTP sort (0 when no signal)
+  hasExistingSolution: boolean;
+  searchText: string;
+}
+
+export async function getLibraryProblems(): Promise<LibraryProblem[]> {
+  const db = getDb();
+  const [rows, wtpRows, solRows, quoteRows] = await Promise.all([
+    db.select().from(problems),
+    db
+      .select({ pid: wtpSignals.problemId, n: wtpSignals.mentionCount })
+      .from(wtpSignals),
+    db.select({ pid: existingSolutions.problemId }).from(existingSolutions),
+    db
+      .select({ pid: problemQuotes.problemId, text: problemQuotes.quoteText })
+      .from(problemQuotes),
+  ]);
+
+  const wtpCounts = new Map(wtpRows.map((r) => [r.pid, r.n]));
+  const solSet = new Set(solRows.map((r) => r.pid));
+  const quotesByProblem = new Map<string, string[]>();
+  for (const q of quoteRows) {
+    const arr = quotesByProblem.get(q.pid);
+    if (arr) arr.push(q.text);
+    else quotesByProblem.set(q.pid, [q.text]);
+  }
+
+  return rows.map((p) => {
+    const sourceLabels = p.sources
+      .filter(isSourceKey)
+      .map((k) => resolveBadge(k).label)
+      .join(" ");
+    const quoteText = (quotesByProblem.get(p.id) ?? []).join(" ");
+    return {
+      ...p,
+      hasWtpSignal: wtpCounts.has(p.id),
+      wtpMentionCount: wtpCounts.get(p.id) ?? 0,
+      hasExistingSolution: solSet.has(p.id),
+      searchText: `${p.title} ${sourceLabels} ${quoteText}`.toLowerCase(),
+    };
+  });
 }
