@@ -1,5 +1,5 @@
 import type { WeeklyMomentum } from "@bristle/shared";
-import { hoursAgo, minsAgo } from "./types";
+import { daysAgo, hoursAgo, minsAgo } from "./types";
 
 // Dashboard fixtures: the recent-activity rail (Image 1), the KPI/usage meters,
 // the weekly-momentum chart payload, and the alert-delivery panel (Image 5).
@@ -21,6 +21,17 @@ export const ACTIVITY: ActivitySeed[] = [
   { type: "problem_added", title: "3 problems added in Auth & SSO", deltaLabel: "NEW", global: true, createdAt: hoursAgo(2).toISOString() },
   { type: "threshold_crossed", title: "iOS 18.4 OTA mentions doubled overnight", deltaLabel: "+96%", slug: "expo-ota-ios-18-4", createdAt: hoursAgo(3).toISOString() },
   { type: "saved", title: "Marlon saved pgvector indexes", deltaLabel: "SAVED", slug: "pgvector-index-degradation-2m", global: true, createdAt: hoursAgo(5).toISOString() },
+
+  // Hero-activity top-up (slice 4.3, STOP-3): the Stripe hero's problem-scoped
+  // timeline so its Activity tab reads as a real timeline (the design doesn't
+  // depict the tab; this matches the dashboard rail's richness). Timestamps are
+  // OLDER than the 5 rail entries above (12m–5h), so the dashboard's newest-5
+  // rail is unchanged; getProblemActivity(stripe) returns all of these (~5).
+  // Now-relative per TF-023; existing activity types only; no schema change.
+  { type: "quotes_added", title: "Stripe webhooks added 12 new quotes", deltaLabel: "+12 quotes", slug: "stripe-webhooks-vercel-cold-starts", createdAt: daysAgo(1).toISOString() },
+  { type: "saved", title: "Stripe webhooks saved to Payments", deltaLabel: "SAVED", slug: "stripe-webhooks-vercel-cold-starts", createdAt: daysAgo(2).toISOString() },
+  { type: "threshold_crossed", title: "Stripe webhooks crossed Hobby threshold", deltaLabel: "+180%", slug: "stripe-webhooks-vercel-cold-starts", createdAt: daysAgo(4).toISOString() },
+  { type: "problem_added", title: "Stripe webhooks first detected", deltaLabel: "NEW", slug: "stripe-webhooks-vercel-cold-starts", createdAt: daysAgo(8).toISOString() },
 ];
 
 // KPI tiles (Image 1) + tier displays. saved_problems 28/50 is the headline literal
