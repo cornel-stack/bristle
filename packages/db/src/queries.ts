@@ -18,6 +18,7 @@ import {
   problemRelated,
   problemSources,
   problems,
+  savedCollections,
   usageMeters,
   userSavedProblems,
   wtpSignals,
@@ -30,6 +31,7 @@ import {
   type ProblemQuote,
   type ProblemRelated,
   type ProblemSource,
+  type SavedCollection,
   type UsageMeter,
   type WtpSignal,
 } from "./schema";
@@ -650,4 +652,42 @@ export async function getLibraryProblems(): Promise<LibraryProblem[]> {
       searchText: `${p.title} ${sourceLabels} ${quoteText}`.toLowerCase(),
     };
   });
+}
+
+// --- Slice 4.5 (020): saved Kanban board read helper -------------------------
+// The Saved board IS user-scoped (the demo user's saves) — read-only. Slice 4.5
+// is the first WRITE slice, but the writes are EPHEMERAL/in-memory (the client
+// board mutates React state; reload resets to this seeded baseline). The real
+// per-user write path is wired at Tier 5.5 (TF-028). No persisting helper here.
+
+export interface SavedBoardColumn {
+  collection: SavedCollection;
+  problems: Problem[];
+}
+
+export async function getSavedBoard(userId: string): Promise<SavedBoardColumn[]> {
+  const db = getDb();
+  const [cols, saves] = await Promise.all([
+    db
+      .select()
+      .from(savedCollections)
+      .where(eq(savedCollections.userId, userId))
+      .orderBy(savedCollections.position),
+    db
+      .select({ collectionId: userSavedProblems.collectionId, problem: problems })
+      .from(userSavedProblems)
+      .innerJoin(problems, eq(userSavedProblems.problemId, problems.id))
+      .where(eq(userSavedProblems.userId, userId))
+      .orderBy(userSavedProblems.position),
+  ]);
+
+  const byCollection = new Map<string, Problem[]>();
+  for (const s of saves) {
+    if (!s.collectionId) continue;
+    const arr = byCollection.get(s.collectionId);
+    if (arr) arr.push(s.problem);
+    else byCollection.set(s.collectionId, [s.problem]);
+  }
+
+  return cols.map((c) => ({ collection: c, problems: byCollection.get(c.id) ?? [] }));
 }
