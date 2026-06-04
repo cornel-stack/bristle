@@ -69,9 +69,11 @@ export {
   getWtpCountsByProblem,
   getSavedProblemIds,
   getProblemActivity,
+  getLibraryProblems,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
   ConsumeEmailCodeResult,
   ProblemDetail,
+  LibraryProblem,
 } from "./queries";
