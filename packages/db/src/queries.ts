@@ -14,6 +14,7 @@ import {
   problemSources,
   problems,
   usageMeters,
+  userSavedProblems,
   wtpSignals,
   type Category,
   type ExistingSolution,
@@ -561,4 +562,33 @@ export async function getWtpCountsByProblem(): Promise<Record<string, number>> {
     .select({ pid: wtpSignals.problemId, n: wtpSignals.mentionCount })
     .from(wtpSignals);
   return Object.fromEntries(rows.map((r) => [r.pid, r.n]));
+}
+
+// --- Slice 4.3 (018): problem-detail read helpers ----------------------------
+// Both read-only and seam/id-parameterized — they take the getAppUser()-resolved
+// id (the Tier-5.5 flip point), never a hardcoded id. getProblemActivity is a
+// separate helper because getProblemDetail returns the 8 problem-scoped child
+// sets but NOT the activity log (a distinct, lazily-read problem-scoped log).
+
+// The viewer's saved-problem ids — powers the detail Save button's read-only
+// "Saved" state. The Save toggle ships in slice 4.5; the click is inert for now.
+export async function getSavedProblemIds(userId: string): Promise<Set<string>> {
+  const rows = await getDb()
+    .select({ pid: userSavedProblems.problemId })
+    .from(userSavedProblems)
+    .where(eq(userSavedProblems.userId, userId));
+  return new Set(rows.map((r) => r.pid));
+}
+
+// One problem's activity log, newest first — the detail Activity tab. Read-only.
+export async function getProblemActivity(
+  problemId: string,
+  limit = 20,
+): Promise<ProblemActivity[]> {
+  return getDb()
+    .select()
+    .from(problemActivityLog)
+    .where(eq(problemActivityLog.problemId, problemId))
+    .orderBy(desc(problemActivityLog.createdAt))
+    .limit(limit);
 }
