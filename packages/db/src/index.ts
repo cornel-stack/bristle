@@ -71,6 +71,7 @@ export {
   getProblemActivity,
   getLibraryProblems,
   getSavedBoard,
+  getAlertsData,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
@@ -78,4 +79,5 @@ export type {
   ProblemDetail,
   LibraryProblem,
   SavedBoardColumn,
+  AlertNotificationVM,
 } from "./queries";

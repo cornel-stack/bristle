@@ -8,6 +8,7 @@ import {
 import { getDb } from "./client";
 import {
   alertNotifications,
+  alertRules,
   categories,
   dashboardFixtures,
   existingSolutions,
@@ -31,6 +32,8 @@ import {
   type ProblemQuote,
   type ProblemRelated,
   type ProblemSource,
+  type AlertNotification,
+  type AlertRule,
   type SavedCollection,
   type UsageMeter,
   type WtpSignal,
@@ -690,4 +693,35 @@ export async function getSavedBoard(userId: string): Promise<SavedBoardColumn[]>
   }
 
   return cols.map((c) => ({ collection: c, problems: byCollection.get(c.id) ?? [] }));
+}
+
+// --- Slice 4.6 (021): alerts read helper -------------------------------------
+// User-scoped watch rules + the notification feed. Read-only. Slice 4.6 is the
+// second WRITE slice but inherits the 4.5 ephemeral model (the client island
+// mutates in-memory state; reload resets to this seeded baseline; real per-user
+// writes at Tier 5.5 — TF-028). No persisting helper.
+
+export interface AlertNotificationVM extends AlertNotification {
+  slug: string | null; // the linked problem's slug (null for digest/weekly)
+}
+
+export async function getAlertsData(
+  userId: string,
+): Promise<{ rules: AlertRule[]; notifications: AlertNotificationVM[] }> {
+  const db = getDb();
+  const [rules, notifRows] = await Promise.all([
+    db
+      .select()
+      .from(alertRules)
+      .where(eq(alertRules.userId, userId))
+      .orderBy(alertRules.position),
+    db
+      .select({ notif: alertNotifications, slug: problems.slug })
+      .from(alertNotifications)
+      .leftJoin(problems, eq(alertNotifications.problemId, problems.id))
+      .where(eq(alertNotifications.userId, userId))
+      .orderBy(desc(alertNotifications.createdAt)),
+  ]);
+
+  return { rules, notifications: notifRows.map((r) => ({ ...r.notif, slug: r.slug })) };
 }
