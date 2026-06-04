@@ -1,4 +1,4 @@
-import { genFrequency, type ProblemFixture } from "./types";
+import { genFrequency, todayISO, type ProblemFixture } from "./types";
 
 // The 14 non-hero fixtures — compact-but-complete: every page-2 section non-empty
 // (≥4 quotes, ≥1 solution, ≥2 personas, ≥2 related, a frequency series), plus a
@@ -6,7 +6,7 @@ import { genFrequency, type ProblemFixture } from "./types";
 // design shows genuine 0 (pgvector). 5-live-source keys only. LLM/pgvector/Expo
 // compare_cards match Core_app.pdf page 6 verbatim.
 const freq = (from: number, to: number) =>
-  genFrequency({ endDate: "2026-05-12", days: 30, from, to });
+  genFrequency({ endDate: todayISO(), days: 30, from, to });
 
 export const OTHER_FIXTURES: ProblemFixture[] = [
   {

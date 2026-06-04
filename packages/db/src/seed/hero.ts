@@ -1,4 +1,4 @@
-import { genFrequency, type ProblemFixture } from "./types";
+import { daysAgoISO, genFrequency, todayISO, type ProblemFixture } from "./types";
 
 // The hero fixture (Stripe webhooks) — fully populates the page-2 problem-detail
 // screen (FR-025/SC-009). 47-quote source breakdown over the 5 live sources (no
@@ -152,11 +152,11 @@ export const HERO: ProblemFixture = {
     { label: "Background jobs in serverless" },
   ],
   frequency: genFrequency({
-    endDate: "2026-05-12",
+    endDate: todayISO(),
     days: 90,
     from: 1,
     to: 6,
-    thresholdDate: "2026-04-16",
+    thresholdDate: daysAgoISO(26),
   }),
   compareCard: {
     validatedDemand: { value: "Validated", tone: "positive" },

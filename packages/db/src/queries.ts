@@ -1,21 +1,30 @@
-import { and, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { WeeklyMomentumSchema, type WeeklyMomentum } from "@bristle/shared";
 import { getDb } from "./client";
 import {
+  alertNotifications,
+  categories,
+  dashboardFixtures,
   existingSolutions,
+  problemActivityLog,
   problemFrequencyPoints,
   problemPersonas,
   problemQuotes,
   problemRelated,
   problemSources,
   problems,
+  usageMeters,
   wtpSignals,
+  type Category,
   type ExistingSolution,
   type Problem,
+  type ProblemActivity,
   type ProblemFrequencyPoint,
   type ProblemPersona,
   type ProblemQuote,
   type ProblemRelated,
   type ProblemSource,
+  type UsageMeter,
   type WtpSignal,
 } from "./schema";
 import {
@@ -454,4 +463,102 @@ export async function getProblemDetail(
     related,
     frequency,
   };
+}
+
+// --- Slice 4.2 (017): dashboard read helpers --------------------------------
+// All read-only, all scoped to the userId resolved by the app's getAppUser() seam
+// (apps/web/src/lib/app-user.ts) — never a hardcoded id. JSON payloads are parsed
+// through the shared Zod contract at the boundary.
+
+// The four KPI tiles + the greeting subhead counts.
+export async function getUsageMeters(userId: string): Promise<UsageMeter[]> {
+  return getDb()
+    .select()
+    .from(usageMeters)
+    .where(eq(usageMeters.userId, userId));
+}
+
+// The sidebar's watched categories (label + displayed count + tint keys), in the
+// user's watched order (= the design sidebar order), not the catalog order.
+export async function getWatchedCategories(
+  userId: string,
+): Promise<Category[]> {
+  const db = getDb();
+  const [u] = await db
+    .select({ watched: users.watchedCategories })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const slugs = u?.watched ?? [];
+  if (slugs.length === 0) return [];
+  const rows = await db
+    .select()
+    .from(categories)
+    .where(inArray(categories.key, slugs));
+  return rows.sort((a, b) => slugs.indexOf(a.key) - slugs.indexOf(b.key));
+}
+
+// The recent-activity rail: the user's own entries + global (user_id null) ones,
+// newest first.
+export async function getRecentActivity(
+  userId: string,
+  limit = 5,
+): Promise<ProblemActivity[]> {
+  return getDb()
+    .select()
+    .from(problemActivityLog)
+    .where(
+      or(
+        eq(problemActivityLog.userId, userId),
+        isNull(problemActivityLog.userId),
+      ),
+    )
+    .orderBy(desc(problemActivityLog.createdAt))
+    .limit(limit);
+}
+
+// The dashboard weekly-momentum chart payload — parsed through the shared Zod
+// contract (null if absent or malformed).
+export async function getWeeklyMomentum(
+  userId: string,
+): Promise<WeeklyMomentum | null> {
+  const [row] = await getDb()
+    .select()
+    .from(dashboardFixtures)
+    .where(
+      and(
+        eq(dashboardFixtures.userId, userId),
+        eq(dashboardFixtures.key, "weekly_momentum"),
+      ),
+    )
+    .limit(1);
+  if (!row) return null;
+  const parsed = WeeklyMomentumSchema.safeParse(row.payload);
+  return parsed.success ? parsed.data : null;
+}
+
+// The top-bar bell badge.
+export async function getUnreadNotificationCount(
+  userId: string,
+): Promise<number> {
+  const [row] = await getDb()
+    .select({ n: count() })
+    .from(alertNotifications)
+    .where(
+      and(
+        eq(alertNotifications.userId, userId),
+        eq(alertNotifications.isRead, false),
+      ),
+    );
+  return row?.n ?? 0;
+}
+
+// WTP signal mention-count per problem (problemId → count) — the dashboard's
+// Willingness-to-pay sort needs it (wtp_signals lives off the Problem row).
+// Read-only.
+export async function getWtpCountsByProblem(): Promise<Record<string, number>> {
+  const rows = await getDb()
+    .select({ pid: wtpSignals.problemId, n: wtpSignals.mentionCount })
+    .from(wtpSignals);
+  return Object.fromEntries(rows.map((r) => [r.pid, r.n]));
 }

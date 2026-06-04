@@ -61,6 +61,12 @@ export {
   completeOnboarding,
   getDashboardProblems,
   getProblemDetail,
+  getUsageMeters,
+  getWatchedCategories,
+  getRecentActivity,
+  getWeeklyMomentum,
+  getUnreadNotificationCount,
+  getWtpCountsByProblem,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
