@@ -52,8 +52,16 @@ export function WtpPanel({
           Median stated price: ${wtp.median}/mo
         </p>
       ) : null}
-      {wtp.note && !compact ? (
-        <p className="mt-snug text-body-md text-text-secondary">{wtp.note}</p>
+      {wtp.note ? (
+        <p
+          className={
+            compact
+              ? "mt-snug text-body-sm text-text-secondary"
+              : "mt-snug text-body-md text-text-secondary"
+          }
+        >
+          {wtp.note}
+        </p>
       ) : null}
     </div>
   );

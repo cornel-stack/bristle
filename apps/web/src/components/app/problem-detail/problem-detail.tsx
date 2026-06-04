@@ -5,6 +5,7 @@ import type { DetailViewModel } from "@/lib/problem-detail-adapter";
 
 import { DetailHeader } from "./detail-header";
 import { DetailTabs, type DetailTab, type DetailTabKey } from "./detail-tabs";
+import { DetailRail } from "./rail/detail-rail";
 import { ActivityPanel } from "./panels/activity-panel";
 import { EvidencePanel } from "./panels/evidence-panel";
 import { FrequencyPanel } from "./panels/frequency-panel";
@@ -52,9 +53,7 @@ export function ProblemDetail({
           <DetailTabs tabs={tabs} panels={panels} />
         </div>
         <aside className="flex flex-col gap-grid lg:sticky lg:top-grid lg:self-start">
-          <div className="rounded-card border border-border-default bg-surface-card p-grid text-body-sm text-text-secondary">
-            Right rail
-          </div>
+          <DetailRail vm={vm} />
         </aside>
       </div>
     </div>
