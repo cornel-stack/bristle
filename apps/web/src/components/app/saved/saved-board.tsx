@@ -1,17 +1,17 @@
 "use client";
 
 import type { Problem, SavedBoardColumn } from "@bristle/db";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
-import { dotClass } from "./collection-color";
+import { SavedColumn } from "./saved-column";
 import { SavedHeader } from "./saved-header";
 
 // The Saved Kanban board (the single client island). EPHEMERAL write model
 // (slice 4.5, A1): the board hydrates ONCE from the server `initial` into local
-// state; every interaction mutates this state only — no DB write, no storage —
-// so a reload resets to the seeded baseline. Tier 5.5 swaps these transitions for
-// real per-user server actions (TF-028). Batch 0 renders read-only columns;
-// Batch A adds the card/column components, Batch B the interactions.
+// state; every interaction — move / remove / new / rename / add — mutates this
+// state only. No DB write, no storage, no server action — so a reload resets to
+// the seeded baseline. Tier 5.5 swaps these transitions for real per-user server
+// actions (TF-028, the write analogue of the read seam).
 export interface BoardColumn {
   id: string;
   name: string;
@@ -30,14 +30,61 @@ function hydrate(initial: SavedBoardColumn[]): BoardColumn[] {
 
 export function SavedBoard({
   initial,
+  allProblems,
   savedUsed,
   savedQuota,
 }: {
   initial: SavedBoardColumn[];
+  allProblems: Problem[];
   savedUsed: number;
   savedQuota: number | null;
 }) {
-  const [columns] = useState<BoardColumn[]>(() => hydrate(initial));
+  const [columns, setColumns] = useState<BoardColumn[]>(() => hydrate(initial));
+  const nextId = useRef(0);
+
+  // "+ Add problem" offers problems not saved in ANY column (a problem is saved
+  // once — user_saved_problems is unique per (user, problem)). The 6 unsaved of
+  // the 15 are addable.
+  const addable = useMemo(() => {
+    const saved = new Set(columns.flatMap((c) => c.cards.map((p) => p.slug)));
+    return allProblems.filter((p) => !saved.has(p.slug));
+  }, [columns, allProblems]);
+
+  const allColumns = columns.map((c) => ({ id: c.id, name: c.name }));
+
+  function moveCard(cardSlug: string, toColId: string) {
+    setColumns((cols) => {
+      const card = cols.flatMap((c) => c.cards).find((p) => p.slug === cardSlug);
+      if (!card) return cols;
+      return cols.map((c) => {
+        if (c.id === toColId) return { ...c, cards: [...c.cards.filter((p) => p.slug !== cardSlug), card] };
+        return { ...c, cards: c.cards.filter((p) => p.slug !== cardSlug) };
+      });
+    });
+  }
+
+  function removeCard(cardSlug: string) {
+    setColumns((cols) => cols.map((c) => ({ ...c, cards: c.cards.filter((p) => p.slug !== cardSlug) })));
+  }
+
+  function renameCollection(colId: string, name: string) {
+    setColumns((cols) => cols.map((c) => (c.id === colId ? { ...c, name } : c)));
+  }
+
+  function newCollection() {
+    setColumns((cols) => [
+      ...cols,
+      { id: `tmp-${nextId.current++}`, name: "New collection", color: "blue", cards: [] },
+    ]);
+  }
+
+  function addProblem(colId: string, problemSlug: string) {
+    const problem = allProblems.find((p) => p.slug === problemSlug);
+    if (!problem) return;
+    setColumns((cols) =>
+      cols.map((c) => (c.id === colId ? { ...c, cards: [...c.cards, problem] } : c)),
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-grid py-section">
@@ -45,23 +92,20 @@ export function SavedBoard({
         savedUsed={savedUsed}
         savedQuota={savedQuota}
         collectionCount={columns.length}
+        onNewCollection={newCollection}
       />
       <div className="mt-section flex gap-grid overflow-x-auto pb-grid">
         {columns.map((col) => (
-          <section key={col.id} className="w-72 shrink-0">
-            <div className="flex items-center gap-2 px-1 pb-grid">
-              <span className={`size-2.5 rounded-pill ${dotClass(col.color)}`} aria-hidden="true" />
-              <h2 className="text-body-md font-medium text-text-primary">{col.name}</h2>
-              <span className="font-mono text-body-sm text-text-tertiary">{col.cards.length}</span>
-            </div>
-            <ul className="flex flex-col gap-grid">
-              {col.cards.map((p) => (
-                <li key={p.slug} className="text-body-sm text-text-secondary">
-                  {p.title}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <SavedColumn
+            key={col.id}
+            column={col}
+            allColumns={allColumns}
+            addable={addable}
+            onMoveCard={moveCard}
+            onRemoveCard={removeCard}
+            onRename={(name) => renameCollection(col.id, name)}
+            onAddProblem={(slug) => addProblem(col.id, slug)}
+          />
         ))}
       </div>
     </div>
