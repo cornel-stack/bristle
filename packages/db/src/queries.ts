@@ -552,3 +552,13 @@ export async function getUnreadNotificationCount(
     );
   return row?.n ?? 0;
 }
+
+// WTP signal mention-count per problem (problemId → count) — the dashboard's
+// Willingness-to-pay sort needs it (wtp_signals lives off the Problem row).
+// Read-only.
+export async function getWtpCountsByProblem(): Promise<Record<string, number>> {
+  const rows = await getDb()
+    .select({ pid: wtpSignals.problemId, n: wtpSignals.mentionCount })
+    .from(wtpSignals);
+  return Object.fromEntries(rows.map((r) => [r.pid, r.n]));
+}
