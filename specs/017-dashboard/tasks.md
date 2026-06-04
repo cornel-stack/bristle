@@ -48,7 +48,7 @@
 ## Phase 0 — App shell + auth gate + seam (STOP 1) · T001–T006
 
 - [X] T001 [P] [US1] Create `apps/web/src/lib/app-user.ts` — `getAppUser(): Promise<User>`, the **single demo-vs-session seam** (v1.0 → `getUserByEmail("demo@bristle.dev")`; the demo-email literal lives ONLY here; Tier-5.5 one-line flip to the session user). Resolves WHICH user, not WHETHER. (dep: none)
-- [ ] T002 [P] [US1] Edit `apps/web/src/middleware.ts` — add `"/app/:path*"` to `config.matcher` (cookie-presence pre-check; absent → `/login?callbackUrl=<pathname>`). One line; cookie-gate logic unchanged. (dep: none)
+- [X] T002 [P] [US1] Edit `apps/web/src/middleware.ts` — add `"/app/:path*"` to `config.matcher` (cookie-presence pre-check; absent → `/login?callbackUrl=<pathname>`). One line; cookie-gate logic unchanged. (dep: none)
 - [ ] T003 [P] [US1] Create `apps/web/src/components/app/sidebar-nav.tsx` (**client**) — the 5 nav links (Dashboard/Library/Saved/Alerts/Compare) with active state from `usePathname()` (`aria-current`), and the mobile sidebar toggle. §4 tokens. (dep: none)
 - [ ] T004 [P] [US1] Create `apps/web/src/components/app/app-sidebar.tsx` (server) — Bristle logo; ⌘K search affordance (visual only); `<SidebarNav>`; a CATEGORIES section (props-driven, **placeholder** until T021); Settings link pinned at bottom. Props `{ user; categories; activePath }`. (dep: T003)
 - [ ] T005 [P] [US1] Create `apps/web/src/components/app/app-topbar.tsx` (server) — context label ("Today"); search field (visual only); notification bell (badge from `unreadCount` prop, **placeholder** until T021, `aria-label`); avatar (user initials). Props `{ user; contextLabel; unreadCount }`. (dep: none)
