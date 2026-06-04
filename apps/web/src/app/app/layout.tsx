@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+import {
+  getUnreadNotificationCount,
+  getWatchedCategories,
+} from "@bristle/db";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -20,12 +24,21 @@ export default async function AppLayout({
   const session = await auth();
   if (!session?.user?.email) redirect("/login?callbackUrl=/app");
   const user = await getAppUser();
+  const [watched, unreadCount] = await Promise.all([
+    getWatchedCategories(user.id),
+    getUnreadNotificationCount(user.id),
+  ]);
+  const categories = watched.map((c) => ({
+    key: c.key,
+    label: c.label,
+    problemCount: c.problemCount,
+  }));
 
   return (
     <div className="flex min-h-dvh bg-surface-canvas">
-      <AppSidebar categories={[]} />
+      <AppSidebar categories={categories} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar user={user} contextLabel="Today" unreadCount={0} />
+        <AppTopbar user={user} contextLabel="Today" unreadCount={unreadCount} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
