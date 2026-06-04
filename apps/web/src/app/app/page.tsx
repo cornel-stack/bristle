@@ -2,15 +2,19 @@ import type { Metadata } from "next";
 
 import {
   getDashboardProblems,
+  getRecentActivity,
   getUsageMeters,
+  getWeeklyMomentum,
   getWtpCountsByProblem,
 } from "@bristle/db";
 
+import { ActivityRail } from "@/components/app/dashboard/activity-rail";
 import { DashboardHeader } from "@/components/app/dashboard/dashboard-header";
 import { HeaderActions } from "@/components/app/dashboard/header-actions";
 import { KpiCard } from "@/components/app/dashboard/kpi-card";
 import { ProblemGrid } from "@/components/app/dashboard/problem-grid";
 import { SortTabs } from "@/components/app/dashboard/sort-tabs";
+import { WeeklyMomentumChart } from "@/components/app/dashboard/weekly-momentum-chart";
 import { getAppUser } from "@/lib/app-user";
 import { isSortKey, sortProblems } from "@/lib/dashboard-sort";
 
@@ -34,10 +38,12 @@ export default async function DashboardPage({
   const sort = isSortKey(sortParam) ? sortParam : "momentum";
 
   const user = await getAppUser();
-  const [meters, problems, wtpCounts] = await Promise.all([
+  const [meters, problems, wtpCounts, weekly, activity] = await Promise.all([
     getUsageMeters(user.id),
     getDashboardProblems(),
     getWtpCountsByProblem(),
+    getWeeklyMomentum(user.id),
+    getRecentActivity(user.id),
   ]);
 
   const byMetric = new Map(meters.map((m) => [m.metric, m]));
@@ -92,6 +98,13 @@ export default async function DashboardPage({
           </p>
         </div>
         <ProblemGrid problems={top6} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-grid lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          {weekly ? <WeeklyMomentumChart data={weekly} /> : null}
+        </div>
+        <ActivityRail entries={activity} />
       </div>
     </div>
   );
