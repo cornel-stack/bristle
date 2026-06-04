@@ -1,6 +1,8 @@
 // Persistent top bar (server component). Context label, a visual-only search field
 // (functional search is the command palette, 4.8), a notification bell badged with
 // the unread count, and the user avatar (initials). §4 tokens, no hex.
+import type { ReactNode } from "react";
+
 import type { User } from "@bristle/db";
 import { Bell, Search } from "lucide-react";
 import Link from "next/link";
@@ -17,16 +19,21 @@ export function AppTopbar({
   user,
   contextLabel,
   unreadCount,
+  leftSlot,
 }: {
   user: User;
   contextLabel: string;
   unreadCount: number;
+  leftSlot?: ReactNode;
 }) {
   return (
     <header className="flex items-center justify-between border-b border-border-default bg-surface-card px-loose py-snug">
-      <span className="text-body-md font-medium text-text-primary">
-        {contextLabel}
-      </span>
+      <div className="flex items-center gap-snug">
+        {leftSlot}
+        <span className="text-body-md font-medium text-text-primary">
+          {contextLabel}
+        </span>
+      </div>
       <div className="flex items-center gap-grid">
         <div className="hidden w-64 items-center gap-snug rounded-button border border-border-default bg-surface-canvas px-snug py-1.5 text-body-sm text-text-tertiary md:flex">
           <Search className="size-4" strokeWidth={1.5} aria-hidden="true" />

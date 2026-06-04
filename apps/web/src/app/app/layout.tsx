@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppSidebar } from "@/components/app/app-sidebar";
 import { AppTopbar } from "@/components/app/app-topbar";
+import { MobileSidebar } from "@/components/app/mobile-sidebar";
 import { getAppUser } from "@/lib/app-user";
 
 // The persistent authenticated app shell — reused by every Tier-4 screen (4.2–4.8
@@ -36,9 +37,18 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-dvh bg-surface-canvas">
-      <AppSidebar categories={categories} />
+      <AppSidebar categories={categories} className="hidden lg:flex" />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar user={user} contextLabel="Today" unreadCount={unreadCount} />
+        <AppTopbar
+          user={user}
+          contextLabel="Today"
+          unreadCount={unreadCount}
+          leftSlot={
+            <MobileSidebar>
+              <AppSidebar categories={categories} />
+            </MobileSidebar>
+          }
+        />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>

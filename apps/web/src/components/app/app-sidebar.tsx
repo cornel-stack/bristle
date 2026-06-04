@@ -15,11 +15,15 @@ export interface SidebarCategory {
 
 export function AppSidebar({
   categories,
+  className = "",
 }: {
   categories: SidebarCategory[];
+  className?: string;
 }) {
   return (
-    <aside className="flex h-dvh w-64 shrink-0 flex-col gap-loose overflow-y-auto border-r border-border-default bg-surface-card p-card">
+    <aside
+      className={`flex h-dvh w-64 shrink-0 flex-col gap-loose overflow-y-auto border-r border-border-default bg-surface-card p-card ${className}`}
+    >
       {/* Brand lockup — rotated-square diamond + serif wordmark. */}
       <div className="flex items-center gap-snug">
         <span className="size-3 rotate-45 bg-accent-bristle" aria-hidden="true" />
