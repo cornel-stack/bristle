@@ -7,10 +7,16 @@ import { StackOverflowIcon } from "./stack-overflow";
 import { ProductHuntIcon } from "./product-hunt";
 import { AppStoreIcon } from "./app-store";
 import { GooglePlayIcon } from "./google-play";
+import { ForumIcon } from "./forum";
 
-export { GithubIcon, HackerNewsIcon, StackOverflowIcon, ProductHuntIcon, AppStoreIcon, GooglePlayIcon };
+export { GithubIcon, HackerNewsIcon, StackOverflowIcon, ProductHuntIcon, AppStoreIcon, GooglePlayIcon, ForumIcon };
 
-export type SourceKey = "gh" | "hn" | "so" | "ph" | "ap" | "gp";
+// `forum` added in slice 4.2 (the 4.1 registry's 5th live source). `ph`/`gp` are
+// vestigial (the 4.1 model dropped Product Hunt / Google Play) but kept INERT — the
+// Tier-2 landing card may still reference them, and the 4.x adapter never feeds
+// them. Full reconciliation (drop ph/gp; route badge rendering through the registry
+// resolveBadge) is deferred — TF-022.
+export type SourceKey = "gh" | "hn" | "so" | "ph" | "ap" | "gp" | "forum";
 
 type IconComponent = (props: { className?: string }) => React.JSX.Element;
 
@@ -21,6 +27,7 @@ const ICONS: Record<SourceKey, IconComponent> = {
   ph: ProductHuntIcon,
   ap: AppStoreIcon,
   gp: GooglePlayIcon,
+  forum: ForumIcon,
 };
 
 export const SOURCE_LABELS: Record<SourceKey, string> = {
@@ -30,6 +37,7 @@ export const SOURCE_LABELS: Record<SourceKey, string> = {
   ph: "Product Hunt",
   ap: "Apple App Store",
   gp: "Google Play",
+  forum: "Forums",
 };
 
 export function SourceIcon({ source, className }: { source: SourceKey; className?: string }) {
