@@ -67,6 +67,8 @@ export {
   getWeeklyMomentum,
   getUnreadNotificationCount,
   getWtpCountsByProblem,
+  getSavedProblemIds,
+  getProblemActivity,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
