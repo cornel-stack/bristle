@@ -88,7 +88,7 @@ All under `apps/web/src/components/app/dashboard/`. §4 tokens; no hex.
 ## Phase C — Weekly chart + activity rail + shell data (STOP 4) · T018–T021
 
 - [X] T018 [P] [US1] Create `dashboard/weekly-momentum-chart.tsx` (server) — **HAND-ROLLED SVG (no charting dep, §9.5)**, reusing the `Sparkline`/`buildSparklinePath` pattern: per-category polylines + a **dashed projection** polyline + the editorial caption + an "Open in Library →" link (target: the Library route, 4.4). Reduced-motion (static). Props `{ data: WeeklyMomentum }`. (dep: STOP 2)
-- [ ] T019 [P] [US1] Create `dashboard/activity-rail.tsx` (server) — from `getRecentActivity`: each entry's type tag (threshold / new / saved), title, delta label, relative time. Props `{ entries }`. (dep: STOP 2)
+- [X] T019 [P] [US1] Create `dashboard/activity-rail.tsx` (server) — from `getRecentActivity`: each entry's type tag (threshold / new / saved), title, delta label, relative time. Props `{ entries }`. (dep: STOP 2)
 - [ ] T020 [US1] Wire `<WeeklyMomentumChart>` (from `getWeeklyMomentum`) + `<ActivityRail>` (from `getRecentActivity`) into `app/(app)/page.tsx`. (dep: T017, T018, T019)
 - [ ] T021 [US1] Wire the **shell's real data**: `app/(app)/layout.tsx` passes `getWatchedCategories()` → `<AppSidebar>` (7 categories + counts + tints), `getUnreadNotificationCount()` → `<AppTopbar>` bell badge, and the `getAppUser()` name/initials → greeting + avatar. (dep: T006, T008)
 
