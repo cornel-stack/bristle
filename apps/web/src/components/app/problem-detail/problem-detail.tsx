@@ -1,34 +1,35 @@
-import type { ProblemActivity, ProblemDetail } from "@bristle/db";
+import type { ProblemActivity } from "@bristle/db";
 import type { ReactNode } from "react";
+
+import type { DetailViewModel } from "@/lib/problem-detail-adapter";
 
 import { DetailHeader } from "./detail-header";
 import { DetailTabs, type DetailTab, type DetailTabKey } from "./detail-tabs";
 
 // Layout composer for /app/problems/[slug]. Renders the header (with the action
 // bar) + the tab island, and the persistent right rail OUTSIDE the island so it
-// survives tab switches. The seven panels + the rail regions are placeholders
-// this batch (Batch B fills the panels, Batch C the rail); the tab strip, counts,
-// deep-linking, and keyboard nav are live now.
+// survives tab switches. Everything reads the boundary-adapter view model. The
+// seven panels + the rail regions are placeholders this batch (Batch B fills the
+// panels, Batch C the rail); the tab strip, counts, deep-linking, and keyboard
+// nav are live now.
 
 function Placeholder({ label }: { label: string }) {
   return <p className="text-body-md text-text-secondary">{label}</p>;
 }
 
 export function ProblemDetail({
-  detail,
+  vm,
   activity,
-  isSaved,
 }: {
-  detail: ProblemDetail;
+  vm: DetailViewModel;
   activity: ProblemActivity[];
-  isSaved: boolean;
 }) {
   const tabs: DetailTab[] = [
     { key: "synthesis", label: "Synthesis" },
     { key: "frequency", label: "Frequency" },
-    { key: "evidence", label: "Evidence", count: detail.quotes.length },
-    { key: "solutions", label: "Solutions", count: detail.solutions.length },
-    { key: "wtp", label: "WTP", count: detail.wtp?.mentionCount ?? 0 },
+    { key: "evidence", label: "Evidence", count: vm.quoteTotal },
+    { key: "solutions", label: "Solutions", count: vm.solutions.length },
+    { key: "wtp", label: "WTP", count: vm.wtp?.mentionCount ?? 0 },
     { key: "related", label: "Related" },
     { key: "activity", label: "Activity" },
   ];
@@ -45,7 +46,7 @@ export function ProblemDetail({
 
   return (
     <div className="mx-auto max-w-6xl px-grid py-section">
-      <DetailHeader detail={detail} isSaved={isSaved} />
+      <DetailHeader vm={vm} />
       <div className="grid gap-grid pt-section lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0">
           <DetailTabs tabs={tabs} panels={panels} />

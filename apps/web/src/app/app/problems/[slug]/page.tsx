@@ -12,6 +12,7 @@ import { getProblemActivity, getProblemDetail, getSavedProblemIds } from "@brist
 
 import { ProblemDetail } from "@/components/app/problem-detail/problem-detail";
 import { getAppUser } from "@/lib/app-user";
+import { adaptProblemDetail } from "@/lib/problem-detail-adapter";
 
 export default async function ProblemDetailPage({
   params,
@@ -28,11 +29,7 @@ export default async function ProblemDetailPage({
     getProblemActivity(detail.problem.id),
   ]);
 
-  return (
-    <ProblemDetail
-      detail={detail}
-      activity={activity}
-      isSaved={savedIds.has(detail.problem.id)}
-    />
-  );
+  const vm = adaptProblemDetail(detail, savedIds.has(detail.problem.id));
+
+  return <ProblemDetail vm={vm} activity={activity} />;
 }
