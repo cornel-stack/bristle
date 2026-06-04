@@ -19,6 +19,19 @@ export const SORT_LABELS: Record<SortKey, string> = {
   wtp: "willingness-to-pay",
 };
 
+// Facet display labels (one source for the rail + the active-filter chips).
+export const MOMENTUM_LABELS: Record<MomentumBucket, string> = {
+  gte100: "+100% or higher",
+  p25to99: "+25% to +99%",
+  flat: "Flat or declining",
+  new: "New (under 30 days)",
+};
+export const SIGNAL_LABELS: Record<SignalKey, string> = {
+  wtp: "Has WTP signal",
+  solution: "Has existing solution",
+  validated: "Validated demand",
+};
+
 export interface LibraryQuery {
   categories: string[];
   sources: BadgeKey[];
