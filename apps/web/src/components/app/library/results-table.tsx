@@ -60,7 +60,8 @@ export function ResultsTable({ results }: { results: Problem[] }) {
               </td>
               <td className="py-3 pr-grid text-right font-mono">
                 <span className={up ? "text-accent-bristle" : "text-status-warning"}>
-                  {up ? "↑" : "↓"} {up ? "+" : ""}
+                  <span aria-hidden="true">{up ? "↑" : "↓"} </span>
+                  {up ? "+" : ""}
                   {p.momentumPct}%
                 </span>
               </td>
