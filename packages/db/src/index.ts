@@ -70,10 +70,12 @@ export {
   getSavedProblemIds,
   getProblemActivity,
   getLibraryProblems,
+  getSavedBoard,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
   ConsumeEmailCodeResult,
   ProblemDetail,
   LibraryProblem,
+  SavedBoardColumn,
 } from "./queries";
