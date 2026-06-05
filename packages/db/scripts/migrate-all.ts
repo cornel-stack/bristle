@@ -15,28 +15,50 @@ import { redactConnectionString } from "../src/redact";
 //   DATABASE_URL_DIRECT_DEV  → dev project   (set in Batch C when the dev project exists)
 //   DATABASE_URL_DIRECT      → prod project  (the existing var)
 //
-// FAIL-FAST: if EITHER URL is missing we refuse to run, so you can't silently
-// apply to only one and drift the other. (Two separate databases can't share one
-// transaction, so this isn't atomic across them — the per-target apply is atomic,
-// and the raw_items drift test on each DB is the backstop that catches a partial
-// apply.) Authored in Batch A (T005); first RUN is Batch C (T023), once the dev
-// project exists. NOT run here — no database is touched at authoring time.
+// REFUSE-BOTH-OR-NEITHER. Two failure modes can half-apply: (1) a URL is MISSING,
+// (2) a target is UNREACHABLE (DNS flake, paused project, wrong host). We guard
+// both: first require both URLs, then PRE-FLIGHT a connection to each — if either
+// can't be reached we abort BEFORE applying to anyone, so prod is never migrated
+// while dev silently lags (or vice-versa). Two databases can't share a
+// transaction, so this isn't atomic across them; the pre-flight removes the
+// realistic failure, migrations are idempotent (a retry completes a laggard), and
+// the raw_items drift test on each DB is the final backstop.
+//   DATABASE_URL_DIRECT_DEV  → dev project (session pooler 5432)
+//   DATABASE_URL_DIRECT      → prod project (session pooler 5432)
 const targets = [
-  { label: "dev", url: process.env.DATABASE_URL_DIRECT_DEV },
-  { label: "prod", url: process.env.DATABASE_URL_DIRECT },
+  { label: "dev", env: "DATABASE_URL_DIRECT_DEV", url: process.env.DATABASE_URL_DIRECT_DEV },
+  { label: "prod", env: "DATABASE_URL_DIRECT", url: process.env.DATABASE_URL_DIRECT },
 ] as const;
 
-const missing = targets.filter((t) => !t.url).map((t) => t.label);
+const missing = targets.filter((t) => !t.url);
 if (missing.length > 0) {
   console.error(
-    `Refusing to migrate: missing ${missing
-      .map((l) => (l === "dev" ? "DATABASE_URL_DIRECT_DEV" : "DATABASE_URL_DIRECT"))
-      .join(" + ")}. ` +
+    `Refusing to migrate: missing ${missing.map((t) => t.env).join(" + ")}. ` +
       `Both dev and prod must be set so a migration can't be half-applied.`,
   );
   process.exit(1);
 }
 
+// Pre-flight: a connection must succeed for EVERY target before any apply.
+const unreachable: string[] = [];
+for (const { label, url } of targets) {
+  let sql: ReturnType<typeof postgres> | undefined;
+  try {
+    sql = postgres(url!, { max: 1, connect_timeout: 10 });
+    await sql`select 1`;
+  } catch (err) {
+    unreachable.push(`${label} (${redactConnectionString(url!)}): ${err instanceof Error ? err.message : err}`);
+  } finally {
+    await sql?.end({ timeout: 3 });
+  }
+}
+if (unreachable.length > 0) {
+  console.error("Refusing to migrate — unreachable target(s), aborting before ANY apply:");
+  for (const u of unreachable) console.error(`  - ${u}`);
+  process.exit(1);
+}
+
+// Both reachable → apply the chain to each.
 for (const { label, url } of targets) {
   let sql: ReturnType<typeof postgres> | undefined;
   try {
