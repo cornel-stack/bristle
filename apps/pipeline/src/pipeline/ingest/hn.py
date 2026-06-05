@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import logging
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -14,8 +15,17 @@ import httpx
 
 from pipeline import db
 
+logger = logging.getLogger(__name__)
+
 # A fetch is: given a lower-bound timestamp, return the upstream hits at or after it.
 FetchFn = Callable[[datetime], Awaitable[list[dict[str, Any]]]]
+
+# hn.algolia.com caps RETRIEVABLE results per query at ~1000 (paginationLimitedTo):
+# beyond this, pages return nothing. search_by_date is newest-first, so paging an
+# over-cap window would silently drop the OLDEST items in it. We subdivide the
+# [since, now] window by created_at_i until each sub-range is under the cap, then
+# paginate within it — so the full window is covered regardless of volume.
+ALGOLIA_PAGINATION_CAP = 1000
 
 _FIELD_SEP = "\x1f"  # ASCII unit separator — unambiguous join delimiter
 
@@ -100,38 +110,106 @@ async def _request_with_backoff(
     raise RuntimeError("unreachable")  # pragma: no cover
 
 
+async def _fetch_page(
+    client: httpx.AsyncClient,
+    url: str,
+    *,
+    lo: int,
+    hi: int,
+    page: int,
+    tags: str,
+    hits_per_page: int,
+    sleep: Callable[[float], Awaitable[None]],
+) -> dict[str, Any]:
+    # Half-open range [lo, hi): created_at_i>=lo AND created_at_i<hi. An item at
+    # exactly a sub-range boundary belongs to exactly ONE side, so ties at a seam
+    # are never dropped or double-counted (HN timestamps are second-granular).
+    return await _request_with_backoff(
+        client,
+        url,
+        {
+            "tags": tags,
+            "numericFilters": f"created_at_i>={lo},created_at_i<{hi}",
+            "hitsPerPage": hits_per_page,
+            "page": page,
+        },
+        sleep=sleep,
+    )
+
+
+async def _collect_range(
+    client: httpx.AsyncClient,
+    url: str,
+    lo: int,
+    hi: int,
+    *,
+    tags: str,
+    hits_per_page: int,
+    cap: int,
+    sleep: Callable[[float], Awaitable[None]],
+    out: list[dict[str, Any]],
+) -> None:
+    """Recursively collect every hit in [lo, hi). If the range holds more than the
+    cap, bisect it by time and recurse; otherwise paginate it fully."""
+    if hi <= lo:
+        return
+    first = await _fetch_page(
+        client, url, lo=lo, hi=hi, page=0, tags=tags, hits_per_page=hits_per_page, sleep=sleep
+    )
+    nb_hits = int(first.get("nbHits", len(first.get("hits", []))))
+    if nb_hits > cap:
+        if hi - lo > 1:
+            mid = lo + (hi - lo) // 2
+            await _collect_range(
+                client, url, lo, mid, tags=tags, hits_per_page=hits_per_page,
+                cap=cap, sleep=sleep, out=out,
+            )
+            await _collect_range(
+                client, url, mid, hi, tags=tags, hits_per_page=hits_per_page,
+                cap=cap, sleep=sleep, out=out,
+            )
+            return
+        # Degenerate: a single second holding more than the cap — beyond what the
+        # API can paginate. Vanishingly unlikely on HN; collect the cap and warn
+        # rather than fail (the only residual truncation path, made loud).
+        logger.warning(
+            "HN ingest: >%d items at created_at_i=%d — pagination cap may truncate this second",
+            cap,
+            lo,
+        )
+    out.extend(first.get("hits", []))
+    nb_pages = int(first.get("nbPages", 1))
+    for page in range(1, nb_pages):
+        payload = await _fetch_page(
+            client, url, lo=lo, hi=hi, page=page, tags=tags,
+            hits_per_page=hits_per_page, sleep=sleep,
+        )
+        out.extend(payload.get("hits", []))
+
+
 async def fetch_since(
     client: httpx.AsyncClient,
     base: str,
     since: datetime,
+    until: datetime | None = None,
     *,
     sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     tags: str = "story",
-    hits_per_page: int = 1000,
-    max_pages: int = 10,
+    hits_per_page: int = ALGOLIA_PAGINATION_CAP,
+    cap: int = ALGOLIA_PAGINATION_CAP,
 ) -> list[dict[str, Any]]:
-    """Fetch HN items created at/after `since` from the Algolia HN endpoint,
-    paginating. `search_by_date` + numericFilters gives newest-first by created_at."""
+    """Fetch EVERY HN item created in [since, until] from the Algolia HN endpoint,
+    subdividing the window under the pagination cap so a high-volume window is
+    never silently truncated. `until` defaults to now."""
+    until = until or datetime.now(tz=UTC)
     url = f"{base.rstrip('/')}/search_by_date"
-    since_unix = int(since.timestamp())
-    hits: list[dict[str, Any]] = []
-    for page in range(max_pages):
-        payload = await _request_with_backoff(
-            client,
-            url,
-            {
-                "tags": tags,
-                "numericFilters": f"created_at_i>={since_unix}",
-                "hitsPerPage": hits_per_page,
-                "page": page,
-            },
-            sleep=sleep,
-        )
-        page_hits = payload.get("hits", [])
-        hits.extend(page_hits)
-        if len(page_hits) < hits_per_page:
-            break
-    return hits
+    lo = int(since.timestamp())
+    hi = int(until.timestamp()) + 1  # half-open upper bound; +1 includes the latest second
+    out: list[dict[str, Any]] = []
+    await _collect_range(
+        client, url, lo, hi, tags=tags, hits_per_page=hits_per_page, cap=cap, sleep=sleep, out=out
+    )
+    return out
 
 
 def default_fetch(base: str) -> FetchFn:
