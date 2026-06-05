@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import {
+  getCommandIndex,
   getUnreadNotificationCount,
   getWatchedCategories,
 } from "@bristle/db";
@@ -9,6 +10,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppSidebar } from "@/components/app/app-sidebar";
 import { AppTopbar } from "@/components/app/app-topbar";
+import { CommandPalette } from "@/components/app/command-palette/command-palette";
 import { MobileSidebar } from "@/components/app/mobile-sidebar";
 import { getAppUser } from "@/lib/app-user";
 
@@ -25,9 +27,10 @@ export default async function AppLayout({
   const session = await auth();
   if (!session?.user?.email) redirect("/login?callbackUrl=/app");
   const user = await getAppUser();
-  const [watched, unreadCount] = await Promise.all([
+  const [watched, unreadCount, commandIndex] = await Promise.all([
     getWatchedCategories(user.id),
     getUnreadNotificationCount(user.id),
+    getCommandIndex(),
   ]);
   const categories = watched.map((c) => ({
     key: c.key,
@@ -51,6 +54,7 @@ export default async function AppLayout({
         />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+      <CommandPalette index={commandIndex} />
     </div>
   );
 }

@@ -725,3 +725,37 @@ export async function getAlertsData(
 
   return { rules, notifications: notifRows.map((r) => ({ ...r.notif, slug: r.slug })) };
 }
+
+// --- Slice 4.8 (023): command-palette index ----------------------------------
+// Read-only slim index for the global ⌘K palette: the 15 problems (title/slug/
+// category) + the 8 catalog categories (with the displayed problem_count). The
+// palette is a navigator — no write.
+
+export interface CommandIndexProblem {
+  title: string;
+  slug: string;
+  category: string;
+}
+export interface CommandIndexCategory {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export async function getCommandIndex(): Promise<{
+  problems: CommandIndexProblem[];
+  categories: CommandIndexCategory[];
+}> {
+  const db = getDb();
+  const [probs, cats] = await Promise.all([
+    db
+      .select({ title: problems.title, slug: problems.slug, category: problems.category })
+      .from(problems)
+      .orderBy(desc(problems.momentumPct)),
+    db
+      .select({ key: categories.key, label: categories.label, count: categories.problemCount })
+      .from(categories)
+      .orderBy(categories.position),
+  ]);
+  return { problems: probs, categories: cats };
+}
