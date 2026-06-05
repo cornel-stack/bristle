@@ -10,7 +10,7 @@
 // (A3); the shared @bristle/ui ProblemCardFull leaf is never touched.
 
 import { X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { TOUR_LENGTH, TOUR_STEPS, type TourTargetKey } from "./tour-steps";
 
@@ -38,6 +38,9 @@ export function FirstRunTour() {
   const [rect, setRect] = useState<Rect | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  const baseId = useId();
+  const titleId = `${baseId}-title`;
+  const bodyId = `${baseId}-body`;
 
   const current = TOUR_STEPS[step];
   const isLast = step === TOUR_LENGTH - 1;
@@ -188,7 +191,8 @@ export function FirstRunTour() {
         ref={bubbleRef}
         role="dialog"
         aria-modal="true"
-        aria-label={`First-run tour — step ${step + 1} of ${TOUR_LENGTH}`}
+        aria-labelledby={titleId}
+        aria-describedby={bodyId}
         style={bubbleStyle}
         className="absolute rounded-modal border border-border-default bg-surface-card p-card shadow-[0_12px_32px_rgba(0,0,0,0.12)] transition-[top,left] duration-180 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none"
       >
@@ -206,10 +210,12 @@ export function FirstRunTour() {
           </button>
         </div>
 
-        <h2 className="font-serif text-h3 font-semibold text-text-primary">
+        <h2 id={titleId} className="font-serif text-h3 font-semibold text-text-primary">
           {current.title}
         </h2>
-        <p className="mt-tight text-body-sm text-text-secondary">{current.body}</p>
+        <p id={bodyId} className="mt-tight text-body-sm text-text-secondary">
+          {current.body}
+        </p>
 
         {current.tip ? (
           <div className="mt-grid flex items-center gap-snug rounded-button bg-surface-raised px-snug py-2">
