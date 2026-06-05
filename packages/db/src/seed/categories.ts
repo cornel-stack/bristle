@@ -23,7 +23,7 @@ export const CATEGORIES: NewCategory[] = [
     tintFgKey: "category-ai-ml-fg",
     problemCount: 124,
     momentumSeries: { points: [71, 76, 80, 86, 92, 98, 103, 109, 114, 118, 121, 124] },
-    position: 1,
+    position: 2,
   },
   {
     key: "payments",
@@ -32,7 +32,7 @@ export const CATEGORIES: NewCategory[] = [
     tintFgKey: "category-payments-fg",
     problemCount: 86,
     momentumSeries: { points: [70, 71, 72, 74, 75, 77, 78, 80, 81, 83, 84, 86] },
-    position: 2,
+    position: 1,
   },
   {
     key: "deployment",
@@ -41,7 +41,7 @@ export const CATEGORIES: NewCategory[] = [
     tintFgKey: "category-deployment-fg",
     problemCount: 67,
     momentumSeries: { points: [54, 55, 57, 58, 60, 61, 62, 63, 64, 65, 66, 67] },
-    position: 3,
+    position: 4,
   },
   {
     key: "mobile",
@@ -50,7 +50,7 @@ export const CATEGORIES: NewCategory[] = [
     tintFgKey: "category-mobile-fg",
     problemCount: 58,
     momentumSeries: { points: [41, 43, 45, 47, 48, 50, 51, 53, 54, 55, 57, 58] },
-    position: 4,
+    position: 6,
   },
   {
     key: "auth-sso",
@@ -59,7 +59,7 @@ export const CATEGORIES: NewCategory[] = [
     tintFgKey: "category-auth-sso-fg",
     problemCount: 41,
     momentumSeries: { points: [33, 34, 35, 36, 36, 37, 38, 38, 39, 40, 40, 41] },
-    position: 5,
+    position: 3,
   },
   {
     key: "analytics",
@@ -68,7 +68,7 @@ export const CATEGORIES: NewCategory[] = [
     tintFgKey: "category-analytics-fg",
     problemCount: 35,
     momentumSeries: { points: [28, 29, 29, 30, 31, 31, 32, 33, 33, 34, 34, 35] },
-    position: 6,
+    position: 5,
   },
   {
     key: "email",
