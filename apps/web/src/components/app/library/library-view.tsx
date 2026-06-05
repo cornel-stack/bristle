@@ -93,13 +93,27 @@ export function LibraryView({
           <FacetRail query={query} facetCounts={facetCounts} />
         </aside>
         <div className="min-w-0">
+          {query.select.length > 0 ? (
+            <div className="mb-grid flex flex-wrap items-center justify-between gap-2 rounded-card border border-border-default bg-surface-raised px-grid py-2">
+              <span className="text-body-sm text-text-secondary">
+                {query.select.length} selected to compare
+                {query.select.length > 4 ? " (first 4)" : ""}
+              </span>
+              <Link
+                href={`/app/compare?compare=${query.select.slice(0, 4).join(",")}`}
+                className="inline-flex items-center gap-1.5 rounded-button bg-accent-bristle px-3 py-1.5 text-body-sm font-medium text-surface-card transition-colors hover:bg-accent-bristle/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle"
+              >
+                Compare selected →
+              </Link>
+            </div>
+          ) : null}
           {total === 0 ? (
             <EmptyState />
           ) : query.view === "grid" ? (
             <ResultsGrid results={results} />
           ) : (
             <div className="overflow-x-auto">
-              <ResultsTable results={results} />
+              <ResultsTable results={results} selected={query.select} />
             </div>
           )}
         </div>
