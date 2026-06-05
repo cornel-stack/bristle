@@ -89,10 +89,14 @@ async def test_tie_cluster_on_a_seam_is_not_dropped_or_doubled():
     # cap (50) forces the subdivision. Half-open [lo,mid)/[mid,hi) must place all
     # 30 ties on the right side, once each.
     cap, hpp = 50, 20
+
+    def _item(obj_id: str, created: int) -> dict:
+        return {"objectID": obj_id, "title": "x", "url": "u", "created_at_i": created}
+
     items: list[dict] = []
-    items += [{"objectID": f"tie{i}", "title": "x", "url": "u", "created_at_i": 1064} for i in range(30)]
-    items += [{"objectID": f"lo{i}", "title": "x", "url": "u", "created_at_i": 1000 + i} for i in range(20)]
-    items += [{"objectID": f"hi{i}", "title": "x", "url": "u", "created_at_i": 1090 + i} for i in range(20)]
+    items += [_item(f"tie{i}", 1064) for i in range(30)]  # the cluster, exactly on the seam
+    items += [_item(f"lo{i}", 1000 + i) for i in range(20)]  # below the seam
+    items += [_item(f"hi{i}", 1090 + i) for i in range(20)]  # above the seam
     hits = await _fetch_all(items, since_ts=1000, until_ts=1127, cap=cap, hpp=hpp)
     got = [h["objectID"] for h in hits]
     assert len(got) == 70
