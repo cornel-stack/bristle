@@ -1,9 +1,10 @@
 import { Download, GitCompare, Plus } from "lucide-react";
+import Link from "next/link";
 
 // Saved board header. "28 of 50" is the usage_meters literal (already on the
-// dashboard KPI); the collection count is real. Export all (Tier 6) + New
-// comparison (Compare 4.7) render visual-only; New collection is the ephemeral
-// add (wired by the board).
+// dashboard KPI); the collection count is real. Export all (Tier 6) renders
+// visual-only; New comparison links to Compare (slice 4.7 wires this); New
+// collection is the ephemeral add (wired by the board).
 export function SavedHeader({
   savedUsed,
   savedQuota,
@@ -27,10 +28,10 @@ export function SavedHeader({
             <Download className="size-4" strokeWidth={1.5} aria-hidden="true" />
             Export all
           </button>
-          <button type="button" className={secondary}>
+          <Link href="/app/compare" className={secondary}>
             <GitCompare className="size-4" strokeWidth={1.5} aria-hidden="true" />
             New comparison
-          </button>
+          </Link>
           <button
             type="button"
             onClick={onNewCollection}

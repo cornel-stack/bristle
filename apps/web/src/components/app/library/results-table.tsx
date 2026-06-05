@@ -7,6 +7,7 @@ import { BADGE_TO_ICON } from "@/lib/problem-detail-adapter";
 import { relativeTime } from "@/lib/relative-time";
 
 import { CategoryChip } from "./category-chip";
+import { LibraryCompareSelect } from "./library-compare-select";
 
 // Library list/table (the page-3 primary view). Semantic <table>; the Problem
 // cell is the row's single navigation link (whole-row hover affordance + a
@@ -23,11 +24,24 @@ function sourceIconKeys(p: Problem) {
 
 const TH = "py-2 pr-grid font-medium";
 
-export function ResultsTable({ results }: { results: Problem[] }) {
+const MAX_COMPARE = 4;
+
+export function ResultsTable({
+  results,
+  selected = [],
+}: {
+  results: Problem[];
+  selected?: string[];
+}) {
+  const selectedSet = new Set(selected);
+  const atMax = selectedSet.size >= MAX_COMPARE;
   return (
     <table className="w-full min-w-[44rem] border-collapse text-body-sm">
       <thead>
         <tr className="border-b border-border-strong text-left text-text-secondary">
+          <th scope="col" className="py-2 pr-2">
+            <span className="sr-only">Select to compare</span>
+          </th>
           <th scope="col" className={TH}>Problem</th>
           <th scope="col" className={TH}>Category</th>
           <th scope="col" className={`${TH} text-right`}>Mentions</th>
@@ -44,6 +58,14 @@ export function ResultsTable({ results }: { results: Problem[] }) {
           const up = p.momentumPct >= 0;
           return (
             <tr key={p.slug} className="border-b border-border-default hover:bg-surface-raised">
+              <td className="py-3 pr-2 align-middle">
+                <LibraryCompareSelect
+                  slug={p.slug}
+                  checked={selectedSet.has(p.slug)}
+                  atMax={atMax}
+                  title={p.title}
+                />
+              </td>
               <td className="max-w-[22rem] py-3 pr-grid">
                 <Link
                   href={`/app/problems/${p.slug}`}

@@ -40,6 +40,8 @@ export interface LibraryQuery {
   q: string;
   sort: SortKey;
   view: LibraryView;
+  /** Slugs checked for "Compare selected" (slice 4.7 entry); ?select=. */
+  select: string[];
 }
 
 export const MOMENTUM_VALUES: MomentumBucket[] = ["gte100", "p25to99", "flat", "new"];
@@ -77,6 +79,7 @@ export function parseLibraryQuery(sp: SP): LibraryQuery {
     q: (first(sp.q) ?? "").trim(),
     sort: isSortKey(sortRaw) ? sortRaw : "momentum",
     view: first(sp.view) === "grid" ? "grid" : "list",
+    select: multi(sp.select),
   };
 }
 
