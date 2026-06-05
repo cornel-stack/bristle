@@ -72,6 +72,7 @@ export {
   getLibraryProblems,
   getSavedBoard,
   getAlertsData,
+  getCommandIndex,
 } from "./queries";
 export type {
   ConsumeVerificationResult,
@@ -80,4 +81,6 @@ export type {
   LibraryProblem,
   SavedBoardColumn,
   AlertNotificationVM,
+  CommandIndexProblem,
+  CommandIndexCategory,
 } from "./queries";
