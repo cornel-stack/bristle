@@ -38,6 +38,11 @@ export type {
   PasswordResetToken,
   NewPasswordResetToken,
 } from "./auth-schema";
+// Slice 5.1 (migration 0005) — the pipeline's raw_items capture table. Exposed
+// for the contract generator + future (5.5) JS-side reads; the Tier-5 Python
+// ingester writes it via asyncpg, not this client.
+export { rawItems } from "./pipeline-schema";
+export type { RawItem, NewRawItem } from "./pipeline-schema";
 export { getDb } from "./client";
 export {
   getFirstProblem,
