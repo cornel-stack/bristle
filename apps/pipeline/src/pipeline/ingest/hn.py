@@ -27,6 +27,13 @@ FetchFn = Callable[[datetime], Awaitable[list[dict[str, Any]]]]
 # paginate within it — so the full window is covered regardless of volume.
 ALGOLIA_PAGINATION_CAP = 1000
 
+# We split BELOW the hard cap so there's headroom: Algolia's `nbHits` for a range
+# count is approximate when `exhaustiveNbHits` is false (large index), and an
+# under-reported count near 1000 must not let an over-cap window slip through to
+# pagination. We also split whenever the count is NON-exhaustive (an approximate
+# count can't be trusted as "safely under cap"). 200 of headroom.
+ALGOLIA_SPLIT_THRESHOLD = 800
+
 _FIELD_SEP = "\x1f"  # ASCII unit separator — unambiguous join delimiter
 
 
@@ -137,6 +144,18 @@ async def _fetch_page(
     )
 
 
+def _is_exhaustive(payload: dict[str, Any]) -> bool:
+    """Whether Algolia's nbHits is exact. Reads the legacy `exhaustiveNbHits` or the
+    newer `exhaustive.nbHits`. Absent → assume exact (the split-threshold margin
+    still applies); a false here means the count is approximate → we must split."""
+    if "exhaustiveNbHits" in payload:
+        return bool(payload["exhaustiveNbHits"])
+    exhaustive = payload.get("exhaustive")
+    if isinstance(exhaustive, dict) and "nbHits" in exhaustive:
+        return bool(exhaustive["nbHits"])
+    return True
+
+
 async def _collect_range(
     client: httpx.AsyncClient,
     url: str,
@@ -146,35 +165,38 @@ async def _collect_range(
     tags: str,
     hits_per_page: int,
     cap: int,
+    split_threshold: int,
     sleep: Callable[[float], Awaitable[None]],
     out: list[dict[str, Any]],
 ) -> None:
-    """Recursively collect every hit in [lo, hi). If the range holds more than the
-    cap, bisect it by time and recurse; otherwise paginate it fully."""
+    """Recursively collect every hit in [lo, hi). Bisect by time while the range is
+    "over": more than the split threshold OR a non-exhaustive (approximate) count —
+    either way it might exceed the hard retrieval cap. Otherwise paginate it fully."""
     if hi <= lo:
         return
     first = await _fetch_page(
         client, url, lo=lo, hi=hi, page=0, tags=tags, hits_per_page=hits_per_page, sleep=sleep
     )
     nb_hits = int(first.get("nbHits", len(first.get("hits", []))))
-    if nb_hits > cap:
-        if hi - lo > 1:
-            mid = lo + (hi - lo) // 2
-            await _collect_range(
-                client, url, lo, mid, tags=tags, hits_per_page=hits_per_page,
-                cap=cap, sleep=sleep, out=out,
-            )
-            await _collect_range(
-                client, url, mid, hi, tags=tags, hits_per_page=hits_per_page,
-                cap=cap, sleep=sleep, out=out,
-            )
-            return
-        # Degenerate: a single second holding more than the cap — beyond what the
-        # API can paginate. Vanishingly unlikely on HN; collect the cap and warn
-        # rather than fail (the only residual truncation path, made loud).
+    over = (not _is_exhaustive(first)) or nb_hits > split_threshold
+    if over and hi - lo > 1:
+        mid = lo + (hi - lo) // 2
+        await _collect_range(
+            client, url, lo, mid, tags=tags, hits_per_page=hits_per_page,
+            cap=cap, split_threshold=split_threshold, sleep=sleep, out=out,
+        )
+        await _collect_range(
+            client, url, mid, hi, tags=tags, hits_per_page=hits_per_page,
+            cap=cap, split_threshold=split_threshold, sleep=sleep, out=out,
+        )
+        return
+    if over:
+        # A single second still "over" — beyond what the API can subdivide. Pages
+        # are capped, so this is the only residual truncation path; made loud.
         logger.warning(
-            "HN ingest: >%d items at created_at_i=%d — pagination cap may truncate this second",
-            cap,
+            "HN ingest: ~%d items (exhaustive=%s) in one second at %d — cap may truncate",
+            nb_hits,
+            _is_exhaustive(first),
             lo,
         )
     out.extend(first.get("hits", []))
@@ -197,17 +219,19 @@ async def fetch_since(
     tags: str = "story",
     hits_per_page: int = ALGOLIA_PAGINATION_CAP,
     cap: int = ALGOLIA_PAGINATION_CAP,
+    split_threshold: int = ALGOLIA_SPLIT_THRESHOLD,
 ) -> list[dict[str, Any]]:
     """Fetch EVERY HN item created in [since, until] from the Algolia HN endpoint,
-    subdividing the window under the pagination cap so a high-volume window is
-    never silently truncated. `until` defaults to now."""
+    subdividing the window under the pagination cap (with margin) so a high-volume
+    window is never silently truncated. `until` defaults to now."""
     until = until or datetime.now(tz=UTC)
     url = f"{base.rstrip('/')}/search_by_date"
     lo = int(since.timestamp())
     hi = int(until.timestamp()) + 1  # half-open upper bound; +1 includes the latest second
     out: list[dict[str, Any]] = []
     await _collect_range(
-        client, url, lo, hi, tags=tags, hits_per_page=hits_per_page, cap=cap, sleep=sleep, out=out
+        client, url, lo, hi, tags=tags, hits_per_page=hits_per_page,
+        cap=cap, split_threshold=split_threshold, sleep=sleep, out=out,
     )
     return out
 
