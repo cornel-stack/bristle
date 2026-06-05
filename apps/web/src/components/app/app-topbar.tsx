@@ -1,11 +1,13 @@
-// Persistent top bar (server component). Context label, a visual-only search field
-// (functional search is the command palette, 4.8), a notification bell badged with
+// Persistent top bar (server component). Context label, the command-palette
+// trigger (the functional ⌘K search — slice 4.8), a notification bell badged with
 // the unread count, and the user avatar (initials). §4 tokens, no hex.
 import type { ReactNode } from "react";
 
 import type { User } from "@bristle/db";
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import Link from "next/link";
+
+import { CommandPaletteTrigger } from "@/components/app/command-palette/command-palette-trigger";
 
 function initials(name: string | null): string {
   if (!name) return "?";
@@ -35,10 +37,7 @@ export function AppTopbar({
         </span>
       </div>
       <div className="flex items-center gap-grid">
-        <div className="hidden w-64 items-center gap-snug rounded-button border border-border-default bg-surface-canvas px-snug py-1.5 text-body-sm text-text-tertiary md:flex">
-          <Search className="size-4" strokeWidth={1.5} aria-hidden="true" />
-          Search…
-        </div>
+        <CommandPaletteTrigger />
         <Link
           href="/app/alerts"
           aria-label={`Notifications — ${unreadCount} unread`}
