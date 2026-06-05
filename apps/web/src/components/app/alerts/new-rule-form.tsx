@@ -1,11 +1,10 @@
 "use client";
 
-import { CATEGORY_LABELS, type CategoryKey } from "@bristle/shared";
 import { useState } from "react";
 
-import { RULE_TYPE_OPTIONS, thresholdUnit, type RuleType } from "./rule-format";
+import { useCategories } from "@/components/app/categories/categories-context";
 
-const CATEGORY_ENTRIES = Object.entries(CATEGORY_LABELS) as [CategoryKey, string][];
+import { RULE_TYPE_OPTIONS, thresholdUnit, type RuleType } from "./rule-format";
 
 // New-rule form (slice 4.6, A1) — category + condition-type + threshold (omitted
 // for "any new problem"). The board derives the "<Category> · <condition>" name
@@ -17,6 +16,7 @@ export function NewRuleForm({
   onSubmit: (categoryKey: string, ruleType: RuleType, threshold: number | null) => void;
   onCancel: () => void;
 }) {
+  const { categories } = useCategories();
   const [category, setCategory] = useState<string>("payments");
   const [ruleType, setRuleType] = useState<RuleType>("momentum");
   const [threshold, setThreshold] = useState("100");
@@ -39,9 +39,9 @@ export function NewRuleForm({
       <label className="block text-body-sm text-text-secondary">
         Category
         <select value={category} onChange={(e) => setCategory(e.target.value)} className={select}>
-          {CATEGORY_ENTRIES.map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
+          {categories.map((c) => (
+            <option key={c.key} value={c.key}>
+              {c.label}
             </option>
           ))}
         </select>

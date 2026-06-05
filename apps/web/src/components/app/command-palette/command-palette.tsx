@@ -5,6 +5,7 @@ import { Command } from "cmdk";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
+import { useCategories } from "@/components/app/categories/categories-context";
 import { CategoryChip } from "@/components/app/library/category-chip";
 
 import { buildActions } from "./command-actions";
@@ -35,6 +36,7 @@ export function CommandPalette({ index }: { index: CommandIndex }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const restoreFocus = useRef<HTMLElement | null>(null);
+  const { categories: allCategories } = useCategories();
 
   useEffect(() => {
     function onKey(e: globalThis.KeyboardEvent) {
@@ -74,8 +76,8 @@ export function CommandPalette({ index }: { index: CommandIndex }) {
   if (!open) return null;
 
   const problems = index.problems.filter((p) => matches(query, p.title, p.category));
-  const categories = index.categories.filter((c) => matches(query, c.label));
-  const actions = buildActions(query, index.categories);
+  const categories = allCategories.filter((c) => matches(query, c.label));
+  const actions = buildActions(query, allCategories);
   const total = problems.length + categories.length + actions.length;
 
   function onPaletteKeyDown(e: KeyboardEvent<HTMLDivElement>) {
