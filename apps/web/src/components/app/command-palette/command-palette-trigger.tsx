@@ -9,6 +9,7 @@ export function CommandPaletteTrigger() {
   return (
     <button
       type="button"
+      data-tour="palette"
       onClick={() => window.dispatchEvent(new Event("bristle:open-command"))}
       aria-label="Open command palette"
       className="hidden w-64 items-center gap-snug rounded-button border border-border-default bg-surface-canvas px-snug py-1.5 text-body-sm text-text-tertiary transition-colors hover:text-text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle md:flex"

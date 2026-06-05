@@ -15,6 +15,7 @@ import { KpiCard } from "@/components/app/dashboard/kpi-card";
 import { ProblemGrid } from "@/components/app/dashboard/problem-grid";
 import { SortTabs } from "@/components/app/dashboard/sort-tabs";
 import { WeeklyMomentumChart } from "@/components/app/dashboard/weekly-momentum-chart";
+import { FirstRunTour } from "@/components/app/tour/first-run-tour";
 import { getAppUser } from "@/lib/app-user";
 import { isSortKey, sortProblems } from "@/lib/dashboard-sort";
 
@@ -106,6 +107,10 @@ export default async function DashboardPage({
         </div>
         <ActivityRail entries={activity} />
       </div>
+
+      {/* The first-run spotlight tour — the one client island, dashboard-only
+          (slice 025). Ephemeral/session-scoped; gated to /app by virtue of mount. */}
+      <FirstRunTour />
     </div>
   );
 }

@@ -11,10 +11,13 @@ import { toProblemCardProps } from "../problem-card-adapter";
 export function ProblemGrid({ problems }: { problems: Problem[] }) {
   return (
     <div className="grid grid-cols-1 gap-grid md:grid-cols-2 xl:grid-cols-3">
-      {problems.map((p) => (
+      {problems.map((p, i) => (
         <Link
           key={p.slug}
           href={`/app/problems/${p.slug}`}
+          // Anchor the FIRST card for the slice-025 tour (step 2). The wrapping
+          // Link is in-app; the shared @bristle/ui ProblemCardFull leaf is untouched.
+          data-tour={i === 0 ? "problem-card" : undefined}
           className="block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bristle"
         >
           <ProblemCardFull {...toProblemCardProps(p)} />
