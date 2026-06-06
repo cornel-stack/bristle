@@ -1,0 +1,120 @@
+{
+  "table": "processed_items",
+  "columns": [
+    {
+      "name": "classifier_model",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "confidence",
+      "type": "real",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "embedding",
+      "type": "vector(1536)",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "embedding_model",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "forced_keep",
+      "type": "boolean",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "notNull": true,
+      "primaryKey": true,
+      "unique": false
+    },
+    {
+      "name": "label",
+      "type": "text",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "normalized_text",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "processed_at",
+      "type": "timestamp with time zone",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "prompt_version",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "raw_item_id",
+      "type": "uuid",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": true
+    },
+    {
+      "name": "reason",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    }
+  ],
+  "uniqueConstraints": [
+    {
+      "name": "processed_items_raw_item_id_unique",
+      "columns": [
+        "raw_item_id"
+      ]
+    }
+  ],
+  "indexes": [
+    {
+      "name": "processed_items_embedding_hnsw_idx",
+      "columns": [
+        "embedding"
+      ],
+      "unique": false,
+      "method": "hnsw"
+    }
+  ],
+  "foreignKeys": [
+    {
+      "name": "processed_items_raw_item_id_raw_items_id_fk",
+      "columns": [
+        "raw_item_id"
+      ],
+      "refTable": "raw_items",
+      "refColumns": [
+        "id"
+      ],
+      "onDelete": "cascade"
+    }
+  ]
+}

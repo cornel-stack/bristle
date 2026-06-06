@@ -108,7 +108,8 @@
         "source",
         "source_created_at"
       ],
-      "unique": false
+      "unique": false,
+      "method": "btree"
     },
     {
       "name": "raw_items_source_source_id_idx",
@@ -116,7 +117,9 @@
         "source",
         "source_id"
       ],
-      "unique": false
+      "unique": false,
+      "method": "btree"
     }
-  ]
+  ],
+  "foreignKeys": []
 }
