@@ -1,0 +1,7 @@
+# apps/pipeline (Python) — never commit secrets, the venv, or caches.
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

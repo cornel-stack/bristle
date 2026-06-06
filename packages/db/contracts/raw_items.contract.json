@@ -1,0 +1,122 @@
+{
+  "table": "raw_items",
+  "columns": [
+    {
+      "name": "author",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "body",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "content_hash",
+      "type": "text",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": true
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "notNull": true,
+      "primaryKey": true,
+      "unique": false
+    },
+    {
+      "name": "ingested_at",
+      "type": "timestamp with time zone",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "num_comments",
+      "type": "integer",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "points",
+      "type": "integer",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "raw",
+      "type": "jsonb",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "source",
+      "type": "text",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "source_created_at",
+      "type": "timestamp with time zone",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "source_id",
+      "type": "text",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    },
+    {
+      "name": "url",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false
+    }
+  ],
+  "uniqueConstraints": [
+    {
+      "name": "raw_items_content_hash_unique",
+      "columns": [
+        "content_hash"
+      ]
+    }
+  ],
+  "indexes": [
+    {
+      "name": "raw_items_source_created_at_idx",
+      "columns": [
+        "source",
+        "source_created_at"
+      ],
+      "unique": false
+    },
+    {
+      "name": "raw_items_source_source_id_idx",
+      "columns": [
+        "source",
+        "source_id"
+      ],
+      "unique": false
+    }
+  ]
+}

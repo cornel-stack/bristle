@@ -7,8 +7,10 @@
   "types": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
   "scripts": {
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "drizzle-kit generate && tsx scripts/gen-contract.ts",
+    "db:contract": "tsx scripts/gen-contract.ts",
     "db:migrate": "tsx src/migrate.ts",
+    "db:migrate:all": "tsx scripts/migrate-all.ts",
     "db:seed": "tsx src/seed.ts",
     "db:studio": "drizzle-kit studio",
     "db:probe": "tsx scripts/probe.ts",
