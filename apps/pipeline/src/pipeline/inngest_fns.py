@@ -34,7 +34,13 @@ inngest_client = inngest.Inngest(
     concurrency=[inngest.Concurrency(limit=1)],
     retries=3,
 )
-async def hn_ingest(ctx: inngest.Context, step: inngest.Step) -> dict[str, int]:
+async def hn_ingest(ctx: inngest.Context) -> dict[str, int]:
+    # Inngest (Python SDK) invokes the handler with a SINGLE context argument and
+    # exposes steps as `ctx.step` — there is NO separate `step` parameter. (A
+    # two-arg `(ctx, step)` handler registers fine but fails at dispatch with
+    # "missing 1 required positional argument: 'step'", which is what broke the
+    # first Cloud invocation.) This is a cron trigger, so there is no event payload
+    # to read. We don't use steps here; if we did it would be `await ctx.step.run(...)`.
     settings = load_settings()
     pool = await db.create_pool(settings.database_url)
     try:
