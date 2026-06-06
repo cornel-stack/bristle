@@ -1,8 +1,8 @@
 {
-  "table": "raw_items",
+  "table": "processed_items",
   "columns": [
     {
-      "name": "author",
+      "name": "classifier_model",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
@@ -10,7 +10,23 @@
       "generated": false
     },
     {
-      "name": "body",
+      "name": "confidence",
+      "type": "real",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false,
+      "generated": false
+    },
+    {
+      "name": "embedding",
+      "type": "vector(1536)",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false,
+      "generated": false
+    },
+    {
+      "name": "embedding_model",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
@@ -18,11 +34,11 @@
       "generated": false
     },
     {
-      "name": "content_hash",
-      "type": "text",
+      "name": "forced_keep",
+      "type": "boolean",
       "notNull": true,
       "primaryKey": false,
-      "unique": true,
+      "unique": false,
       "generated": false
     },
     {
@@ -34,7 +50,31 @@
       "generated": false
     },
     {
-      "name": "ingested_at",
+      "name": "kept",
+      "type": "boolean",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false,
+      "generated": true
+    },
+    {
+      "name": "label",
+      "type": "text",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false,
+      "generated": false
+    },
+    {
+      "name": "normalized_text",
+      "type": "text",
+      "notNull": false,
+      "primaryKey": false,
+      "unique": false,
+      "generated": false
+    },
+    {
+      "name": "processed_at",
       "type": "timestamp with time zone",
       "notNull": true,
       "primaryKey": false,
@@ -42,55 +82,7 @@
       "generated": false
     },
     {
-      "name": "num_comments",
-      "type": "integer",
-      "notNull": false,
-      "primaryKey": false,
-      "unique": false,
-      "generated": false
-    },
-    {
-      "name": "points",
-      "type": "integer",
-      "notNull": false,
-      "primaryKey": false,
-      "unique": false,
-      "generated": false
-    },
-    {
-      "name": "raw",
-      "type": "jsonb",
-      "notNull": true,
-      "primaryKey": false,
-      "unique": false,
-      "generated": false
-    },
-    {
-      "name": "source",
-      "type": "text",
-      "notNull": true,
-      "primaryKey": false,
-      "unique": false,
-      "generated": false
-    },
-    {
-      "name": "source_created_at",
-      "type": "timestamp with time zone",
-      "notNull": true,
-      "primaryKey": false,
-      "unique": false,
-      "generated": false
-    },
-    {
-      "name": "source_id",
-      "type": "text",
-      "notNull": true,
-      "primaryKey": false,
-      "unique": false,
-      "generated": false
-    },
-    {
-      "name": "title",
+      "name": "prompt_version",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
@@ -98,7 +90,15 @@
       "generated": false
     },
     {
-      "name": "url",
+      "name": "raw_item_id",
+      "type": "uuid",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": true,
+      "generated": false
+    },
+    {
+      "name": "reason",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
@@ -108,31 +108,33 @@
   ],
   "uniqueConstraints": [
     {
-      "name": "raw_items_content_hash_unique",
+      "name": "processed_items_raw_item_id_unique",
       "columns": [
-        "content_hash"
+        "raw_item_id"
       ]
     }
   ],
   "indexes": [
     {
-      "name": "raw_items_source_created_at_idx",
+      "name": "processed_items_embedding_hnsw_idx",
       "columns": [
-        "source",
-        "source_created_at"
+        "embedding"
       ],
       "unique": false,
-      "method": "btree"
-    },
-    {
-      "name": "raw_items_source_source_id_idx",
-      "columns": [
-        "source",
-        "source_id"
-      ],
-      "unique": false,
-      "method": "btree"
+      "method": "hnsw"
     }
   ],
-  "foreignKeys": []
+  "foreignKeys": [
+    {
+      "name": "processed_items_raw_item_id_raw_items_id_fk",
+      "columns": [
+        "raw_item_id"
+      ],
+      "refTable": "raw_items",
+      "refColumns": [
+        "id"
+      ],
+      "onDelete": "cascade"
+    }
+  ]
 }

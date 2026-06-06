@@ -29,11 +29,17 @@ tests/              content_hash · dedup · backfill · watermark_trap · backo
 ## Develop
 
 ```sh
+# Ephemeral pgvector Postgres (slice 5.2 needs the vector extension + HNSW index):
+docker run --rm -d --name bristle_pgtest \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=pipeline_test \
+  -p 55432:5432 pgvector/pgvector:pg16
+
 uv sync                                   # create .venv + uv.lock
 uv run ruff check .                       # lint
 TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:55432/pipeline_test \
-  uv run pytest                           # tests against an EPHEMERAL postgres:16 (never Supabase)
+  uv run pytest                           # tests against the EPHEMERAL pgvector container (never Supabase)
 ```
 
-The tests are **gate-free** — they run against a throwaway Postgres with migration
-`0005` applied in `conftest.py`; no Supabase or Railway is required.
+The tests are **gate-free** — they run against a throwaway **`pgvector/pgvector:pg16`**
+Postgres with the pipeline migrations (`0005` + `0006`, incl. its `CREATE EXTENSION
+vector` + HNSW index) applied in `conftest.py`; no Supabase or Railway is required.

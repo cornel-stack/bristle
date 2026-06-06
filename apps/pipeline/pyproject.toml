@@ -9,6 +9,10 @@ dependencies = [
     "inngest>=0.4",
     "fastapi>=0.115",
     "uvicorn>=0.32",
+    # Slice 5.2 — per-slice ML deps (standing OD-7): the constitution names these
+    # exact providers; you don't hand-roll provider clients.
+    "anthropic>=0.40",
+    "openai>=1.50",
 ]
 
 [dependency-groups]
@@ -28,4 +32,4 @@ package = false
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]

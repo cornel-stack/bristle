@@ -11,9 +11,10 @@ import inspect
 import logging
 import types
 
+import conftest
+
 from pipeline import db, inngest_fns
 from pipeline.ingest import hn
-from pipeline.settings import Settings
 
 _SENTINEL = {"fetched": 0, "inserted": 0, "skipped": 0}
 
@@ -41,17 +42,7 @@ async def test_handler_runs_when_called_with_single_context(monkeypatch):
     async def _fake_run_ingest(pool, fetch, **kwargs):
         return dict(_SENTINEL)
 
-    monkeypatch.setattr(
-        inngest_fns, "load_settings",
-        lambda: Settings(
-            database_url="postgresql://stub",
-            inngest_signing_key=None,
-            inngest_event_key=None,
-            algolia_base="https://hn.algolia.com/api/v1",
-            lookback_hours=24,
-            backfill_hours=72,
-        ),
-    )
+    monkeypatch.setattr(inngest_fns, "load_settings", lambda: conftest.make_settings())
     monkeypatch.setattr(db, "create_pool", _fake_create_pool)
     monkeypatch.setattr(hn, "run_ingest", _fake_run_ingest)
 
