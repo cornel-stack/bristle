@@ -11,7 +11,7 @@ Stand up the **processor**: a second `apps/pipeline` job that, for every unproce
 ## Constitution Check
 
 - **Locked stack** (§3): Python 3.12, FastAPI, Inngest, Railway, Supabase + **pgvector**, Drizzle, **Claude Haiku** (filter classification — exactly §3's stated use), **OpenAI `text-embedding-3-small`** (embeddings — exactly §3) — all as specified. **PASS.**
-- **OD-7 (Python ML deps)**: two new per-slice deps — the **Anthropic SDK** and **OpenAI SDK** — each justified per-slice (the constitution names these exact models; you don't hand-roll provider clients). Within the OD-7 principle (the JS no-dep rule doesn't transfer to the Python runtime). **CONFIRM in OD-1.**
+- **Standing OD-7 (Python ML deps)**: two new per-slice deps — the **Anthropic SDK** and **OpenAI SDK** — each justified per-slice (the constitution names these exact models; you don't hand-roll provider clients), under the standing §8 OD-7 principle (the JS no-dep rule doesn't transfer to the Python runtime). **ACCEPTED (5.2-OD-1).**
 - **All DB access through Drizzle** governs the web app; the Python pipeline uses asyncpg; **schema stays Drizzle-owned** (migration `0006`). The nuance from 5.1. **PASS.**
 - **Additive, no app-table touch** (FR-015): `0006` is `CREATE TABLE processed_items` + FK + HNSW index (+ idempotent `CREATE EXTENSION IF NOT EXISTS vector`). **PASS.**
 - **Workspace hygiene**: `apps/pipeline` stays out of pnpm/Turbo; `pipeline-ci.yml` extends (now on `pgvector/pgvector:pg16`). **PASS.**
@@ -33,7 +33,7 @@ Most of 5.2 is **gate-free** — schema + migration authoring, the contract/drif
 ## Architecture
 
 ### A. Schema + migration `0006` (Drizzle-owned, gate-free to author)
-A new pipeline-namespaced Drizzle table `processedItems` (in `packages/db`) → `drizzle-kit generate` emits **`0006_*.sql`** (offline). Columns: `id` uuid PK; `raw_item_id` uuid FK→`raw_items(id)` **UNIQUE** (idempotency key; `ON DELETE CASCADE`); `label` (text — OD-7 below on text-vs-enum); `reason` text; `confidence` real; `forced_keep` boolean default false; `normalized_text` text; `embedding` **`vector(1536)`** NULL; `classifier_model` text; `prompt_version` text; `embedding_model` text; `processed_at` timestamptz default now(). **Keep/drop is derived** (`label != 'noise'`), not stored. **HNSW index** on `embedding`. The SQL is hand-topped with `CREATE EXTENSION IF NOT EXISTS vector` (self-contained for the standalone conftest apply — the migration-0000 precedent). Applying `0006` is a **gated** step (Batch C).
+A new pipeline-namespaced Drizzle table `processedItems` (in `packages/db`) → `drizzle-kit generate` emits **`0006_*.sql`** (offline). Columns: `id` uuid PK; `raw_item_id` uuid FK→`raw_items(id)` **UNIQUE** (idempotency key; `ON DELETE CASCADE`); `label` (text — 5.2-OD-2); `reason` text; `confidence` real; `forced_keep` boolean default false; `normalized_text` text; `embedding` **`vector(1536)`** NULL; `classifier_model` text; `prompt_version` text; `embedding_model` text; `processed_at` timestamptz default now(). **Keep/drop is derived** (`label != 'noise'`), not stored. **HNSW index** on `embedding`. The SQL is hand-topped with `CREATE EXTENSION IF NOT EXISTS vector` (self-contained for the standalone conftest apply — the migration-0000 precedent). Applying `0006` is a **gated** step (Batch C).
 
 ### B. The TS↔Python contract — now TWO tables (generalize the 5.1 seam)
 Today `gen-contract.ts` hardcodes `rawItems`→`raw_items.contract.json`, and `test_schema_contract.py` checks only `raw_items`. **Generalize both**: `gen-contract` iterates a `{rawItems, processedItems}` map → emits `raw_items.contract.json` **and** `processed_items.contract.json` (still chained into `db:generate`); the drift test asserts **each** live table == its committed contract == its Python column spec — extended to cover the **`vector(1536)`** column, the **HNSW index**, and the **FK + UNIQUE** on `raw_item_id`. Python gains a `PROCESSED_ITEMS_COLUMNS` spec alongside `RAW_ITEMS_COLUMNS`.
@@ -56,11 +56,11 @@ eval/           # the gold-eval harness (see D)
 
 ### D. The data-quality DoD — the gold eval set + harness (the headline, the analogue of 5.1's watermark-trap)
 - **Gold set (build-time, founder-in-the-loop)**: a task drafts the rubric (already in the spec), **auto-labels a stratified ~150–200-item sample** of real dev `raw_items` (Claude), the **founder corrects** it, and the corrected labels are **committed** (e.g. `apps/pipeline/eval/gold_set.jsonl`) — the frozen measuring stick.
-- **Eval harness (committed test)**: runs the **real classifier prompt** over the gold set (mocked transport in CI replays recorded outputs, OR a gated `--live` mode for a real measured run), computes **two-sided** metrics, and **asserts noise-drop ≥ 80% AND problem-retention ≥ target** (retention prioritized; the target % is OD-6). This is a **quality gate**, not prose — it fails CI if the prompt regresses.
+- **Eval harness (committed test)**: runs the **real classifier prompt** over the gold set (mocked transport in CI replays recorded outputs, OR a gated `--live` mode for a real measured run), computes **two-sided** metrics, and **asserts noise-drop ≥ 80% AND problem-retention ≥ target** (retention prioritized; the target % is 5.2-OD-6, set on the labeled gold set). The **`--live` run is the pass/fail DoD; CI's mocked replay is the regression guard** (5.2-OD-9).
 
 ### E. Cost safety + orchestration
-- **Cap + ceiling** (`cost.py`): a run processes ≤ `MAX_ITEMS_PER_RUN` (default ~1000) and tracks estimated $ against `DAILY_USD_CEILING` (default $5); on either breach it **halts gracefully** (finish the in-flight item, log `processed/halted/reason`, exit 0) — never crash. Tested: backlog > cap → exactly cap; simulated spend > ceiling → graceful halt.
-- **Processor cron** (`inngest_fns.py`): a **separate** Inngest scheduled function (OD-4 — same app/service as the ingester, distinct `fn_id`), `concurrency:1`, retries; **synchronous** per-item processing of the `NOT EXISTS` pickup.
+- **Cap + ceiling** (`cost.py`): a run processes ≤ `MAX_ITEMS_PER_RUN` (default ~1000) and tracks estimated $ against `DAILY_USD_CEILING` (**default $20** — a runaway tripwire well above steady-state, NOT $5 which sits near real daily cost and would trip normally); on either breach it **halts gracefully** (finish the in-flight item, log `processed/halted/reason`, exit 0) — never crash. Tested: backlog > cap → exactly cap; simulated spend > ceiling → graceful halt.
+- **Processor cron** (`inngest_fns.py`): a **separate** Inngest scheduled function (5.2-OD-4 — same app/service as the ingester, distinct `fn_id`), `concurrency:1`, retries; **synchronous** per-item processing of the `NOT EXISTS` pickup.
 - **Backfill** (`backfill.py`): a **one-shot** Message Batches command (async, ~half price) to drain the initial ~3,200; **gated on keys, founder-run**; steady-state stays the sync cron.
 
 ### F. CI + the pgvector container
@@ -83,24 +83,26 @@ eval/           # the gold-eval harness (see D)
   **Checkpoint C**: dev+prod have `processed_items`; prod untouched but for the new empty table. — STOP.
 
 - **Batch D — Gold eval set + the quality gate** *(auto-label is GATE-KEYS; founder-correction is founder-run)*.
-  Stratified sample of dev `raw_items`; Claude auto-labels (gated on keys); **founder corrects → commit `gold_set.jsonl`**; the eval harness asserts two-sided drop≥80%/retention≥target. Tune the prompt until the gate passes.
-  **Checkpoint D**: the gold set is committed and the **eval gate passes** (the real DoD). — STOP.
+  Stratified ~150–200-item sample of dev `raw_items` (**HN-only at 5.2**); Claude auto-labels (gated on keys); **founder corrects → commit `gold_set.jsonl`**; **set the retention target with the founder on the labeled set** (5.2-OD-6) and **calibrate `FORCED_KEEP_BELOW`** to meet it (5.2-OD-3); tune the prompt until the **`--live` eval** (real Haiku over the gold set, ~$0.20) asserts two-sided drop≥80% AND retention≥target. CI then runs the mocked/replay version as the regression guard (5.2-OD-9).
+  **Checkpoint D**: the gold set + target + threshold are committed and the **`--live` eval gate passes** (the real DoD). — STOP.
 
 - **Batch E — Deploy + backfill + autonomous processing** *(GATE-KEYS + GATE-RAILWAY/INNGEST)*.
   Railway gets the two keys; the processor cron registers; the **one-shot Batch-API backfill** drains the ~3,200 (founder-run); confirm `processed_items` populates, kept⇒embedding holds on real data, a re-run does nothing, cost stays under the guard. §8 note.
   **Checkpoint E (slice gate)**: live processing meets the DoD (filtered, embedded, idempotent, bounded cost, prod isolated). **No tag.** — STOP.
 
-## Open decisions the plan forces (each with a recommendation)
+## Open decisions — RESOLVED (the `5.2-OD-n` namespace)
 
-- **OD-1 — New deps (Anthropic + OpenAI SDKs).** **Recommend: accept** both as per-slice ML deps (OD-7; the constitution names these exact models). *Confirm.*
-- **OD-2 — `label` as `text` vs a Postgres `enum`.** **Recommend `text`** + a CHECK or app-level validation — forward-compatible (adding a label later doesn't need an `ALTER TYPE`), simpler for the contract/drift introspection. *Alt: pg enum (stricter, heavier migration).* 
-- **OD-3 — Confidence threshold for forced-keep.** **Recommend a config knob `FORCED_KEEP_BELOW` (default 0.5)** — tune on the gold set; bias against false-drops. Forced-keep items **do embed** (they're kept). *Confirm the default + that forced_keep is recorded.*
-- **OD-4 — One Inngest app/Railway service or separate.** **Recommend: same app + service as the 5.1 ingester, a distinct `fn_id` (`process-items`)** — one deploy, shared secrets; the two crons are independent functions. *Alt: a second service (more isolation, more ops).* 
-- **OD-5 — HNSW index params.** **Recommend pgvector defaults (`m=16, ef_construction=64`)** at this corpus size; revisit at scale (a 5.9/5.10 tuning concern). Distance op: **cosine** (`vector_cosine_ops`) to match embedding semantics. *Confirm.*
-- **OD-6 — The retention target %.** **Recommend setting it WITH the founder on the gold set** (e.g. retain ≥95% of true problems) once labeled — not guessed now; retention is prioritized over drop-rate. *Confirm the method (set-on-gold-set).* 
-- **OD-7 — Eval-set size + stratification.** **Recommend ~150–200 items stratified by source + by Claude's draft label** (so noise and each keep-type are represented). *Confirm size.*
-- **OD-8 — Batch-API result handling.** **Recommend: the backfill command submits the batch, polls to completion, then writes results through the SAME atomic `insert_processed` path** (so batch + sync converge on one writer + the idempotency guarantee). *Confirm poll-then-write (vs a webhook).* 
-- **OD-9 — Eval harness in CI: replay vs live.** **Recommend: CI runs the harness against recorded/mocked outputs (deterministic, spend-free); a gated `--live` mode** does a real measured run on demand. *Confirm CI stays mocked.*
+> Renumbered to `5.2-OD-n` so the **durable** ones don't collide with the standing **OD-1…OD-7 from slice 5.1/026** in CLAUDE.md §8 (there OD-1 = the 24h lookback `B`, OD-7 = the Python-dependency principle). Any `5.2-OD-n` that becomes durable in §8 carries the `5.2-` prefix.
+
+- **5.2-OD-1 — New deps (Anthropic + OpenAI SDKs). [ACCEPTED]** Both added as per-slice ML deps under the standing OD-7 principle (the constitution names these exact models; you don't hand-roll provider clients).
+- **5.2-OD-2 — `label` as `text` (not a pg enum). [ACCEPTED]** `text` + an app-level/CHECK validation — forward-compatible (a new label needs no `ALTER TYPE`), simpler for contract/drift introspection.
+- **5.2-OD-3 — Forced-keep threshold. [SETTLED — starting default, calibrated in Batch D]** `FORCED_KEEP_BELOW = 0.5` is a **STARTING default only**, **calibrated against the gold set in Batch D to hit the retention target** (tied to 5.2-OD-6) — NOT locked by guess. **Forced-keep items still embed** (they're kept); `forced_keep` + `confidence` are stored.
+- **5.2-OD-4 — One Inngest app + Railway service, distinct `fn_id`. [ACCEPTED]** Same app + service as the 5.1 ingester, `fn_id = process-items` — one deploy, shared secrets; the two crons are independent functions.
+- **5.2-OD-5 — HNSW params. [ACCEPTED]** `m=16, ef_construction=64` (pgvector defaults) at this corpus size; revisit at scale (5.9/5.10). Distance op **cosine** (`vector_cosine_ops`).
+- **5.2-OD-6 — Retention target %. [SETTLED — deferred to the labeled gold set]** **Do NOT guess a number now.** The retention target is set **with the founder on the labeled gold set** in Batch D; retention is prioritized over drop-rate. (5.2-OD-3's threshold is calibrated to meet it.)
+- **5.2-OD-7 — Eval-set size + stratification. [SETTLED — HN-only at 5.2, must extend per-source later]** ~150–200 items stratified by Claude's draft label. **At 5.2 the gold set is HN-only** (HN is the only `source` in `raw_items`). It **MUST be extended with stratified per-source samples as 5.6–5.10 add GitHub/SO/etc., with the quality gate re-measured** — an HN-calibrated filter + threshold is **not assumed to generalize** across sources. (Recorded as a follow-up.)
+- **5.2-OD-8 — Batch-API result handling. [ACCEPTED]** The backfill command submits the batch, **polls to completion, then writes results through the SAME atomic `insert_processed` path** (batch + sync converge on one writer + the idempotency guarantee).
+- **5.2-OD-9 — The real quality gate is `--live`; CI stays mocked. [SETTLED]** **Batch D's pass/fail DoD is the `--live` measurement** — real Haiku over the ~150–200 gold items (~$0.20) vs the founder's labels. **Standing CI stays mocked/deterministic/free** — it is the **regression guard**, not the DoD. (Live = pass/fail; mock = no-regress.)
 
 ## Slice-integrity manifest
 - **NEW (committed)**: `packages/db/src/pipeline-schema.ts` (+`processedItems`) · `packages/db/drizzle/0006_*.sql` (+ snapshot/journal) · `packages/db/contracts/processed_items.contract.json` · `apps/pipeline/src/pipeline/{classify,embed,process,cost,backfill}.py` + `eval/**` (harness + `gold_set.jsonl`) + tests · `apps/pipeline/.env.example` (+ the two keys).
@@ -110,7 +112,8 @@ eval/           # the gold-eval harness (see D)
 
 ## Risks & follow-ups
 - **The DoD is a model-quality target, not a deterministic invariant** — the gold set + two-sided gate make it measurable, but a prompt that passes the ~180-item gold set can still drift on the full corpus. Mitigation: retention-prioritized bar + forced-keep + the 5.10 quality-tuning pass (which the stored confidence + reproducibility metadata feed).
-- **Cost guard is estimate-based** (token→$); the $5 ceiling is a tripwire far above real cost (~$0.0001/item × 1000 ≈ $0.10/run). Real $ accounting is 5.6/5.8.
+- **Cost guard is estimate-based** (token→$); the **$20/day** ceiling is a **runaway tripwire** set well above steady-state ($5 was rejected — it sits near real daily cost and would trip normally). Per-run classification is ~$0.0001/item; the ceiling exists to catch a loop, not to bound normal operation. Real $ accounting is 5.6/5.8.
+- **HN-only calibration (follow-up)**: the gold set + the forced-keep threshold are calibrated on **HN only** (the sole source today); 5.6–5.10 MUST extend the gold set with per-source samples and **re-measure the quality gate** — the filter is not assumed to generalize across sources (5.2-OD-7).
 - **Batch-API latency** — the backfill is async (minutes–hours); the one-shot command polls; not a cron.
 - **Two-project tax holds** — `0006` to both dev+prod via the hardened `db:migrate:all`.
 - **Sandbox can't reach Supabase reliably** (project memory) — gated steps (C apply, D auto-label, E deploy/backfill) are **founder-run**; the sandbox proves the gate-free logic (mocked-provider tests on the pgvector container).
