@@ -7,11 +7,88 @@ test for clean tables — the same committed SQL the monorepo uses."""
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
+import asyncpg
 import pytest_asyncio
 
 import pipeline.db as db
+from pipeline.classify import Verdict
+from pipeline.settings import Settings
+
+
+def make_settings(**over: Any) -> Settings:
+    """Test Settings with sane defaults; override per test (e.g. max_items_per_run)."""
+    base: dict[str, Any] = dict(
+        database_url="postgresql://test",
+        inngest_signing_key=None,
+        inngest_event_key=None,
+        algolia_base="",
+        lookback_hours=24,
+        backfill_hours=72,
+        anthropic_api_key="test",
+        openai_api_key="test",
+        max_items_per_run=1000,
+        daily_usd_ceiling=20.0,
+        forced_keep_below=0.5,
+        classify_body_tokens=500,
+        embed_body_tokens=1000,
+        classifier_model="test-haiku",
+        embedding_model="test-embed",
+        embedding_dimensions=1536,
+        prompt_version="v1",
+    )
+    base.update(over)
+    return Settings(**base)
+
+
+async def seed_raw_item(conn: asyncpg.Connection, source_id: str, **over: Any) -> Any:
+    """Insert one raw_items row; returns its id."""
+    row = dict(
+        source="hn",
+        source_id=source_id,
+        content_hash=f"h{source_id}",
+        title=f"title {source_id}",
+        body="some body text",
+        url=None,
+        author="a",
+        points=1,
+        num_comments=0,
+        source_created_at=datetime(2026, 6, 1, tzinfo=UTC),
+        raw={},
+    )
+    row.update(over)
+    return await conn.fetchval(
+        """
+        INSERT INTO raw_items
+          (source, source_id, content_hash, title, body, url, author,
+           points, num_comments, source_created_at, raw)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id
+        """,
+        row["source"], row["source_id"], row["content_hash"], row["title"], row["body"],
+        row["url"], row["author"], row["points"], row["num_comments"],
+        row["source_created_at"], row["raw"],
+    )
+
+
+def fixed_classify(label="bug", confidence=0.9, forced_keep=False, reason="r"):
+    """A mocked classify_fn returning a fixed Verdict (no Anthropic call)."""
+
+    async def fn(_item: dict[str, Any]) -> Verdict:
+        return Verdict(label=label, reason=reason, confidence=confidence, forced_keep=forced_keep)
+
+    return fn
+
+
+def fake_embed(dims: int = 1536):
+    """A mocked embed_fn returning a fixed vector (no OpenAI call)."""
+
+    async def fn(_item: dict[str, Any]) -> list[float]:
+        return [0.01] * dims
+
+    return fn
 
 TEST_DSN = os.environ.get(
     "TEST_DATABASE_URL",
@@ -41,7 +118,8 @@ def _migration_statements() -> list[str]:
     stmts: list[str] = []
     for migration in _PIPELINE_MIGRATIONS:
         # Drizzle separates statements with this marker.
-        stmts += [s.strip() for s in migration.read_text().split("--> statement-breakpoint") if s.strip()]
+        parts = migration.read_text().split("--> statement-breakpoint")
+        stmts += [s.strip() for s in parts if s.strip()]
     return stmts
 
 
