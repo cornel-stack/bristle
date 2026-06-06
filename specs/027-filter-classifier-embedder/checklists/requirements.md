@@ -31,6 +31,6 @@
 
 ## Notes
 
-- **By design this spec STOPS at spec + SETTLED decisions + open questions.** It is NOT cleared for `/speckit.plan` until the founder confirms Decisions 1–5 and resolves Open Questions (a)–(f) — above all **(a)** the classification rubric + labeled eval set, without which the "≥80% noise filtered" DoD (FR-009/SC-001) is unmeasurable.
+- **All decisions + former open questions are now SETTLED (2026-06-06).** The rubric + two-sided DoD, eval methodology (gold set built at implementation), body-slice budgets, cap + $ ceiling, batch-vs-sync, low-confidence forced-keep, and reproducibility metadata are folded into the spec. The slice is cleared for `/speckit.plan` (plan only, then STOP).
+- The build-plan conflict is **resolved**: the 5-way `label` is retained on `processed_items`; keep/drop is derived (`label != noise`); the DoD gates the noise-vs-keep boundary, not four-way accuracy (constitution §7).
 - The "no implementation details" items carry a documented, bounded exception (the founder-requested SETTLED Decisions); the rest of the spec stays outcome-level.
-- One raised conflict with the build plan (5-way label → keep/drop binary) is surfaced for confirmation, per constitution §7.
