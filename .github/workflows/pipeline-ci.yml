@@ -1,0 +1,62 @@
+name: Pipeline CI
+
+# Standalone Python CI for apps/pipeline (OD-7) — OUTSIDE the JS Turbo graph.
+# Runs uv + ruff + pytest against an EPHEMERAL postgres:16 service container, with
+# migration 0005 applied in conftest. Never touches dev or prod Supabase.
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "apps/pipeline/**"
+      - "packages/db/drizzle/**" # conftest applies the real 0005 SQL
+      - "packages/db/contracts/**" # the drift test reads the committed contract
+      - ".github/workflows/pipeline-ci.yml"
+  pull_request:
+    paths:
+      - "apps/pipeline/**"
+      - "packages/db/drizzle/**"
+      - "packages/db/contracts/**"
+      - ".github/workflows/pipeline-ci.yml"
+
+concurrency:
+  group: pipeline-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pipeline
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pipeline_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # The ephemeral service container — NEVER a Supabase URL.
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/pipeline_test
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      - name: Sync dependencies (frozen)
+        run: uv sync --frozen
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Test (pytest, ephemeral postgres:16)
+        run: uv run pytest -q
