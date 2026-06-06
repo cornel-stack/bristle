@@ -1,5 +1,16 @@
 import { sql } from "drizzle-orm";
-import { index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  real,
+  text,
+  timestamp,
+  uuid,
+  vector,
+} from "drizzle-orm/pg-core";
 
 // === Slice 5.1 (migration 0005) — pipeline-namespaced, separate from the app's
 // problems/categories. The ONLY table this slice adds. The Python HN ingester
@@ -59,3 +70,60 @@ export const rawItems = pgTable(
 
 export type RawItem = typeof rawItems.$inferSelect;
 export type NewRawItem = typeof rawItems.$inferInsert;
+
+// === Slice 5.2 (migration 0006) — derived classification + embedding. raw_items
+// stays IMMUTABLE; this is the ONLY table 5.2 adds, one row per processed
+// raw_item. Additive — touches no app table. Drizzle stays the single migration
+// authority (Decision 1); the Python processor reads/writes via asyncpg.
+//
+// KEEP/DROP IS DERIVED (`label != 'noise'`) — never stored separately (FR-001/007).
+// The four keep-types are best-effort secondary signal for 5.3/5.4; the DoD gates
+// the noise-vs-keep boundary only.
+export const processedItems = pgTable(
+  "processed_items",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    // THE IDEMPOTENCY KEY (FR-004/006). UNIQUE → exactly one verdict per raw item;
+    // the processor writes INSERT … ON CONFLICT (raw_item_id) DO NOTHING, so
+    // overlapping / retried / concurrent runs cannot double-write. CASCADE so a
+    // deleted raw item can't orphan a verdict.
+    rawItemId: uuid("raw_item_id")
+      .notNull()
+      .unique()
+      .references(() => rawItems.id, { onDelete: "cascade" }),
+    // The 5-way classifier label (5.2-OD-2: `text`, NOT a pg enum — a new label
+    // needs no ALTER TYPE; simpler contract/drift introspection): complaint / bug /
+    // feature-request / wish / noise. Keep/drop = (label != 'noise').
+    label: text("label").notNull(),
+    reason: text("reason"),
+    confidence: real("confidence"),
+    // FR-011: true when a sub-threshold confidence overrode a 'noise' call to keep
+    // (bias against false-drops). forced_keep items STILL embed (they're kept).
+    forcedKeep: boolean("forced_keep").notNull().default(false),
+    // The normalized text that was classified/embedded (the embedded input).
+    normalizedText: text("normalized_text"),
+    // 1536-dim embedding — NULL for 'noise' (only kept items embed, FR-002); width
+    // matches the existing problems.embedding vector(1536) (A9, locked).
+    embedding: vector("embedding", { dimensions: 1536 }),
+    // Reproducibility metadata (FR-013) — enables selective re-processing when the
+    // classifier model, the prompt/rubric, or the embedding model changes.
+    classifierModel: text("classifier_model"),
+    promptVersion: text("prompt_version"),
+    embeddingModel: text("embedding_model"),
+    processedAt: timestamp("processed_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // HNSW (cosine) for 5.3's nearest-neighbor joins — incremental-friendly
+    // (5.2-OD-5: m=16, ef_construction=64; vector_cosine_ops).
+    index("processed_items_embedding_hnsw_idx")
+      .using("hnsw", t.embedding.op("vector_cosine_ops"))
+      .with({ m: 16, ef_construction: 64 }),
+  ],
+);
+
+export type ProcessedItem = typeof processedItems.$inferSelect;
+export type NewProcessedItem = typeof processedItems.$inferInsert;
