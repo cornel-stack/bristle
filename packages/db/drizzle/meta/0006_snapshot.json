@@ -1,5 +1,5 @@
 {
-  "id": "6d831979-214b-4bd0-91ca-e43960b4d93e",
+  "id": "db163032-5765-4f2e-a6e2-cc86fc4b9368",
   "prevId": "655d5acf-a7c8-45f6-87ae-5b2e18e2adeb",
   "version": "7",
   "dialect": "postgresql",
@@ -1770,6 +1770,16 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "kept": {
+          "name": "kept",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "generated": {
+            "as": "label <> 'noise' OR forced_keep",
+            "type": "stored"
+          }
         },
         "normalized_text": {
           "name": "normalized_text",

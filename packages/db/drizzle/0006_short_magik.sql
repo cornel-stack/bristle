@@ -12,6 +12,7 @@ CREATE TABLE "processed_items" (
 	"reason" text,
 	"confidence" real,
 	"forced_keep" boolean DEFAULT false NOT NULL,
+	"kept" boolean GENERATED ALWAYS AS (label <> 'noise' OR forced_keep) STORED NOT NULL,
 	"normalized_text" text,
 	"embedding" vector(1536),
 	"classifier_model" text,

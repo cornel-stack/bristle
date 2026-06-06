@@ -6,84 +6,104 @@
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "confidence",
       "type": "real",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "embedding",
       "type": "vector(1536)",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "embedding_model",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "forced_keep",
       "type": "boolean",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "id",
       "type": "uuid",
       "notNull": true,
       "primaryKey": true,
-      "unique": false
+      "unique": false,
+      "generated": false
+    },
+    {
+      "name": "kept",
+      "type": "boolean",
+      "notNull": true,
+      "primaryKey": false,
+      "unique": false,
+      "generated": true
     },
     {
       "name": "label",
       "type": "text",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "normalized_text",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "processed_at",
       "type": "timestamp with time zone",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "prompt_version",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "raw_item_id",
       "type": "uuid",
       "notNull": true,
       "primaryKey": false,
-      "unique": true
+      "unique": true,
+      "generated": false
     },
     {
       "name": "reason",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     }
   ],
   "uniqueConstraints": [

@@ -6,91 +6,104 @@
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "body",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "content_hash",
       "type": "text",
       "notNull": true,
       "primaryKey": false,
-      "unique": true
+      "unique": true,
+      "generated": false
     },
     {
       "name": "id",
       "type": "uuid",
       "notNull": true,
       "primaryKey": true,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "ingested_at",
       "type": "timestamp with time zone",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "num_comments",
       "type": "integer",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "points",
       "type": "integer",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "raw",
       "type": "jsonb",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "source",
       "type": "text",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "source_created_at",
       "type": "timestamp with time zone",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "source_id",
       "type": "text",
       "notNull": true,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "title",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     },
     {
       "name": "url",
       "type": "text",
       "notNull": false,
       "primaryKey": false,
-      "unique": false
+      "unique": false,
+      "generated": false
     }
   ],
   "uniqueConstraints": [

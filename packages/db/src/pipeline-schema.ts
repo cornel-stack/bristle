@@ -102,6 +102,15 @@ export const processedItems = pgTable(
     // FR-011: true when a sub-threshold confidence overrode a 'noise' call to keep
     // (bias against false-drops). forced_keep items STILL embed (they're kept).
     forcedKeep: boolean("forced_keep").notNull().default(false),
+    // KEEP/DROP — the SINGLE DB-COMPUTED source of truth. A forced-keep item has
+    // label='noise' + forced_keep=true + an embedding, so it must count as KEPT:
+    // `label != 'noise'` alone would wrongly DROP it (and 5.3 would silently exclude
+    // exactly the items forced-keep exists to save). GENERATED STORED so it can't
+    // drift, is index-ready for the constant downstream "select kept", and removes
+    // the OR-forced_keep footgun from every query site. 5.3 reads `WHERE kept`.
+    kept: boolean("kept")
+      .notNull()
+      .generatedAlwaysAs(sql`label <> 'noise' OR forced_keep`),
     // The normalized text that was classified/embedded (the embedded input).
     normalizedText: text("normalized_text"),
     // 1536-dim embedding — NULL for 'noise' (only kept items embed, FR-002); width

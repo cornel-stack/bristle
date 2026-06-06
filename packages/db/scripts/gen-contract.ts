@@ -29,6 +29,9 @@ function buildContract(table: PgTable) {
       notNull: c.notNull,
       primaryKey: c.primary,
       unique: c.isUnique ?? false,
+      // GENERATED ALWAYS AS … STORED (the processed_items.kept column) — captured
+      // so the drift test verifies the generation isn't silently dropped.
+      generated: c.generated != null,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
