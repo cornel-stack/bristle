@@ -10,7 +10,7 @@ import os
 
 import inngest
 
-from pipeline import db
+from pipeline import db, process
 from pipeline.ingest import hn
 from pipeline.settings import load_settings
 
@@ -54,6 +54,32 @@ async def hn_ingest(ctx: inngest.Context) -> dict[str, int]:
             "hn-ingest fetched=%(fetched)s inserted=%(inserted)s skipped=%(skipped)s",
             result,
         )
+        return result
+    finally:
+        await pool.close()
+
+
+@inngest_client.create_function(
+    fn_id="process-items",
+    name="Classify + embed raw items",
+    # 30 min after the ingester (every 4h) so it picks up what was just fetched —
+    # but DECOUPLED (no event-chaining): a stateless NOT EXISTS pickup (Decision 4).
+    trigger=inngest.TriggerCron(cron="30 */4 * * *"),
+    # concurrency:1 (like the ingester) → processor runs never overlap; the atomic
+    # ON CONFLICT (raw_item_id) is the deeper guarantee. Retries re-run safely
+    # (idempotent — a retry re-picks only still-unprocessed items).
+    concurrency=[inngest.Concurrency(limit=1)],
+    retries=3,
+)
+async def process_items(ctx: inngest.Context) -> dict[str, object]:
+    settings = load_settings()
+    classify_fn, embed_fn = process.build_provider_fns(settings)
+    pool = await db.create_pool(settings.database_url)
+    try:
+        result = await process.run(
+            pool, classify_fn=classify_fn, embed_fn=embed_fn, settings=settings
+        )
+        ctx.logger.info("process-items %s", result)
         return result
     finally:
         await pool.close()

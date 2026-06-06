@@ -7,7 +7,7 @@ from __future__ import annotations
 import fastapi
 import inngest.fast_api
 
-from pipeline.inngest_fns import hn_ingest, inngest_client
+from pipeline.inngest_fns import hn_ingest, inngest_client, process_items
 
 app = fastapi.FastAPI(title="Bristle Pipeline")
 
@@ -18,4 +18,5 @@ async def health() -> dict[str, str]:
 
 
 # Registers POST/PUT/GET /api/inngest. Signing key from INNGEST_SIGNING_KEY (env).
-inngest.fast_api.serve(app, inngest_client, [hn_ingest])
+# Both crons served: hn-ingest (5.1) + process-items (5.2).
+inngest.fast_api.serve(app, inngest_client, [hn_ingest, process_items])
