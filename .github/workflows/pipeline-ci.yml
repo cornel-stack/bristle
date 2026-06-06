@@ -30,7 +30,9 @@ jobs:
         working-directory: apps/pipeline
     services:
       postgres:
-        image: postgres:16
+        # pgvector image (not plain postgres:16) — migration 0006 creates the vector
+        # extension + a vector(1536) column + an HNSW index, which need pgvector.
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: pipeline_test
